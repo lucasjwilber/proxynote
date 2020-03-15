@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/map"
+    android:name="com.google.android.gms.maps.SupportMapFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MapActivity" >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageButton
+            android:id="@+id/menuButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="27dp"
+            android:layout_marginLeft="27dp"
+            android:layout_marginTop="28dp"
+            android:onClick="showPopup"
+            app:layout_constraintHorizontal_bias="0.407"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.461"
+            android:background="@drawable/hamburger_menu"
+            />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addPostButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="40dp"
+            android:layout_marginRight="40dp"
+            android:layout_marginBottom="40dp"
+            android:clickable="true"
+            android:onClick="toggleFormVisibility"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/create_post_button_background" />
+
+        <LinearLayout
+            android:id="@+id/createPostForm"
+            android:layout_width="231dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="invisible"
+            android:background="#fffee0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+            <TextView
+                android:id="@+id/postLocationTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:text="Your Location"
+                android:textAlignment="center"
+                android:textSize="12sp"
+                android:layout_gravity="center_horizontal" />
+            <TextView
+                android:id="@+id/postTitleLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:text="Title"
+                tools:text="Title" />
+            <EditText
+                android:id="@+id/postTitleEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="#FFFFFF"
+                android:ems="10"
+                android:inputType="textPersonName" />
+            <TextView
+                android:id="@+id/postBodyLabel"
+                android:layout_width="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_height="19dp"
+                android:text="Post"
+                tools:text="Post" />
+            <EditText
+                android:id="@+id/postBodyEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="#FFFFFF"
+                android:ems="10"
+                android:gravity="start|top"
+                android:inputType="textMultiLine" />
+            <Button
+                android:id="@+id/postSubmitButton"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_margin="15dp"
+                android:ems="10"
+                android:layout_gravity="center"
+                android:text="Post"
+                android:textStyle="bold"
+                android:textColor="#FFFF00"
+                android:background="#ff8c69"
+                android:clickable="true"
+                android:onClick="createPost" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/addReplyForm"
+            android:layout_width="231dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="invisible"
+            android:background="#fffee0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.6">
+            <TextView
+                android:id="@+id/replyLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                tools:text="Title" />
+            <EditText
+                android:id="@+id/replyEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:background="#FFFFFF"
+                android:ems="10"
+                android:inputType="textPersonName" />
+            <Button
+                android:id="@+id/replySubmitButton"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_margin="15dp"
+                android:ems="10"
+                android:layout_gravity="center"
+                android:text="Reply"
+                android:textStyle="bold"
+                android:textColor="#FFFF00"
+                android:background="#ff8c69"
+                android:clickable="true"
+                android:onClick="addReplyToPost" />
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</fragment>
