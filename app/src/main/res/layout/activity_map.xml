@@ -117,7 +117,7 @@
 
 
         <LinearLayout
-            android:id="@+id/addReplyForm"
+            android:id="@+id/addCommentForm"
             android:layout_width="231dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -129,14 +129,14 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.6">
             <TextView
-                android:id="@+id/replyLabel"
+                android:id="@+id/commentLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="15dp"
                 tools:text="Title" />
             <EditText
-                android:id="@+id/replyEditText"
+                android:id="@+id/commentEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
@@ -145,18 +145,18 @@
                 android:ems="10"
                 android:inputType="textPersonName" />
             <Button
-                android:id="@+id/replySubmitButton"
+                android:id="@+id/commentSubmitButton"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:layout_margin="15dp"
                 android:ems="10"
                 android:layout_gravity="center"
-                android:text="Reply"
+                android:text="Comment"
                 android:textStyle="bold"
                 android:textColor="#FFFF00"
                 android:background="#ff8c69"
                 android:clickable="true"
-                android:onClick="addReplyToPost" />
+                android:onClick="addCommentToPost" />
         </LinearLayout>
 
 

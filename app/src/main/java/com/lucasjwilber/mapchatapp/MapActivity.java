@@ -39,11 +39,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -64,9 +59,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public double userLat;
     public double userLng;
     public String userCurrentAddress = "somewhere";
-    FirebaseFirestore db;
     LinearLayout createPostForm;
-    LinearLayout addReplyForm;
+    LinearLayout addCommentForm;
     TextView userLocationTV;
     BitmapDescriptor postIcon;
     BitmapDescriptor userIcon;
@@ -80,13 +74,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         setContentView(R.layout.activity_map);
 
         createPostForm = findViewById(R.id.createPostForm);
-        addReplyForm = findViewById(R.id.addReplyForm);
+        addCommentForm = findViewById(R.id.addCommentForm);
         userLocationTV = findViewById(R.id.postLocationTextView);
 
         postIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.yellow_chat_icon));
         userIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.user_location_pin));
 
-        db = FirebaseFirestore.getInstance();
         getPostsFromDbAndCreateMapMarkers();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -330,7 +323,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void onMapClick(LatLng arg0) {
-        addReplyForm.setVisibility(View.INVISIBLE);
+        addCommentForm.setVisibility(View.INVISIBLE);
         createPostForm.setVisibility(View.INVISIBLE);
     }
 
@@ -342,10 +335,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onInfoWindowLongClick(Marker marker) {
         Log.i("ljw", marker.getId() + " long pressed");
-        // so that you can't reply to your user pin:
+        // so that you can't comment on your user pin:
         if (marker.getId().equals("m0")) return;
 
-        addReplyForm.setVisibility(View.VISIBLE);
+        addCommentForm.setVisibility(View.VISIBLE);
         Post c = (Post) marker.getTag();
         if (c != null) {
             currentSelectedPost = c;
@@ -355,14 +348,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         currentSelectedMarker = marker;
     }
 
-    public void addReplyToPost(View v) {
-        Log.i("ljw", "reply button clicked");
-        EditText replyEditText = findViewById(R.id.replyEditText);
-//        Reply reply = new Reply("user", replyEditText.getText().toString(), new Date().getTime());
+    public void addCommentToPost(View v) {
+        Log.i("ljw", "commentbutton clicked");
+        EditText commentEditText = findViewById(R.id.commentEditText);
+//        Comment comment= new Comment("user", commentEditText.getText().toString(), new Date().getTime());
 //
 //        if (currentSelectedPostId == null) {
 //            Log.i("ljw", "post has a null id so a DB query won't work");
-//            addReplyForm.setVisibility(View.INVISIBLE);
+//            addCommentForm.setVisibility(View.INVISIBLE);
 //            return;
 //        }
 //
@@ -378,10 +371,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 //                        Post c = Objects.requireNonNull(task.getResult()).toObject(Post.class);
 //                        //these are to prevent NPEs on old posts that didn't have IDs or instantiated LLs:
 //                        if (c == null) return;
-//                        if (c.replies == null) c.replies = new LinkedList<>();
-//                        Log.i("ljw", "post currently has " + c.replies.size() + " replies already:");
-//                        Log.i("ljw", c.replies.toString());
-//                        c.replies.add(reply);
+//                        if (c.comments == null) c.comments = new LinkedList<>();
+//                        Log.i("ljw", "post currently has " + c.comments.size() + " comments already:");
+//                        Log.i("ljw", c.comments.toString());
+//                        c.comments.add(comment);
 //
 //                        //update post in firestore
 //                        db.collection("posts")
@@ -390,9 +383,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 //                                .addOnSuccessListener(new OnSuccessListener<Void>() {
 //                                    @Override
 //                                    public void onSuccess(Void aVoid) {
-//                                        Log.i("ljw", "successfully updated post with new reply");
-//                                        addReplyForm.setVisibility(View.INVISIBLE);
-//                                        replyEditText.setText("");
+//                                        Log.i("ljw", "successfully updated post with new comment");
+//                                        addCommentForm.setVisibility(View.INVISIBLE);
+//                                        commentEditText.setText("");
 //
 //                                        //refresh marker
 //                                        currentSelectedMarker.remove();
@@ -410,29 +403,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 //                                .addOnFailureListener(new OnFailureListener() {
 //                                    @Override
 //                                    public void onFailure(@NonNull Exception e) {
-//                                        Log.i("ljw", "failed updating post with new reply:\n", e);
+//                                        Log.i("ljw", "failed updating post with new comment:\n", e);
 //                                    }
 //                                });
 //                    }
 //                });
     }
 
-    public void deleteDocumentByID(String collection, String id) {
-        db.collection(collection).document(id)
-                .delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.i("ljw", "successfully deleted " + id + " from " + collection);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.i("ljw", "Error deleting document", e);
-                    }
-                });
-    }
 
     public void addTestPostAtLatLng(Double lat, Double lng) {
         Post post = new Post("fakeid", "lucas", "faketitle", "faketext", "6969 420 avenue", userLat, userLng);

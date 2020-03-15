@@ -42,17 +42,17 @@ public class PostInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
             commentHTML.append("<h4>" + post.getTitle() + "</h4>");
             commentHTML.append("<p>" + post.getText() + "</p>");
 
-            // add replies
+            // add comments
 //        Post c = (Post) marker.getTag();
-//        if (c != null && c.replies != null) {
+//        if (c != null && c.comments != null) {
 //            Date date = new java.util.Date((long) c.getTimestamp());
 //            SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-M-yyyy hh:mm:ss", Locale.US);
 //            String formattedDate = sdf.format(date);
-//            for (Reply reply : c.replies) {
-//                //  TODO: use time for when reply was made, not comment
-////                commentHTML.append("<br><p><i><b>" + reply.getUsername() + "</b>, " + formattedDate + "</i></p>");
-//                commentHTML.append("<br><p><i><b>" + reply.getUsername() + "</b></i></p>");
-//                commentHTML.append("<p>" + reply.getBody() + "</p>");
+//            for (Comment comment : c.comments) {
+//                //  TODO: use time for when comment was made, not comment
+////                commentHTML.append("<br><p><i><b>" + comment.getUsername() + "</b>, " + formattedDate + "</i></p>");
+//                commentHTML.append("<br><p><i><b>" + comment.getUsername() + "</b></i></p>");
+//                commentHTML.append("<p>" + comment.getBody() + "</p>");
 //            }
 //        }
         }

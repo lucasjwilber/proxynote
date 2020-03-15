@@ -1,39 +1,29 @@
 package com.lucasjwilber.mapchatapp;
 
-public class MapchatAppUser {
+import java.util.LinkedList;
+import java.util.List;
+
+public class User {
     private String id;
     private String username;
-    private String email;
-    private String password;
+    private List<Post> posts;
     private long timeOfLastPost;
     private boolean isPaid;
     private int totalScore;
     private double lastLat;
     private double lastLng;
-    private String messagesId;
 
-    public MapchatAppUser() {};
+    public User() {};
 
-    public MapchatAppUser(String id, String username, String email, String password) {
-        this.id = id;
+    public User(String username) {
         this.username = username;
-        this.email = email;
-//        this.password = [encrypted pw]
-
+        this.posts = new LinkedList<>();
         this.isPaid = false;
         this.totalScore = 0;
-
-        //create a document locally then set it to be this obj, using its id to set this' id:
-//        https://stackoverflow.com/questions/46844907/firestore-is-it-possible-to-get-the-id-before-it-was-added
-
     }
 
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getUsername() {
@@ -42,22 +32,6 @@ public class MapchatAppUser {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public long getTimeOfLastPost() {
@@ -100,11 +74,11 @@ public class MapchatAppUser {
         this.lastLng = lastLng;
     }
 
-    public String getMessagesId() {
-        return messagesId;
+    public List<Post> getPosts() {
+        return posts;
     }
 
-    public void setMessagesId(String messagesId) {
-        this.messagesId = messagesId;
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
     }
 }

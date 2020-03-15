@@ -1,0 +1,46 @@
+type User @model {
+  id: ID!
+  username: String!
+  timeOfLastPost: Int
+  isPaid: Boolean
+  totalScore: Int
+  lastLat: Float
+  lastLng: Float
+  posts: [Post] @connection(name: "UserPosts")
+}
+type Region @model {
+  id: String!
+  currentUserCount: Int
+  totalUserCount: Int
+  currentPostCount: Int
+  totalPostCount: Int
+  currentCommentCount: Int
+  totalCommentCount: Int
+  posts: [Post] @connection(name: "RegionPosts")
+}
+type Post @model {
+  id: ID!
+  user: User @connection(name: "UserPosts")
+  region: Region @connection(name: "RegionPosts")
+  title: String!
+  text: String
+  timestamp: Int
+  location: String
+  lat: Float
+  lng: Float
+  link: String
+  icon: String
+  score: Int
+  replies: [Comment] @connection(name: "PostComments")
+}
+type Comment @model {
+  id: ID!
+  post: Post @connection(name: "PostComments")
+  userId: String
+  username: String
+  text: String
+  timestamp: Int
+  lat: Float
+  lng: Float
+  score: Int
+}

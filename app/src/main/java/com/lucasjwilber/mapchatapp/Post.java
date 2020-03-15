@@ -1,40 +1,41 @@
 package com.lucasjwilber.mapchatapp;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 public class Post {
     private String id;
-    private String creator;
+    private String userId;
+    private String username;
     private String title;
     private String text;
     private long timestamp;
-    private String formattedAddress;
+    private String location;
     private double lat;
     private double lng;
     private String link;
-    private String emoji;
+    private String icon;
     private int score;
-    private List<Reply> children;
+    private List<Comment> comments;
 
     public Post() {};
 
-    public Post(String id, String creator, String title, String text, String formattedAddress, double lat, double lng) {
-        this.id = id;
-        this.creator = creator;
+    public Post(String userId, String username, String title, String text, String location, double lat, double lng) {
+        this.id = UUID.randomUUID().toString();
+        this.userId = userId;
+        this.username = username;
         this.title = title;
         this.text = text;
-        this.formattedAddress = formattedAddress;
+        this.location = location;
         this.lat = lat;
         this.lng = lng;
         this.timestamp = new Date().getTime();
         this.score = 0;
-        this.children = new LinkedList<>();
+        this.comments = new LinkedList<>();
 
-        //if link or emoji were selected, set them in the create post method before uploading the object
+        //if link or icon were selected, set them in the create post method before uploading the object
     }
 
     public String getId() {
@@ -45,12 +46,12 @@ public class Post {
         this.id = id;
     }
 
-    public String getCreator() {
-        return creator;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setCreator(String creator) {
-        this.creator = creator;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getText() {
@@ -69,12 +70,12 @@ public class Post {
         this.timestamp = timestamp;
     }
 
-    public String getFormattedAddress() {
-        return formattedAddress;
+    public String getLocation() {
+        return location;
     }
 
-    public void setFormattedAddress(String formattedAddress) {
-        this.formattedAddress = formattedAddress;
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public String getLink() {
@@ -85,12 +86,12 @@ public class Post {
         this.link = link;
     }
 
-    public String getEmoji() {
-        return emoji;
+    public String getIcon() {
+        return icon;
     }
 
-    public void setEmoji(String emoji) {
-        this.emoji = emoji;
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 
     public int getScore() {
@@ -101,12 +102,12 @@ public class Post {
         this.score = score;
     }
 
-    public List<Reply> getChildren() {
-        return children;
+    public List<Comment> getChildren() {
+        return comments;
     }
 
-    public void setChildren(List<Reply> children) {
-        this.children = children;
+    public void setChildren(List<Comment> comments) {
+        this.comments = comments;
     }
 
     public double getLat() {
@@ -131,5 +132,21 @@ public class Post {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 }

@@ -1,0 +1,264 @@
+# this is an auto generated file. This will be overwritten
+query GetUser($id: ID!) {
+  getUser(id: $id) {
+    id
+    username
+    timeOfLastPost
+    isPaid
+    totalScore
+    lastLat
+    lastLng
+    posts {
+      items {
+        id
+        title
+        text
+        timestamp
+        location
+        lat
+        lng
+        link
+        icon
+        score
+      }
+      nextToken
+    }
+  }
+}
+query ListUsers(
+  $filter: ModelUserFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listUsers(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      username
+      timeOfLastPost
+      isPaid
+      totalScore
+      lastLat
+      lastLng
+      posts {
+        nextToken
+      }
+    }
+    nextToken
+  }
+}
+query GetRegion($id: ID!) {
+  getRegion(id: $id) {
+    id
+    currentUserCount
+    totalUserCount
+    currentPostCount
+    totalPostCount
+    currentCommentCount
+    totalCommentCount
+    posts {
+      items {
+        id
+        title
+        text
+        timestamp
+        location
+        lat
+        lng
+        link
+        icon
+        score
+      }
+      nextToken
+    }
+  }
+}
+query ListRegions(
+  $filter: ModelRegionFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listRegions(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      currentUserCount
+      totalUserCount
+      currentPostCount
+      totalPostCount
+      currentCommentCount
+      totalCommentCount
+      posts {
+        nextToken
+      }
+    }
+    nextToken
+  }
+}
+query GetPost($id: ID!) {
+  getPost(id: $id) {
+    id
+    user {
+      id
+      username
+      timeOfLastPost
+      isPaid
+      totalScore
+      lastLat
+      lastLng
+      posts {
+        nextToken
+      }
+    }
+    region {
+      id
+      currentUserCount
+      totalUserCount
+      currentPostCount
+      totalPostCount
+      currentCommentCount
+      totalCommentCount
+      posts {
+        nextToken
+      }
+    }
+    title
+    text
+    timestamp
+    location
+    lat
+    lng
+    link
+    icon
+    score
+    replies {
+      items {
+        id
+        userId
+        username
+        text
+        timestamp
+        lat
+        lng
+        score
+      }
+      nextToken
+    }
+  }
+}
+query ListPosts(
+  $filter: ModelPostFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listPosts(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      user {
+        id
+        username
+        timeOfLastPost
+        isPaid
+        totalScore
+        lastLat
+        lastLng
+      }
+      region {
+        id
+        currentUserCount
+        totalUserCount
+        currentPostCount
+        totalPostCount
+        currentCommentCount
+        totalCommentCount
+      }
+      title
+      text
+      timestamp
+      location
+      lat
+      lng
+      link
+      icon
+      score
+      replies {
+        nextToken
+      }
+    }
+    nextToken
+  }
+}
+query GetComment($id: ID!) {
+  getComment(id: $id) {
+    id
+    post {
+      id
+      user {
+        id
+        username
+        timeOfLastPost
+        isPaid
+        totalScore
+        lastLat
+        lastLng
+      }
+      region {
+        id
+        currentUserCount
+        totalUserCount
+        currentPostCount
+        totalPostCount
+        currentCommentCount
+        totalCommentCount
+      }
+      title
+      text
+      timestamp
+      location
+      lat
+      lng
+      link
+      icon
+      score
+      replies {
+        nextToken
+      }
+    }
+    userId
+    username
+    text
+    timestamp
+    lat
+    lng
+    score
+  }
+}
+query ListComments(
+  $filter: ModelCommentFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listComments(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      id
+      post {
+        id
+        title
+        text
+        timestamp
+        location
+        lat
+        lng
+        link
+        icon
+        score
+      }
+      userId
+      username
+      text
+      timestamp
+      lat
+      lng
+      score
+    }
+    nextToken
+  }
+}

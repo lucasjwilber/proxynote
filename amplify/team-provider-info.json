@@ -1,0 +1,15 @@
+{
+    "mapchatenv": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-mapchat-mapchatenv-204056-authRole",
+            "UnauthRoleArn": "arn:aws:iam::272195865811:role/amplify-mapchat-mapchatenv-204056-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::272195865811:role/amplify-mapchat-mapchatenv-204056-authRole",
+            "Region": "us-west-2",
+            "DeploymentBucketName": "amplify-mapchat-mapchatenv-204056-deployment",
+            "UnauthRoleName": "amplify-mapchat-mapchatenv-204056-unauthRole",
+            "StackName": "amplify-mapchat-mapchatenv-204056",
+            "StackId": "arn:aws:cloudformation:us-west-2:272195865811:stack/amplify-mapchat-mapchatenv-204056/c8853430-666e-11ea-883e-06c82e60cd18",
+            "AmplifyAppId": "d2kk0a8wr1hbcn"
+        }
+    }
+}

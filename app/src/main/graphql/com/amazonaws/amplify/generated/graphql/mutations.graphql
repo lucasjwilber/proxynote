@@ -1,0 +1,481 @@
+# this is an auto generated file. This will be overwritten
+mutation CreateUser(
+  $input: CreateUserInput!
+  $condition: ModelUserConditionInput
+) {
+  createUser(input: $input, condition: $condition) {
+    id
+    username
+    timeOfLastPost
+    isPaid
+    totalScore
+    lastLat
+    lastLng
+    posts {
+      items {
+        id
+        title
+        text
+        timestamp
+        location
+        lat
+        lng
+        link
+        icon
+        score
+      }
+      nextToken
+    }
+  }
+}
+mutation UpdateUser(
+  $input: UpdateUserInput!
+  $condition: ModelUserConditionInput
+) {
+  updateUser(input: $input, condition: $condition) {
+    id
+    username
+    timeOfLastPost
+    isPaid
+    totalScore
+    lastLat
+    lastLng
+    posts {
+      items {
+        id
+        title
+        text
+        timestamp
+        location
+        lat
+        lng
+        link
+        icon
+        score
+      }
+      nextToken
+    }
+  }
+}
+mutation DeleteUser(
+  $input: DeleteUserInput!
+  $condition: ModelUserConditionInput
+) {
+  deleteUser(input: $input, condition: $condition) {
+    id
+    username
+    timeOfLastPost
+    isPaid
+    totalScore
+    lastLat
+    lastLng
+    posts {
+      items {
+        id
+        title
+        text
+        timestamp
+        location
+        lat
+        lng
+        link
+        icon
+        score
+      }
+      nextToken
+    }
+  }
+}
+mutation CreateRegion(
+  $input: CreateRegionInput!
+  $condition: ModelRegionConditionInput
+) {
+  createRegion(input: $input, condition: $condition) {
+    id
+    currentUserCount
+    totalUserCount
+    currentPostCount
+    totalPostCount
+    currentCommentCount
+    totalCommentCount
+    posts {
+      items {
+        id
+        title
+        text
+        timestamp
+        location
+        lat
+        lng
+        link
+        icon
+        score
+      }
+      nextToken
+    }
+  }
+}
+mutation UpdateRegion(
+  $input: UpdateRegionInput!
+  $condition: ModelRegionConditionInput
+) {
+  updateRegion(input: $input, condition: $condition) {
+    id
+    currentUserCount
+    totalUserCount
+    currentPostCount
+    totalPostCount
+    currentCommentCount
+    totalCommentCount
+    posts {
+      items {
+        id
+        title
+        text
+        timestamp
+        location
+        lat
+        lng
+        link
+        icon
+        score
+      }
+      nextToken
+    }
+  }
+}
+mutation DeleteRegion(
+  $input: DeleteRegionInput!
+  $condition: ModelRegionConditionInput
+) {
+  deleteRegion(input: $input, condition: $condition) {
+    id
+    currentUserCount
+    totalUserCount
+    currentPostCount
+    totalPostCount
+    currentCommentCount
+    totalCommentCount
+    posts {
+      items {
+        id
+        title
+        text
+        timestamp
+        location
+        lat
+        lng
+        link
+        icon
+        score
+      }
+      nextToken
+    }
+  }
+}
+mutation CreatePost(
+  $input: CreatePostInput!
+  $condition: ModelPostConditionInput
+) {
+  createPost(input: $input, condition: $condition) {
+    id
+    user {
+      id
+      username
+      timeOfLastPost
+      isPaid
+      totalScore
+      lastLat
+      lastLng
+      posts {
+        nextToken
+      }
+    }
+    region {
+      id
+      currentUserCount
+      totalUserCount
+      currentPostCount
+      totalPostCount
+      currentCommentCount
+      totalCommentCount
+      posts {
+        nextToken
+      }
+    }
+    title
+    text
+    timestamp
+    location
+    lat
+    lng
+    link
+    icon
+    score
+    replies {
+      items {
+        id
+        userId
+        username
+        text
+        timestamp
+        lat
+        lng
+        score
+      }
+      nextToken
+    }
+  }
+}
+mutation UpdatePost(
+  $input: UpdatePostInput!
+  $condition: ModelPostConditionInput
+) {
+  updatePost(input: $input, condition: $condition) {
+    id
+    user {
+      id
+      username
+      timeOfLastPost
+      isPaid
+      totalScore
+      lastLat
+      lastLng
+      posts {
+        nextToken
+      }
+    }
+    region {
+      id
+      currentUserCount
+      totalUserCount
+      currentPostCount
+      totalPostCount
+      currentCommentCount
+      totalCommentCount
+      posts {
+        nextToken
+      }
+    }
+    title
+    text
+    timestamp
+    location
+    lat
+    lng
+    link
+    icon
+    score
+    replies {
+      items {
+        id
+        userId
+        username
+        text
+        timestamp
+        lat
+        lng
+        score
+      }
+      nextToken
+    }
+  }
+}
+mutation DeletePost(
+  $input: DeletePostInput!
+  $condition: ModelPostConditionInput
+) {
+  deletePost(input: $input, condition: $condition) {
+    id
+    user {
+      id
+      username
+      timeOfLastPost
+      isPaid
+      totalScore
+      lastLat
+      lastLng
+      posts {
+        nextToken
+      }
+    }
+    region {
+      id
+      currentUserCount
+      totalUserCount
+      currentPostCount
+      totalPostCount
+      currentCommentCount
+      totalCommentCount
+      posts {
+        nextToken
+      }
+    }
+    title
+    text
+    timestamp
+    location
+    lat
+    lng
+    link
+    icon
+    score
+    replies {
+      items {
+        id
+        userId
+        username
+        text
+        timestamp
+        lat
+        lng
+        score
+      }
+      nextToken
+    }
+  }
+}
+mutation CreateComment(
+  $input: CreateCommentInput!
+  $condition: ModelCommentConditionInput
+) {
+  createComment(input: $input, condition: $condition) {
+    id
+    post {
+      id
+      user {
+        id
+        username
+        timeOfLastPost
+        isPaid
+        totalScore
+        lastLat
+        lastLng
+      }
+      region {
+        id
+        currentUserCount
+        totalUserCount
+        currentPostCount
+        totalPostCount
+        currentCommentCount
+        totalCommentCount
+      }
+      title
+      text
+      timestamp
+      location
+      lat
+      lng
+      link
+      icon
+      score
+      replies {
+        nextToken
+      }
+    }
+    userId
+    username
+    text
+    timestamp
+    lat
+    lng
+    score
+  }
+}
+mutation UpdateComment(
+  $input: UpdateCommentInput!
+  $condition: ModelCommentConditionInput
+) {
+  updateComment(input: $input, condition: $condition) {
+    id
+    post {
+      id
+      user {
+        id
+        username
+        timeOfLastPost
+        isPaid
+        totalScore
+        lastLat
+        lastLng
+      }
+      region {
+        id
+        currentUserCount
+        totalUserCount
+        currentPostCount
+        totalPostCount
+        currentCommentCount
+        totalCommentCount
+      }
+      title
+      text
+      timestamp
+      location
+      lat
+      lng
+      link
+      icon
+      score
+      replies {
+        nextToken
+      }
+    }
+    userId
+    username
+    text
+    timestamp
+    lat
+    lng
+    score
+  }
+}
+mutation DeleteComment(
+  $input: DeleteCommentInput!
+  $condition: ModelCommentConditionInput
+) {
+  deleteComment(input: $input, condition: $condition) {
+    id
+    post {
+      id
+      user {
+        id
+        username
+        timeOfLastPost
+        isPaid
+        totalScore
+        lastLat
+        lastLng
+      }
+      region {
+        id
+        currentUserCount
+        totalUserCount
+        currentPostCount
+        totalPostCount
+        currentCommentCount
+        totalCommentCount
+      }
+      title
+      text
+      timestamp
+      location
+      lat
+      lng
+      link
+      icon
+      score
+      replies {
+        nextToken
+      }
+    }
+    userId
+    username
+    text
+    timestamp
+    lat
+    lng
+    score
+  }
+}
