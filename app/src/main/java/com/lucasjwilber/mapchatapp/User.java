@@ -4,8 +4,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class User {
-    private String id;
+    private String uid;
+    private String firstName;
+    private String lastName;
     private String username;
+    private String email;
     private List<Post> posts;
     private long timeOfLastPost;
     private boolean isPaid;
@@ -15,15 +18,19 @@ public class User {
 
     public User() {};
 
-    public User(String username) {
+    public User(String firstName, String lastName, String username, String email, String uid) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.username = username;
+        this.email = email;
+        this.uid = uid;
         this.posts = new LinkedList<>();
         this.isPaid = false;
         this.totalScore = 0;
     }
 
-    public String getId() {
-        return id;
+    public String getUid() {
+        return uid;
     }
 
     public String getUsername() {
@@ -81,4 +88,29 @@ public class User {
     public void setPosts(List<Post> posts) {
         this.posts = posts;
     }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
 }
