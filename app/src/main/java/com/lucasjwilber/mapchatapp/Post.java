@@ -15,6 +15,8 @@ public class Post {
     private String location;
     private double lat;
     private double lng;
+    private double latZone;
+    private double lngZone;
     private String link;
     private String icon;
     private int score;
@@ -31,11 +33,29 @@ public class Post {
         this.location = location;
         this.lat = lat;
         this.lng = lng;
+        this.latZone = Math.round(lat * 10) / 10.0;
+        this.lngZone = Math.round(lng * 10) / 10.0;
         this.timestamp = new Date().getTime();
         this.score = 0;
         this.comments = new LinkedList<>();
 
         //if link or icon were selected, set them in the create post method before uploading the object
+    }
+
+    public double getLatZone() {
+        return latZone;
+    }
+
+    public void setLatZone(double latZone) {
+        this.latZone = latZone;
+    }
+
+    public double getLngZone() {
+        return lngZone;
+    }
+
+    public void setLngZone(double lngZone) {
+        this.lngZone = lngZone;
     }
 
     public String getId() {

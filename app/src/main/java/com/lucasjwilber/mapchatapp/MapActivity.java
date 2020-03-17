@@ -23,6 +23,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -33,6 +34,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -54,21 +56,28 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Objects;
 
-public class MapActivity extends FragmentActivity implements OnMapReadyCallback, PopupMenu.OnMenuItemClickListener, GoogleMap.OnInfoWindowLongClickListener  {
+public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
+        PopupMenu.OnMenuItemClickListener,
+        GoogleMap.OnInfoWindowLongClickListener,
+        GoogleMap.OnCameraIdleListener {
 
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     FirebaseFirestore db;
+    long postQueryLimit = 100;
     FirebaseUser user;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 69;
+    double postsRadius = 0.05;
     String currentUsername = "someone";
     String currentUserId = "some id";
-    public double userLat;
-    public double userLng;
+    double userLat;
+    double userLng;
+    LatLngBounds cameraBounds;
     public String userCurrentAddress = "somewhere";
     LinearLayout createPostForm;
     LinearLayout addCommentForm;
@@ -105,8 +114,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
 
-        getPostsFromDbAndCreateMapMarkers();
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -131,6 +138,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         mMap.setInfoWindowAdapter(windowAdapter);
         mMap.setOnInfoWindowLongClickListener(this::onInfoWindowLongClick);
         mMap.setOnMapClickListener(this::onMapClick);
+        mMap.setOnCameraIdleListener(this::onCameraIdle);
     }
 
     @Override
@@ -169,7 +177,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
                         AsyncTask.execute(() -> {
 
-                            //call geocode to get formatted address
+                            // call geocode to get formatted address
                             getUsersFormattedAddress();
 
                             //update map on main thread
@@ -187,14 +195,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
                                     //center the map on the user
                                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
-
-                                    //this zooms in on the user's location by restricting how far you can zoom out:
-                                    //TODO: set the default zoom but somehow still allow users to zoom out farther than that
-                                    mMap.setMinZoomPreference((float) 15.0);
-
-                                    //using map type 2 to remove clutter, so only our markers are displayed:
+                                    cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                                     //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
-                                    mMap.setMapType(2);
+                                    mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                                    mMap.setMinZoomPreference(10f);
+                                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15f));
                                 }
                             };
                             handler.obtainMessage().sendToTarget();
@@ -211,6 +216,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         createPostForm.setVisibility(createPostForm.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
     }
 
+    @Override
+    public void onCameraIdle() {
+        cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+        Log.i("ljw", "camera bounds: " + cameraBounds.toString());
+
+        // query db for posts near the user
+        getPostsFromDbAndCreateMapMarkers();
+    }
+
     public void createPost(View v) {
         //gather form data
         EditText postTitleForm = findViewById(R.id.postTitleEditText);
@@ -219,7 +233,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         String postBody = postBodyForm.getText().toString();
 
         //create a Post object
-        Post post = new Post("fakeid", "lucas", "faketitle", "faketext", "6969 420 avenue", userLat, userLng);
+        Post post = new Post(
+                user.getUid(),
+                user.getDisplayName(),
+                postTitle,
+                postBody,
+                userCurrentAddress,
+                userLat,
+                userLng);
+        //set icon
+        //set link
+        //set any other post attributes here:
+
         Log.i("ljw", "new post created: " + post.toString());
 //
 //        //push it to DB
@@ -249,18 +274,29 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         createPostForm.setVisibility(View.INVISIBLE);
     }
 
-    private Bitmap getBitmap(int drawableRes) {
-        Drawable drawable = getResources().getDrawable(drawableRes);
-        Canvas canvas = new Canvas();
-        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        canvas.setBitmap(bitmap);
-        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-        drawable.draw(canvas);
-        return bitmap;
-    }
-
     public void getPostsFromDbAndCreateMapMarkers() {
+        // get only posts within a certain radius of the user
+        Double latZone = Math.round(userLat * 10) / 10.0;
+
+        Log.i("ljw", "getting posts from " + cameraBounds.southwest.longitude + " to " + cameraBounds.northeast.longitude);
+
         db.collection("posts")
+                .whereLessThan("lng", cameraBounds.northeast.longitude)
+                .whereGreaterThan("lng", cameraBounds.southwest.longitude)
+                // firestore only allows one range query, so latitude is broken into zones and we get the closest ones with a logical OR
+                // the max is 10, we use 9 to make it symmetrical
+                // the range of 0.9 latitude is about 54 miles
+                .whereIn("latZone", Arrays.asList(
+                        latZone - 0.4f,
+                        latZone - 0.3f,
+                        latZone - 0.2f,
+                        latZone - 0.1f,
+                        latZone,
+                        latZone + 0.1f,
+                        latZone + 0.2f,
+                        latZone + 0.3f,
+                        latZone + 0.4f))
+                .limit(postQueryLimit)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -285,8 +321,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .position(new LatLng(post.getLat(), post.getLng()))
                 .anchor(0, 1)
                 .icon(postMarkerIcon)
-//                .title(post.getTitle())  // TODO: are these still necessary with HTML? test
-//                .snippet(post.getText())
         );
         marker.setTag(post);
         return marker;
@@ -337,11 +371,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onMapClick(LatLng arg0) {
         addCommentForm.setVisibility(View.INVISIBLE);
         createPostForm.setVisibility(View.INVISIBLE);
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        return false;
     }
 
     @Override
@@ -421,7 +450,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 });
     }
 
-
     public void addTestPostAtLatLng(Double lat, Double lng) {
         Post post = new Post("fakeid", "lucas", "faketitle", "faketext", "6969 420 avenue", userLat, userLng);
         Log.i("ljw", "new post created: " + post.toString());
@@ -444,5 +472,20 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         Log.i("vik", "Error adding document", e);
                     }
                 });
+    }
+
+    private Bitmap getBitmap(int drawableRes) {
+        Drawable drawable = getResources().getDrawable(drawableRes);
+        Canvas canvas = new Canvas();
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        return false;
     }
 }
