@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/map"
     android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -45,128 +44,62 @@
 <!--        create post form-->
         <LinearLayout
             android:id="@+id/createPostForm"
-            android:layout_width="231dp"
+            android:layout_width="230dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="invisible"
-            android:background="#fffee0"
+            android:visibility="gone"
+            android:background="@drawable/rounded_corner_box_primarycolor"
+            android:clickable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent" >
             <TextView
                 android:id="@+id/postLocationTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:text="Your Location"
-                android:textAlignment="center"
-                android:textSize="12sp"
-                android:layout_gravity="center_horizontal" />
-            <TextView
-                android:id="@+id/postTitleLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:text="Title"
-                tools:text="Title" />
+                android:text="Create a Post"
+                android:textAlignment="center"
+                android:textSize="24sp"
+                android:layout_gravity="center_horizontal" />
             <EditText
                 android:id="@+id/postTitleEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:background="#FFFFFF"
-                android:ems="10"
+                android:layout_margin="15dp"
+                android:hint="Title"
+                android:textSize="18sp"
                 android:inputType="textPersonName" />
-            <TextView
-                android:id="@+id/postBodyLabel"
-                android:layout_width="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_height="19dp"
-                android:text="Post"
-                tools:text="Post" />
             <EditText
                 android:id="@+id/postBodyEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:background="#FFFFFF"
-                android:ems="10"
+                android:layout_margin="15dp"
+                android:hint="Write something"
+                android:textSize="18sp"
                 android:gravity="start|top"
                 android:inputType="textMultiLine" />
             <Button
                 android:id="@+id/postSubmitButton"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_margin="15dp"
-                android:ems="10"
+                android:layout_width="100dp"
+                android:layout_height="45dp"
                 android:layout_gravity="center"
+                android:layout_margin="5dp"
                 android:text="Post"
                 android:textStyle="bold"
-                android:textColor="#FFFF00"
-                android:background="#ff8c69"
-                android:clickable="true"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/rounded_corner_box_accentcolor"
                 android:onClick="createPost" />
         </LinearLayout>
 
-<!--        add comment form-->
-        <LinearLayout
-            android:id="@+id/addCommentForm"
-            android:layout_width="231dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="invisible"
-            android:background="#fffee0"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.6">
-            <TextView
-                android:id="@+id/commentLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                tools:text="Title" />
-            <EditText
-                android:id="@+id/commentEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:background="#FFFFFF"
-                android:ems="10"
-                android:inputType="textPersonName" />
-            <Button
-                android:id="@+id/commentSubmitButton"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_margin="15dp"
-                android:ems="10"
-                android:layout_gravity="center"
-                android:text="Comment"
-                android:textStyle="bold"
-                android:textColor="#FFFF00"
-                android:background="#ff8c69"
-                android:clickable="true"
-                android:onClick="addCommentToPost" />
-        </LinearLayout>
-
-        <!-- post view-->
+        <!-- post recycler view-->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/postRecyclerView"
-            android:layout_width="237dp"
-            android:layout_height="300dp"
+            android:layout_width="275dp"
+            android:layout_height="350dp"
             android:scrollbars="vertical"
             android:visibility="gone"
-            android:background="@drawable/rounded_corner_box"
+            android:background="@drawable/rounded_corner_box_primarycolor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

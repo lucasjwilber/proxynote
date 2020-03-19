@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -20,6 +21,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -83,7 +85,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     LatLngBounds cameraBounds;
     public String userCurrentAddress = "somewhere";
     LinearLayout createPostForm;
-    LinearLayout addCommentForm;
     TextView userLocationTV;
     BitmapDescriptor postMarkerIcon;
     BitmapDescriptor userMarkerIcon;
@@ -119,7 +120,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
 
         createPostForm = mapBinding.createPostForm;
-        addCommentForm = mapBinding.addCommentForm;
         userLocationTV = mapBinding.postLocationTextView;
 
         // post recyclerview
@@ -200,7 +200,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         AsyncTask.execute(() -> {
 
                             // call geocode to get formatted address
-                            getUsersFormattedAddress();
+//                            getUsersFormattedAddress();
 
                             //update map on main thread
                             Handler handler = new Handler(Looper.getMainLooper()) {
@@ -234,8 +234,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void toggleFormVisibility(View v) {
-        //toggle visibility
-        createPostForm.setVisibility(createPostForm.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
+        if (createPostForm.getVisibility() == View.VISIBLE) {
+            createPostForm.setVisibility(View.GONE);
+        } else {
+            createPostForm.setVisibility(View.VISIBLE);
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
+        }
+        postRv.setVisibility(View.GONE);
     }
 
     @Override
@@ -289,7 +294,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 });
 
 //      // hide form
-        createPostForm.setVisibility(View.INVISIBLE);
+        createPostForm.setVisibility(View.GONE);
         postTitleForm.setText("");
         postBodyForm.setText("");
     }
@@ -395,9 +400,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void onMapClick(LatLng arg0) {
-        addCommentForm.setVisibility(View.INVISIBLE);
-        createPostForm.setVisibility(View.INVISIBLE);
+        createPostForm.setVisibility(View.GONE);
         postRv.setVisibility(View.GONE);
+
+        //hide the keyboard
+        InputMethodManager imm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = this.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(this);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     public void addCommentToPost(View v) {
@@ -431,6 +445,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         Log.i("ljw", "successfully added a comment");
+                        postRvAdapter.notifyDataSetChanged();
+                        commentEditText.setText("");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -465,6 +481,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             Log.i("ljw", "no post tagged to the clicked on marker, hmm");
             return true;
         }
+        createPostForm.setVisibility(View.GONE);
 
         currentSelectedMarker = marker;
         currentSelectedPost = (Post) marker.getTag();

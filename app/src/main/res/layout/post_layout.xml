@@ -89,21 +89,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="15sp"
+        android:layout_marginBottom="10dp"
         />
 
     <EditText
         android:id="@+id/postRvPostReplyBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textSize="16sp"
         android:hint="Add a comment"
         />
 
     <Button
         android:id="@+id/postRvPostReplyButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="75dp"
+        android:layout_height="35dp"
+        android:layout_gravity="end"
+        android:padding="0dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/rounded_corner_box_accentcolor"
         android:text="Reply"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
         android:onClick="addCommentToPost"
+        android:layout_marginBottom="5dp"
         />
 
 </LinearLayout>
