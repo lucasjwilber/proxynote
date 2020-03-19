@@ -75,4 +75,18 @@
         android:text="lorem ipsum blah blah blah this is the text of the OP"
         />
 
+    <EditText
+        android:id="@+id/postRvPostReplyBox"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Reply"
+        />
+
+    <Button
+        android:id="@+id/postRvPostReplyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reply"
+        />
+
 </LinearLayout>

@@ -57,7 +57,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 ImageView postImage = l.findViewById(R.id.postRvPostImage);
                 TextView postText = l.findViewById(R.id.postRvPostText);
                 postTitle.setText(post.getTitle());
-                postScore.setText("000");
+                postScore.setText(Long.toString(post.getScore()));
                 postInfo.setText("Posted by " + post.getUsername() + " from " + post.getLocation() + " at " + post.getTimestamp());
                 postImage.setImageURI(post.getLink());
                 postText.setText(post.getText());
