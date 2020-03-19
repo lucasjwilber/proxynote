@@ -334,12 +334,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 Post post = Objects.requireNonNull(document.toObject(Post.class));
 
                                 // for whatever reason the Post created by document.toObject doesn't include the comments list
-                                Log.i("ljw", "document comments: " + document.getData().get("comments").toString());
-                                Log.i("ljw", "post comments: " + post.getComments().toString());
-                                Log.i("ljw", "comments from db is type: " + document.getData().get("comments").getClass().toString());
                                 ArrayList list = (ArrayList) document.getData().get("comments");
-
-                                post.setComments(turnMapsIntoListOfComments(list));
+                                post.setComments(Utils.turnMapsIntoListOfComments(list));
 
                                 createMarkerWithPost(post);
 
@@ -352,28 +348,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 });
     }
 
-    public ArrayList<Comment> turnMapsIntoListOfComments(ArrayList<HashMap> mapList) {
-        ArrayList<Comment> comments = new ArrayList<>();
 
-        for (HashMap map : mapList) {
-            Log.i("ljw", map.getClass().toString());
-
-//            int score = (int) map.get("score");
-            int score = 0;
-            double lat = (double) map.get("lat");
-            double lng = (double) map.get("lng");
-            String text = (String) map.get("text");
-            String id = (String) map.get("id");
-            String userId = (String) map.get("userId");
-            String username = (String) map.get("username");
-            long timestamp = (long) map.get("timestamp");
-
-            comments.add(new Comment(id, userId, username, text, timestamp, lat, lng, score));
-            }
-
-
-        return comments;
-    }
 
     public Marker createMarkerWithPost(Post post) {
         Marker marker = mMap.addMarker(new MarkerOptions()

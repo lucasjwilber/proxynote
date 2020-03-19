@@ -1,5 +1,8 @@
 package com.lucasjwilber.mapchatapp;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class Utils {
     static String getZoneOfCoordinates(double lat, double lng) {
         return getZoneOfLatOrLng(lat) + "/" + getZoneOfLatOrLng(lng);
@@ -33,5 +36,22 @@ public class Utils {
         else
             result = latSplit[0] + "." + latSplit[1].charAt(0) + "00";
         return Double.parseDouble(result);
+    }
+    public static ArrayList<Comment> turnMapsIntoListOfComments(ArrayList<HashMap> mapList) {
+        ArrayList<Comment> comments = new ArrayList<>();
+
+        for (HashMap map : mapList) {
+            long score = (long) map.get("score");
+            double lat = (double) map.get("lat");
+            double lng = (double) map.get("lng");
+            String text = (String) map.get("text");
+            String id = (String) map.get("id");
+            String userId = (String) map.get("userId");
+            String username = (String) map.get("username");
+            long timestamp = (long) map.get("timestamp");
+
+            comments.add(new Comment(id, userId, username, text, timestamp, lat, lng, score));
+        }
+        return comments;
     }
 }
