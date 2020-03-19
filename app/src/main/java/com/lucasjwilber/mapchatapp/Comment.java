@@ -27,6 +27,18 @@ public class Comment {
         this.score = 0;
     }
 
+    // constructor for pre-existing comments from db
+    public Comment(String id, String userId, String username, String text, long timestamp, double lat, double lng, int score) {
+        this.id = id;
+        this.userId = userId;
+        this.username = username;
+        this.text = text;
+        this.timestamp = timestamp;
+        this.lat = lat;
+        this.lng = lng;
+        this.score = score;
+    }
+
     public String getId() {
         return id;
     }
@@ -90,4 +102,6 @@ public class Comment {
     public void setScore(int score) {
         this.score = score;
     }
+
+
 }

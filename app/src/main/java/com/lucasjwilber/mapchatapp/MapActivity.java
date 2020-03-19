@@ -4,9 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -23,7 +24,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -48,6 +48,11 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.gson.JsonDeserializationContext;
+import com.lucasjwilber.mapchatapp.databinding.ActivityMapBinding;
+import com.lucasjwilber.mapchatapp.databinding.PostLayoutBinding;
+
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -56,16 +61,21 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         PopupMenu.OnMenuItemClickListener,
         GoogleMap.OnInfoWindowLongClickListener,
+        GoogleMap.OnMarkerClickListener,
         GoogleMap.OnCameraIdleListener {
 
+    private ActivityMapBinding mapBinding;
+    private PostLayoutBinding postViewBinding;
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     FirebaseFirestore db;
@@ -87,11 +97,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     Post currentSelectedPost;
     String currentSelectedPostId;
     Marker currentSelectedMarker;
+    private RecyclerView postRv;
+    private RecyclerView.Adapter postRvAdapter;
+    private RecyclerView.LayoutManager postRvLayoutManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map);
+
+        mapBinding = ActivityMapBinding.inflate(getLayoutInflater());
+        View view = mapBinding.getRoot();
+        setContentView(view);
+
+        postViewBinding = PostLayoutBinding.inflate(getLayoutInflater());
+
 
         // get location permission if necessary, then get location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -105,9 +125,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             getUserLatLng();
         }
 
-        createPostForm = findViewById(R.id.createPostForm);
-        addCommentForm = findViewById(R.id.addCommentForm);
-        userLocationTV = findViewById(R.id.postLocationTextView);
+        createPostForm = mapBinding.createPostForm;
+        addCommentForm = mapBinding.addCommentForm;
+        userLocationTV = mapBinding.postLocationTextView;
+
+        // post recyclerview
+        postRv = mapBinding.postRecyclerView;
+        postRvLayoutManager = new LinearLayoutManager(this);
+        postRv.setLayoutManager(postRvLayoutManager);
+//        Post testPost = new Post("fakeid", "lucas", "faketitle", "faketext", "6969 420 avenue", userLat, userLng);
+//        postRvAdapter = new PostRvAdapter(testPost, );
+//        postRv.setAdapter(postRvAdapter);
+
         postMarkerIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.yellow_chat_icon));
         userMarkerIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.user_location_pin));
 
@@ -137,6 +166,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         PostInfoWindowAdapter windowAdapter = new PostInfoWindowAdapter(getApplicationContext());
         mMap.setInfoWindowAdapter(windowAdapter);
         mMap.setOnInfoWindowLongClickListener(this::onInfoWindowLongClick);
+        mMap.setOnMarkerClickListener(this::onMarkerClick);
         mMap.setOnMapClickListener(this::onMapClick);
         mMap.setOnCameraIdleListener(this::onCameraIdle);
     }
@@ -227,9 +257,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     public void createPost(View v) {
         //gather form data
-        EditText postTitleForm = findViewById(R.id.postTitleEditText);
+        EditText postTitleForm = mapBinding.postTitleEditText;
         String postTitle = postTitleForm.getText().toString();
-        EditText postBodyForm = findViewById(R.id.postBodyEditText);
+        EditText postBodyForm = mapBinding.postBodyEditText;
         String postBody = postBodyForm.getText().toString();
 
         //create a Post object
@@ -241,24 +271,20 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 userCurrentAddress,
                 userLat,
                 userLng);
-        //set icon
-        //set link
+        //set icon as required here
+        //set link as required here
         //set any other post attributes here:
 
         Log.i("ljw", "new post created: " + post.toString());
 //
 //        //push it to DB
         db.collection("posts")
-                .add(post)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                .document(post.getId())
+                .set(post)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.i("vik", "DocumentSnapshot added with ID: " + documentReference.getId());
+                    public void onSuccess(Void aVoid) {
                         Log.i("ljw", "successfully added new post to DB");
-
-                        //set the post's id to whatever id it was given by firestore
-                        post.setId(documentReference.getId());
-
                         //add the new post to the map now that it's in the db
                         Marker marker = createMarkerWithPost(post);
                     }
@@ -266,12 +292,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.i("vik", "Error adding document", e);
+                        Log.i("ljw", "Error adding post to db: " + e);
                     }
                 });
 
-//        //hide form
+//      // hide form
         createPostForm.setVisibility(View.INVISIBLE);
+        postTitleForm.setText("");
+        postBodyForm.setText("");
     }
 
     public void getPostsFromDbAndCreateMapMarkers() {
@@ -305,15 +333,46 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                             for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                                 Post post = Objects.requireNonNull(document.toObject(Post.class));
 
+                                // for whatever reason the Post created by document.toObject doesn't include the comments list
+                                Log.i("ljw", "document comments: " + document.getData().get("comments").toString());
+                                Log.i("ljw", "post comments: " + post.getComments().toString());
+                                Log.i("ljw", "comments from db is type: " + document.getData().get("comments").getClass().toString());
+                                ArrayList list = (ArrayList) document.getData().get("comments");
+
+                                post.setComments(turnMapsIntoListOfComments(list));
+
                                 createMarkerWithPost(post);
 
-                                Log.i("ljw", "found post \"" + post.getTitle() + "/" + post.getText() + "\" with id " + post.getId());
+                                Log.i("ljw", "found post \"" + post.getTitle() + "/" + post.getText() + "\" with id " + post.getId() + "from document with id " + document.getId());
                             }
                         } else {
                             Log.i("ljw", "Error getting documents.", task.getException());
                         }
                     }
                 });
+    }
+
+    public ArrayList<Comment> turnMapsIntoListOfComments(ArrayList<HashMap> mapList) {
+        ArrayList<Comment> comments = new ArrayList<>();
+
+        for (HashMap map : mapList) {
+            Log.i("ljw", map.getClass().toString());
+
+//            int score = (int) map.get("score");
+            int score = 0;
+            double lat = (double) map.get("lat");
+            double lng = (double) map.get("lng");
+            String text = (String) map.get("text");
+            String id = (String) map.get("id");
+            String userId = (String) map.get("userId");
+            String username = (String) map.get("username");
+            long timestamp = (long) map.get("timestamp");
+
+            comments.add(new Comment(id, userId, username, text, timestamp, lat, lng, score));
+            }
+
+
+        return comments;
     }
 
     public Marker createMarkerWithPost(Post post) {
@@ -392,7 +451,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void addCommentToPost(View v) {
         Log.i("ljw", "commentbutton clicked");
         EditText commentEditText = findViewById(R.id.commentEditText);
-        Comment comment = new Comment("fakeuserid", "fakeusername", "faketext", userLat, userLng);
+        Comment comment = new Comment(user.getUid(),
+                user.getDisplayName(),
+                commentEditText.getText().toString(),
+                userLat,
+                userLng);
 
         if (currentSelectedPostId == null) {
             Log.i("ljw", "post has a null id so a DB query won't work");
@@ -400,52 +463,25 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             return;
         }
 
+        Log.i("ljw", currentSelectedPostId);
+
+        List<Comment> comments = currentSelectedPost.getComments();
+        comments.add(comment);
+
         //get post by id from firestore
         db.collection("posts")
                 .document(currentSelectedPostId)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                .update("comments", comments)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        Log.i("ljw", "query successful");
-
-                        Post c = Objects.requireNonNull(task.getResult()).toObject(Post.class);
-                        //these are to prevent NPEs on old posts that didn't have IDs or instantiated LLs:
-                        if (c == null) return;
-                        Log.i("ljw", "post currently has " + c.getComments().size() + " comments already:");
-                        Log.i("ljw", c.getComments().toString());
-                        c.getComments().add(comment);
-
-                        //update post in firestore
-                        db.collection("posts")
-                                .document(currentSelectedPostId)
-                                .set(c)
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Log.i("ljw", "successfully updated post with new comment");
-                                        addCommentForm.setVisibility(View.INVISIBLE);
-                                        commentEditText.setText("");
-
-                                        //refresh marker
-                                        currentSelectedMarker.remove();
-                                        Marker marker = mMap.addMarker(new MarkerOptions()
-                                                .position(new LatLng(c.getLat(), c.getLng()))
-                                                .anchor(0, 1)
-                                                .icon(postMarkerIcon)
-                                                .title(c.getTitle())
-                                                .snippet(c.getText()));
-                                        marker.setTag(c);
-                                        marker.showInfoWindow();
-                                        currentSelectedMarker = marker;
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.i("ljw", "failed updating post with new comment:\n", e);
-                                    }
-                                });
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Log.i("ljw", "successfully added a comment");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.i("ljw", "failed adding a comment because " + e.toString());
                     }
                 });
     }
@@ -486,6 +522,24 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
+        return false;
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        Log.i("ljw", "clicked on a marker");
+
+        Post p = (Post) marker.getTag();
+        if (p == null) {
+            Log.i("ljw", "no post tagged to the clicked on marker");
+            return true;
+        }
+        Log.i("ljw", "selected post has " + p.getComments().size() + "comments");
+
+        postRvAdapter = new PostRvAdapter(p);
+        postRv.setAdapter(postRvAdapter);
+
+        // returning true instead would prevent the camera centering/info window opening
         return false;
     }
 }

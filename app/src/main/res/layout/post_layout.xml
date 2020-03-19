@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/postView"
+    android:orientation="vertical"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    >
+
+<!--    header-->
+    <LinearLayout
+        android:id="@+id/postRvHeaderLL"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <Button
+            android:id="@+id/postRvHeaderVoteUpBtn"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:textSize="15sp"
+            android:text="^"
+            />
+
+        <TextView
+            android:id="@+id/postRvHeaderScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10"
+            />
+
+        <Button
+            android:id="@+id/postRvHeaderVoteDownBtn"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:textSize="15sp"
+            android:text="v"
+            />
+
+        <TextView
+            android:id="@+id/postRvHeaderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="post title"
+            />
+
+        <Button
+            android:id="@+id/postRvHeaderReportBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="report"
+            />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/postRvPostInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="posted by someone from somewhere sometime"
+        />
+
+    <ImageView
+        android:id="@+id/postRvPostImage"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        />
+
+    <TextView
+        android:id="@+id/postRvPostText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="lorem ipsum blah blah blah this is the text of the OP"
+        />
+
+</LinearLayout>

@@ -1,7 +1,9 @@
 package com.lucasjwilber.mapchatapp;
 
+import android.net.Uri;
+
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,10 +19,10 @@ public class Post {
     private double lng;
     private double latZone;
     private double lngZone;
-    private String link;
+    private Uri link;
     private String icon;
     private int score;
-    private List<Comment> comments;
+    private ArrayList<Comment> comments;
 
     public Post() {};
 
@@ -37,7 +39,7 @@ public class Post {
         this.lngZone = Math.round(lng * 10) / 10.0;
         this.timestamp = new Date().getTime();
         this.score = 0;
-        this.comments = new LinkedList<>();
+        this.comments = new ArrayList<>();
 
         //if link or icon were selected, set them in the create post method before uploading the object
     }
@@ -98,11 +100,11 @@ public class Post {
         this.location = location;
     }
 
-    public String getLink() {
+    public Uri getLink() {
         return link;
     }
 
-    public void setLink(String link) {
+    public void setLink(Uri link) {
         this.link = link;
     }
 
@@ -126,7 +128,7 @@ public class Post {
         return comments;
     }
 
-    public void setChildren(List<Comment> comments) {
+    public void setChildren(ArrayList<Comment> comments) {
         this.comments = comments;
     }
 
@@ -162,11 +164,11 @@ public class Post {
         this.username = username;
     }
 
-    public List<Comment> getComments() {
+    public ArrayList<Comment> getComments() {
         return comments;
     }
 
-    public void setComments(List<Comment> comments) {
+    public void setComments(ArrayList<Comment> comments) {
         this.comments = comments;
     }
 }

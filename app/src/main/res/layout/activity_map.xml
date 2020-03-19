@@ -20,7 +20,6 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginStart="27dp"
-            android:layout_marginLeft="27dp"
             android:layout_marginTop="28dp"
             android:onClick="showPopup"
             app:layout_constraintHorizontal_bias="0.407"
@@ -43,6 +42,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/create_post_button_background" />
 
+<!--        create post form-->
         <LinearLayout
             android:id="@+id/createPostForm"
             android:layout_width="231dp"
@@ -115,7 +115,7 @@
                 android:onClick="createPost" />
         </LinearLayout>
 
-
+<!--        add comment form-->
         <LinearLayout
             android:id="@+id/addCommentForm"
             android:layout_width="231dp"
@@ -158,6 +158,21 @@
                 android:clickable="true"
                 android:onClick="addCommentToPost" />
         </LinearLayout>
+
+        <!-- post view-->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/postRecyclerView"
+            android:scrollbars="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="200dp"
+            android:layout_marginStart="27dp"
+            android:layout_marginTop="28dp"
+            android:onClick="showPopup"
+            android:background="#FFFFFF"
+            app:layout_constraintHorizontal_bias="0.407"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.461"/>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
