@@ -17,12 +17,13 @@
         android:text="posted by someone from somewhere sometime"
         />
 
-<!--    header-->
+<!--    score and title-->
     <LinearLayout
         android:id="@+id/postRvHeaderLL"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         >
 
 <!--        score controls-->
@@ -39,13 +40,14 @@
                 android:layout_height="36dp"
                 android:background="@drawable/up_arrow"
                 />
+
             <TextView
                 android:id="@+id/postRvHeaderScore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="0"
-                />
+                android:textStyle="bold" />
             <Button
                 android:id="@+id/postRvHeaderVoteDownBtn"
                 android:layout_width="36dp"
@@ -62,7 +64,7 @@
             android:textSize="18sp"
             android:layout_gravity="center_vertical"
             android:text="post title"
-            android:layout_marginBottom="15dp"
+            android:textStyle="bold"
             />
 
 <!--        <Button-->
@@ -95,8 +97,10 @@
     <EditText
         android:id="@+id/postRvPostReplyBox"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginBottom="8dp"
         android:textSize="16sp"
+        android:background="@drawable/rectangle_black"
         android:hint="Add a comment"
         />
 
@@ -107,12 +111,12 @@
         android:layout_gravity="end"
         android:padding="0dp"
         android:layout_marginRight="10dp"
+        android:layout_marginBottom="15dp"
         android:background="@drawable/rounded_corner_box_accentcolor"
         android:text="Reply"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:onClick="addCommentToPost"
-        android:layout_marginBottom="5dp"
         />
 
 </LinearLayout>

@@ -93,11 +93,16 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         if (position >= 1) {
             Comment comment = post.getComments().get(position - 1);
             TextView commentHeader = holder.linearLayout.findViewById(R.id.postRvCommentHeader);
+            double distance = Utils.getDistance(post.getLat(), post.getLng(), comment.getLat(), comment.getLng(), "N");
+            String stringDistance = Double.toString(distance);
+            String text = getHtmlDateString(comment.getTimestamp()) + ", " + stringDistance + " miles away";
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                commentHeader.setText(Html.fromHtml(getHtmlDateString(comment.getTimestamp()), Html.FROM_HTML_MODE_COMPACT));
+                commentHeader.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
             } else {
-                commentHeader.setText(Html.fromHtml(getHtmlDateString(comment.getTimestamp())));
+                commentHeader.setText(Html.fromHtml(text));
             }
+
             TextView commentText = holder.linearLayout.findViewById(R.id.postRvCommentText);
             commentText.setText(comment.getText());
         }
