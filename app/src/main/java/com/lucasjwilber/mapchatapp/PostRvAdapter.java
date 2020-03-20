@@ -1,6 +1,9 @@
 package com.lucasjwilber.mapchatapp;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,12 +23,21 @@ import java.util.Locale;
 public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHolder> {
 
     private Post post;
+    private double distanceMultiplier = 0.8684;
+    private String distanceType = " miles";
 
     private static final int POST_HEADER = 0;
     private static final int POST_COMMENT = 1;
 
-    PostRvAdapter(Post post) {
+    PostRvAdapter(Post post, Context context) {
         this.post = post;
+
+        SharedPreferences prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+        String distanceType = prefs.getString("distanceType", "imperial");
+        if (distanceType.equals("metric"))  {
+            distanceMultiplier = 1.609344;
+            distanceType = " km";
+        }
 
         Log.i("ljw", "post comments = " + post.getComments().toString());
         Log.i("ljw", "made PostRvAdapter with post that has title " + post.getTitle());
@@ -91,11 +103,11 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
         // only if it's a comment are we recycling the same view type:
         if (position >= 1) {
+            // header of comment:
             Comment comment = post.getComments().get(position - 1);
             TextView commentHeader = holder.linearLayout.findViewById(R.id.postRvCommentHeader);
-            double distance = Utils.getDistance(post.getLat(), post.getLng(), comment.getLat(), comment.getLng(), "N");
-            String stringDistance = Double.toString(distance);
-            String text = getHtmlDateString(comment.getTimestamp()) + ", " + stringDistance + " miles away";
+            double distance = comment.getDistanceFromPost() * distanceMultiplier;
+            String text = getHtmlDateString(comment.getTimestamp()) + ", " + distance + distanceType + " away";
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 commentHeader.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
@@ -103,6 +115,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 commentHeader.setText(Html.fromHtml(text));
             }
 
+            // body of comment:
             TextView commentText = holder.linearLayout.findViewById(R.id.postRvCommentText);
             commentText.setText(comment.getText());
         }

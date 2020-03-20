@@ -12,11 +12,13 @@ public class Comment {
     private long timestamp;
     private double lat;
     private double lng;
+    private double distanceFromPost;
     private long score;
 
     public Comment() {};
 
-    public Comment(String userId, String username, String text, double lat, double lng) {
+    //for creating & uploading new comments
+    public Comment(String userId, String username, String text, double lat, double lng, double distanceFromPost) {
         this.id = UUID.randomUUID().toString();
         this.userId = userId;
         this.username = username;
@@ -25,10 +27,11 @@ public class Comment {
         this.lat = lat;
         this.lng = lng;
         this.score = 0;
+        this.distanceFromPost = distanceFromPost;
     }
 
-    // constructor for pre-existing comments from db
-    public Comment(String id, String userId, String username, String text, long timestamp, double lat, double lng, long score) {
+    // for downloading comments
+    public Comment(String id, String userId, String username, String text, long timestamp, double lat, double lng, double distanceFromPost, long score) {
         this.id = id;
         this.userId = userId;
         this.username = username;
@@ -36,7 +39,16 @@ public class Comment {
         this.timestamp = timestamp;
         this.lat = lat;
         this.lng = lng;
+        this.distanceFromPost = distanceFromPost;
         this.score = score;
+    }
+
+    public double getDistanceFromPost() {
+        return distanceFromPost;
+    }
+
+    public void setDistanceFromPost(double distanceFromPost) {
+        this.distanceFromPost = distanceFromPost;
     }
 
     public String getId() {

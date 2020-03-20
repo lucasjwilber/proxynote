@@ -106,7 +106,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         postViewBinding = PostLayoutBinding.inflate(getLayoutInflater());
 
-
         // get location permission if necessary, then get location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         if (ContextCompat.checkSelfPermission(this,
@@ -219,7 +218,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
                                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                                     //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
-                                    mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                                    mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                                     mMap.setMinZoomPreference(10f);
                                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15f));
                                 }
@@ -331,6 +330,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 Post post = Objects.requireNonNull(document.toObject(Post.class));
 
                                 // for whatever reason the Post created by document.toObject doesn't include the comments list
+                                // they are however present as an ArrayList of HashMaps
                                 ArrayList list = (ArrayList) document.getData().get("comments");
                                 post.setComments(Utils.turnMapsIntoListOfComments(list));
 
@@ -402,16 +402,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onMapClick(LatLng arg0) {
         createPostForm.setVisibility(View.GONE);
         postRv.setVisibility(View.GONE);
-
-        //hide the keyboard
-        InputMethodManager imm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
-        View view = this.getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
-        if (view == null) {
-            view = new View(this);
-        }
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     public void addCommentToPost(View v) {
@@ -427,11 +417,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             return;
         }
 
+        double distanceFromPost = Utils.getDistance(userLat, userLng, currentSelectedPost.getLat(), currentSelectedPost.getLng());
+
         Comment comment = new Comment(user.getUid(),
                 user.getDisplayName(),
                 commentEditText.getText().toString(),
                 userLat,
-                userLng);
+                userLng,
+                distanceFromPost);
 
         List<Comment> comments = currentSelectedPost.getComments();
         comments.add(comment);
@@ -485,11 +478,39 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         currentSelectedMarker = marker;
         currentSelectedPost = (Post) marker.getTag();
-        postRvAdapter = new PostRvAdapter(p);
+        postRvAdapter = new PostRvAdapter(p, getApplicationContext());
         postRv.setAdapter(postRvAdapter);
         postRv.setVisibility(View.VISIBLE);
 
         // returning true instead would prevent the camera centering/info window opening
         return false;
+    }
+
+    public void changePostScore(View v) {
+
+        //check if this user has already voted on this first
+
+        int score;
+        if (v.getId() == R.id.postRvHeaderVoteDownBtn)
+            score = currentSelectedPost.getScore() + 1;
+        else
+            score = currentSelectedPost.getScore() - 1;
+
+        db.collection("posts")
+                .document(currentSelectedPost.getId())
+                .update("score", score)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Log.i("ljw", "successfully updated score");
+                        postRvAdapter.notifyDataSetChanged();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.i("ljw", "failed updating score: " + e.toString());
+                    }
+                });
     }
 }
