@@ -1,6 +1,7 @@
 package com.lucasjwilber.mapchatapp;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class Utils {
@@ -71,4 +72,61 @@ public class Utils {
             return distance;
         }
     }
+
+    static String getHowFarAway(double d, String type) {
+        double distance;
+        String unit;
+
+        if (type.equals("imperial")) {
+            distance = d * 0.8684;
+            unit = "miles";
+            if (distance < 0.18939393939) { //distance < 1000 feet
+                unit = "feet";
+                distance = (int) Math.round(distance * 5280);
+            } else {
+                distance *= 10;
+                distance = Math.round(distance);
+                distance = (int) distance / 10;
+            }
+        } else { //metric
+            distance = d * 1.609344;
+            unit = "km";
+            if (distance < 0.1) {
+                unit = "meters";
+                distance = (int) Math.round(distance * 1000);
+            } else {
+                distance *= 10;
+                distance = Math.round(distance);
+                distance = (int) distance / 10;
+            }
+        }
+
+        //TODO: cut off the 3rd+ decimals
+        return distance + " " + unit + " away";
+    }
+
+    static String getHowLongAgo(long timestamp) {
+        long seconds = (new Date().getTime() - timestamp) / 1000;
+        long number;
+        String unit;
+        if (seconds < 60) {
+            number = seconds;
+            unit = "second";
+        } else if (seconds >= 60 && seconds < 3600) {
+            number = seconds/60;
+            unit = "minute";
+        } else if (seconds >= 3600 && seconds < 86400) {
+            number = seconds/3600;
+            unit = "hour";
+        } else { //if (seconds <= 86400) {
+            number = seconds/86400;
+            unit = "day";
+        }
+        if (number == 1) {
+            return number + " " + unit + " ago";
+        } else {
+            return number + " " + unit + "s ago";
+        }
+    }
+
 }

@@ -26,8 +26,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
     private Post post;
     private String userId;
-    private double distanceMultiplier = 0.8684;
-    private String distanceUnits = " miles";
+    private String distanceType;
     Drawable upArrowColored;
     Drawable downArrowColored;
     Drawable upArrow;
@@ -45,12 +44,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         downArrow = context.getDrawable(R.drawable.down_arrow);
 
         SharedPreferences prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-        String distanceUnits = prefs.getString("distanceType", "imperial");
-        // if user prefers metric, change the displayed measurements. otherwise it's in miles by default.
-        if (distanceUnits.equals("metric"))  {
-            distanceMultiplier = 1.609344;
-            distanceUnits = " km";
-        }
+        distanceType = prefs.getString("distanceType", "imperial");
 
         Log.i("ljw", "post comments = " + post.getComments().toString());
         Log.i("ljw", "made PostRvAdapter with post that has title " + post.getTitle());
@@ -95,9 +89,9 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 String postScoreText = Long.toString(post.getScore());
                 postScore.setText(postScoreText);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    postInfo.setText(Html.fromHtml(getHtmlDateString(post.getTimestamp()), Html.FROM_HTML_MODE_COMPACT));
+                    postInfo.setText(Html.fromHtml(getHtmlHeaderString(post.getTimestamp()), Html.FROM_HTML_MODE_COMPACT));
                 } else {
-                    postInfo.setText(Html.fromHtml(getHtmlDateString(post.getTimestamp())));
+                    postInfo.setText(Html.fromHtml(getHtmlHeaderString(post.getTimestamp())));
                 }
                 postImage.setImageURI(post.getLink());
                 postText.setText(post.getText());
@@ -132,16 +126,17 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
         // only if it's a comment are we recycling the same view type:
         if (position >= 1) {
-            // header of comment:
             Comment comment = post.getComments().get(position - 1);
             TextView commentHeader = holder.linearLayout.findViewById(R.id.postRvCommentHeader);
-            double distance = comment.getDistanceFromPost() * distanceMultiplier;
-            String text = getHtmlDateString(comment.getTimestamp()) + ", from " + distance + distanceUnits + " away";
-
+            StringBuilder headerText = new StringBuilder();
+            headerText.append(getHtmlHeaderString(comment.getTimestamp()));
+            headerText.append(", <i>");
+            headerText.append(Utils.getHowFarAway(comment.getDistanceFromPost(), distanceType));
+            headerText.append("</i>");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                commentHeader.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
+                commentHeader.setText(Html.fromHtml(headerText.toString(), Html.FROM_HTML_MODE_COMPACT));
             } else {
-                commentHeader.setText(Html.fromHtml(text));
+                commentHeader.setText(Html.fromHtml(headerText.toString()));
             }
 
             // body of comment:
@@ -155,11 +150,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         return 1 + post.getComments().size();
     }
 
-    public String getHtmlDateString(long timestamp) {
-        Date date = new java.util.Date(timestamp);
-        SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd-M-yyyy hh:mm:ss", Locale.US);
-        String formattedDate = sdf.format(date);
-        return "<i><b>" + post.getUsername() + "</b>, " + formattedDate + "</i>";
+    public String getHtmlHeaderString(long timestamp) {
+        return "<i><b>" + post.getUsername() + "</b>, " + Utils.getHowLongAgo(timestamp) + "</i>";
     }
 
 }
