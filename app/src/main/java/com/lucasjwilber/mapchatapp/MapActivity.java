@@ -492,42 +492,65 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onPostVoteClicked(View v) {
         // need to disable the button until the firestore transaction is complete, otherwise users
         // could cast multiple votes by spamming the button
+        // TODO: move this into Utils
         v.setEnabled(false);
         int usersPreviousVote = 0;
-        int usersNewVote = 0;
+        int currentScore = currentSelectedPost.getScore();
+        Log.i("ljw", "currentScore is " + currentScore);
         HashMap<String, Integer> voteMap = currentSelectedPost.getVotes();
         if (voteMap.containsKey(user.getUid())) {
             usersPreviousVote = voteMap.get(user.getUid());
         }
+
         Button up = findViewById(R.id.postRvHeaderVoteUpBtn);
         Button down = findViewById(R.id.postRvHeaderVoteDownBtn);
+        int usersNewVote = 0;
+        int scoreChange = 0;
 
-        //on downvote
         if (v.getId() == R.id.postRvHeaderVoteDownBtn) {
-            if (usersPreviousVote != -1) {
-                usersNewVote = -1;
-                down.setBackground(getDrawable(R.drawable.down_arrow_colored));
-                if (usersPreviousVote == 1) {
-                    up.setBackground(getDrawable(R.drawable.up_arrow));
-                }
-            } else {
+            if (usersPreviousVote == -1) {
+                usersNewVote = 0;
+                scoreChange = 1;
                 down.setBackground(getDrawable(R.drawable.down_arrow));
-            }
-        //on upvote
-        } else {
-            if (usersPreviousVote != 1) {
-                usersNewVote = 1;
-                up.setBackground(getDrawable(R.drawable.up_arrow_colored));
-                if (usersPreviousVote == -1) {
-                    down.setBackground(getDrawable(R.drawable.down_arrow));
-                }
-            } else {
+            } else if (usersPreviousVote == 0) {
+                usersNewVote = -1;
+                scoreChange = -1;
+                down.setBackground(getDrawable(R.drawable.down_arrow_colored));
+            } else { //if (usersPreviousVote == 1)
+                usersNewVote = -1;
+                scoreChange = -2;
+                down.setBackground(getDrawable(R.drawable.down_arrow));
                 up.setBackground(getDrawable(R.drawable.up_arrow));
             }
         }
-        int scoreChange = usersNewVote - usersPreviousVote;
-        voteMap.put(user.getUid(), usersNewVote);
+        if (v.getId() == R.id.postRvHeaderVoteUpBtn) {
+            if (usersPreviousVote == -1) {
+                usersNewVote = 1;
+                scoreChange = 2;
+                down.setBackground(getDrawable(R.drawable.down_arrow));
+                up.setBackground(getDrawable(R.drawable.up_arrow_colored));
+            } else if (usersPreviousVote == 0) {
+                usersNewVote = 1;
+                scoreChange = 1;
+                up.setBackground(getDrawable(R.drawable.up_arrow_colored));
+            } else { //if (usersPreviousVote == 1)
+                usersNewVote = 0;
+                scoreChange = -1;
+                up.setBackground(getDrawable(R.drawable.up_arrow));
+            }
+        }
+        Log.i("ljw", "score change is " + scoreChange);
 
+        TextView scoreView = findViewById(R.id.postRvHeaderScore);
+        currentSelectedPost.setScore(currentScore + scoreChange);
+        String scoreViewText = Long.toString(currentScore + scoreChange);
+        scoreView.setText(scoreViewText);
+        Log.i("ljw", "new score is " + scoreViewText);
+
+        voteMap.put(user.getUid(), usersNewVote);
+        int finalScoreChange = scoreChange;
+
+        // get the current score in firestore first
         db.collection("posts")
                 .document(currentSelectedPost.getId())
                 .get()
@@ -536,10 +559,35 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
                     db.collection("posts")
                             .document(currentSelectedPost.getId())
-                            .update("score", post.getScore() + scoreChange,
+                            .update("score", post.getScore() + finalScoreChange,
                                     "votes", voteMap)
                             .addOnCompleteListener(task1 -> {
                                 Log.i("ljw", "successfully updated score");
+
+                                //update the post creator's total score field:
+                                db.collection("users")
+                                        .document(currentSelectedPost.getUserId())
+                                        .get()
+                                        .addOnCompleteListener(task2 -> {
+                                            Log.i("ljw", "got post creator for score update");
+                                            User creator = task2.getResult().toObject(User.class);
+                                            int creatorScore = creator.getTotalScore();
+
+                                            db.collection("users")
+                                                    .document(currentSelectedPost.getUserId())
+                                                    .update("totalScore", creatorScore + finalScoreChange)
+                                                    .addOnCompleteListener(task3 -> {
+                                                        Log.i("ljw", "updated post creator's score successfully");
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.i("ljw", "couldn't update creator's score: " + e.toString());
+                                                    });
+
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Log.i("ljw", "failed getting user: " + e.toString());
+                                        });
+
                                 postRvAdapter.notifyDataSetChanged();
                                 v.setEnabled(true);
                             })
