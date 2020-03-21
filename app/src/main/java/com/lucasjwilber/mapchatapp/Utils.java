@@ -51,8 +51,9 @@ public class Utils {
             double lng = (double) map.get("lng");
             double distance = (double) map.get("distanceFromPost");
             long score = (long) map.get("score");
+            HashMap<String, Integer> votes = (HashMap<String, Integer>) map.get("votes");
 
-            comments.add(new Comment(id, userId, username, text, timestamp, lat, lng, distance, score));
+            comments.add(new Comment(id, userId, username, text, timestamp, lat, lng, distance, score, votes));
         }
         return comments;
     }
@@ -67,11 +68,6 @@ public class Utils {
             distance = Math.acos(distance);
             distance = Math.toDegrees(distance);
             distance = distance * 60 * 1.1515;
-//            if (unit.equals("K")) {
-//                distance = distance * 1.609344;
-//            } else if (unit.equals("N")) {
-//                distance = distance * 0.8684;
-//            }
             return distance;
         }
     }

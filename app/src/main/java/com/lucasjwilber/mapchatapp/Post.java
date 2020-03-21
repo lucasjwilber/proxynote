@@ -4,6 +4,7 @@ import android.net.Uri;
 
 import java.util.Date;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +24,7 @@ public class Post {
     private String icon;
     private int score;
     private ArrayList<Comment> comments;
+    private HashMap<String, Integer> votes;
 
     public Post() {};
 
@@ -40,8 +42,17 @@ public class Post {
         this.timestamp = new Date().getTime();
         this.score = 0;
         this.comments = new ArrayList<>();
+        this.votes = new HashMap<>();
 
         //if link or icon were selected, set them in the create post method before uploading the object
+    }
+
+    public HashMap<String, Integer> getVotes() {
+        return votes;
+    }
+
+    public void setVotes(HashMap<String, Integer> votes) {
+        this.votes = votes;
     }
 
     public double getLatZone() {

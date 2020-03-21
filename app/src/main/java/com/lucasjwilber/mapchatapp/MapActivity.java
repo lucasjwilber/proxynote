@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -46,6 +47,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -61,6 +63,7 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -89,7 +92,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     BitmapDescriptor postMarkerIcon;
     BitmapDescriptor userMarkerIcon;
     Post currentSelectedPost;
-    String currentSelectedPostId;
     Marker currentSelectedMarker;
     private RecyclerView postRv;
     private RecyclerView.Adapter postRvAdapter;
@@ -134,6 +136,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) currentUserId = user.getUid();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -469,8 +472,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public boolean onMarkerClick(Marker marker) {
         Log.i("ljw", "clicked on a marker");
 
-        Post p = (Post) marker.getTag();
-        if (p == null) {
+        Post post = (Post) marker.getTag();
+        if (post == null) {
             Log.i("ljw", "no post tagged to the clicked on marker, hmm");
             return true;
         }
@@ -478,7 +481,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         currentSelectedMarker = marker;
         currentSelectedPost = (Post) marker.getTag();
-        postRvAdapter = new PostRvAdapter(p, getApplicationContext());
+        postRvAdapter = new PostRvAdapter(post, getApplicationContext(), currentUserId);
         postRv.setAdapter(postRvAdapter);
         postRv.setVisibility(View.VISIBLE);
 
@@ -486,31 +489,70 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         return false;
     }
 
-    public void changePostScore(View v) {
+    public void onPostVoteClicked(View v) {
+        // need to disable the button until the firestore transaction is complete, otherwise users
+        // could cast multiple votes by spamming the button
+        v.setEnabled(false);
+        int usersPreviousVote = 0;
+        int usersNewVote = 0;
+        HashMap<String, Integer> voteMap = currentSelectedPost.getVotes();
+        if (voteMap.containsKey(user.getUid())) {
+            usersPreviousVote = voteMap.get(user.getUid());
+        }
+        Button up = findViewById(R.id.postRvHeaderVoteUpBtn);
+        Button down = findViewById(R.id.postRvHeaderVoteDownBtn);
 
-        //check if this user has already voted on this first
-
-        int score;
-        if (v.getId() == R.id.postRvHeaderVoteDownBtn)
-            score = currentSelectedPost.getScore() + 1;
-        else
-            score = currentSelectedPost.getScore() - 1;
+        //on downvote
+        if (v.getId() == R.id.postRvHeaderVoteDownBtn) {
+            if (usersPreviousVote != -1) {
+                usersNewVote = -1;
+                down.setBackground(getDrawable(R.drawable.down_arrow_colored));
+                if (usersPreviousVote == 1) {
+                    up.setBackground(getDrawable(R.drawable.up_arrow));
+                }
+            } else {
+                down.setBackground(getDrawable(R.drawable.down_arrow));
+            }
+        //on upvote
+        } else {
+            if (usersPreviousVote != 1) {
+                usersNewVote = 1;
+                up.setBackground(getDrawable(R.drawable.up_arrow_colored));
+                if (usersPreviousVote == -1) {
+                    down.setBackground(getDrawable(R.drawable.down_arrow));
+                }
+            } else {
+                up.setBackground(getDrawable(R.drawable.up_arrow));
+            }
+        }
+        int scoreChange = usersNewVote - usersPreviousVote;
+        voteMap.put(user.getUid(), usersNewVote);
 
         db.collection("posts")
                 .document(currentSelectedPost.getId())
-                .update("score", score)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Log.i("ljw", "successfully updated score");
-                        postRvAdapter.notifyDataSetChanged();
-                    }
+                .get()
+                .addOnCompleteListener(task -> {
+                    Post post = task.getResult().toObject(Post.class);
+
+                    db.collection("posts")
+                            .document(currentSelectedPost.getId())
+                            .update("score", post.getScore() + scoreChange,
+                                    "votes", voteMap)
+                            .addOnCompleteListener(task1 -> {
+                                Log.i("ljw", "successfully updated score");
+                                postRvAdapter.notifyDataSetChanged();
+                                v.setEnabled(true);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.i("ljw", "failed updating score: " + e.toString());
+                                v.setEnabled(true);
+                            });
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.i("ljw", "failed updating score: " + e.toString());
-                    }
+                .addOnFailureListener(e -> {
+                    Log.i("ljw", "error getting post to update its score: " + e.toString());
+                    v.setEnabled(true);
                 });
     }
+
+
 }

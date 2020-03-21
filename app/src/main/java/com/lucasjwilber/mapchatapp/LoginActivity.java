@@ -132,15 +132,16 @@ public class LoginActivity extends AppCompatActivity {
                                 }
                             });
 
-                            //add new user to DB
+                            //add new user to firestore also
                             User newUser = new User(firstName, lastName, username, email, user.getUid());
                             db.collection("users")
-                                    .add(newUser)
-                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                    .document(user.getUid())
+                                    .set(newUser)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
-                                        public void onSuccess(DocumentReference documentReference) {
+                                        public void onSuccess(Void aVoid) {
                                             Log.i("ljw", "added new user to firestore");
-                                            // go to map:
+//                                            // go to map:
                                             Intent intent = new Intent(LoginActivity.this, MapActivity.class);
                                             intent.putExtra("newUser", true);
                                             startActivity(intent);

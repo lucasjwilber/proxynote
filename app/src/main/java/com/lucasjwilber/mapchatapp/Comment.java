@@ -1,6 +1,7 @@
 package com.lucasjwilber.mapchatapp;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +15,7 @@ public class Comment {
     private double lng;
     private double distanceFromPost;
     private long score;
+    private HashMap<String, Integer> votes;
 
     public Comment() {};
 
@@ -28,10 +30,11 @@ public class Comment {
         this.lng = lng;
         this.score = 0;
         this.distanceFromPost = distanceFromPost;
+        this.votes = new HashMap<>();
     }
 
     // for downloading comments
-    public Comment(String id, String userId, String username, String text, long timestamp, double lat, double lng, double distanceFromPost, long score) {
+    public Comment(String id, String userId, String username, String text, long timestamp, double lat, double lng, double distanceFromPost, long score, HashMap<String, Integer> votes) {
         this.id = id;
         this.userId = userId;
         this.username = username;
@@ -41,6 +44,15 @@ public class Comment {
         this.lng = lng;
         this.distanceFromPost = distanceFromPost;
         this.score = score;
+        this.votes = votes;
+    }
+
+    public HashMap<String, Integer> getVotes() {
+        return votes;
+    }
+
+    public void setVotes(HashMap<String, Integer> votes) {
+        this.votes = votes;
     }
 
     public double getDistanceFromPost() {

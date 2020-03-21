@@ -2,6 +2,7 @@ package com.lucasjwilber.mapchatapp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.Html;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -23,20 +25,31 @@ import java.util.Locale;
 public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHolder> {
 
     private Post post;
+    private String userId;
     private double distanceMultiplier = 0.8684;
-    private String distanceType = " miles";
+    private String distanceUnits = " miles";
+    Drawable upArrowColored;
+    Drawable downArrowColored;
+    Drawable upArrow;
+    Drawable downArrow;
 
     private static final int POST_HEADER = 0;
     private static final int POST_COMMENT = 1;
 
-    PostRvAdapter(Post post, Context context) {
+    PostRvAdapter(Post post, Context context, String userId) {
         this.post = post;
+        this.userId = userId;
+        upArrowColored = context.getDrawable(R.drawable.up_arrow_colored);
+        downArrowColored = context.getDrawable(R.drawable.down_arrow_colored);
+        upArrow = context.getDrawable(R.drawable.up_arrow);
+        downArrow = context.getDrawable(R.drawable.down_arrow);
 
         SharedPreferences prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
-        String distanceType = prefs.getString("distanceType", "imperial");
-        if (distanceType.equals("metric"))  {
+        String distanceUnits = prefs.getString("distanceType", "imperial");
+        // if user prefers metric, change the displayed measurements. otherwise it's in miles by default.
+        if (distanceUnits.equals("metric"))  {
             distanceMultiplier = 1.609344;
-            distanceType = " km";
+            distanceUnits = " km";
         }
 
         Log.i("ljw", "post comments = " + post.getComments().toString());
@@ -75,6 +88,9 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 TextView postInfo = l.findViewById(R.id.postRvPostInfo);
                 ImageView postImage = l.findViewById(R.id.postRvPostImage);
                 TextView postText = l.findViewById(R.id.postRvPostText);
+                Button upvoteButton = l.findViewById(R.id.postRvHeaderVoteUpBtn);
+                Button downvoteButton = l.findViewById(R.id.postRvHeaderVoteDownBtn);
+
                 postTitle.setText(post.getTitle());
                 String postScoreText = Long.toString(post.getScore());
                 postScore.setText(postScoreText);
@@ -85,6 +101,19 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 }
                 postImage.setImageURI(post.getLink());
                 postText.setText(post.getText());
+
+                Log.i("ljw", "post votes: " + post.getVotes().size());
+
+                if (post.getVotes().containsKey(userId)) {
+                    Log.i("ljw", "post contains a user vote");
+                    if (post.getVotes().get(userId) > 0) {
+                        Log.i("ljw", "upvote should be colored");
+                        upvoteButton.setBackground(upArrowColored);
+                    } else if (post.getVotes().get(userId) < 0) {
+                        Log.i("ljw", "downvote should be colored");
+                        downvoteButton.setBackground(downArrowColored);
+                    }
+                }
                 return new PostViewHolder(l);
             case POST_COMMENT:
             default:
@@ -107,7 +136,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             Comment comment = post.getComments().get(position - 1);
             TextView commentHeader = holder.linearLayout.findViewById(R.id.postRvCommentHeader);
             double distance = comment.getDistanceFromPost() * distanceMultiplier;
-            String text = getHtmlDateString(comment.getTimestamp()) + ", " + distance + distanceType + " away";
+            String text = getHtmlDateString(comment.getTimestamp()) + ", from " + distance + distanceUnits + " away";
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 commentHeader.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_COMPACT));
