@@ -218,10 +218,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                             .snippet(userCurrentAddress));
 
                                     //center the map on the user
-                                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
                                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                                     //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
                                     mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
                                     mMap.setMinZoomPreference(10f);
                                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15f));
                                 }

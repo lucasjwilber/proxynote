@@ -1,5 +1,7 @@
 package com.lucasjwilber.mapchatapp;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -50,7 +52,15 @@ public class Utils {
             long timestamp = (long) map.get("timestamp");
             double lat = (double) map.get("lat");
             double lng = (double) map.get("lng");
-            double distance = (double) map.get("distanceFromPost");
+            // if lat/long were manually changed in firestore they become Longs
+            double distance;
+            if (map.get("distanceFromPost").getClass() == Long.class) {
+                Log.i("ljw", "issa long");
+                Long d = (Long) map.get("distanceFromPost");
+                distance = d.doubleValue();
+            } else {
+                distance = (double) map.get("distanceFromPost");
+            }
             long score = (long) map.get("score");
             HashMap<String, Integer> votes = (HashMap<String, Integer>) map.get("votes");
 
@@ -73,55 +83,65 @@ public class Utils {
         }
     }
 
+    // using casting instead of formatting methods here because it's faster
     static String getHowFarAway(double d, String type) {
-        double distance;
-        String unit;
-
+        double dDistance;
+        int iDistance;
         if (type.equals("imperial")) {
-            distance = d * 0.8684;
-            unit = "miles";
-            if (distance < 0.18939393939) { //distance < 1000 feet
-                unit = "feet";
-                distance = (int) Math.round(distance * 5280);
-            } else {
-                distance *= 10;
-                distance = Math.round(distance);
-                distance = (int) distance / 10;
+            dDistance = d * 0.8684;
+            if (dDistance < 0.18939393939) { //dDistance < 1000 feet
+                iDistance = (int) Math.round(dDistance * 5280);
+                return iDistance + " feet away";
+            } else if (dDistance < 10){
+                //round the first decimal and remove the others
+                dDistance = Math.round(dDistance * 10);
+                dDistance = dDistance / 10;
+                return dDistance + " miles away";
+            } else { // if (dDistance >= 10)
+                // round it and remove decimals
+                dDistance = Math.round(dDistance * 10);
+                dDistance = dDistance / 10;
+                iDistance = (int) dDistance;
+                return iDistance + " miles away";
             }
-        } else { //metric
-            distance = d * 1.609344;
-            unit = "km";
-            if (distance < 0.1) {
-                unit = "meters";
-                distance = (int) Math.round(distance * 1000);
-            } else {
-                distance *= 10;
-                distance = Math.round(distance);
-                distance = (int) distance / 10;
+        } else { // if (type.equals("metric")
+            dDistance = d * 1.609344;
+            if (dDistance < 0.1) {
+                iDistance = (int) Math.round(dDistance * 1000);
+                return iDistance + " meters away";
+            } else if (dDistance < 10){
+                //round the first decimal and remove the others
+                dDistance = Math.round(dDistance * 10);
+                dDistance = dDistance / 10;
+                return dDistance + " km away";
+            } else { // if (dDistance >= 10)
+                // round it and remove decimals
+                dDistance = Math.round(dDistance * 10);
+                dDistance = dDistance / 10;
+                iDistance = (int) dDistance;
+                return iDistance + " km away";
             }
         }
-
-        //TODO: cut off the 3rd+ decimals
-        return distance + " " + unit + " away";
     }
 
     static String getHowLongAgo(long timestamp) {
         long seconds = (new Date().getTime() - timestamp) / 1000;
         long number;
         String unit;
-        if (seconds < 60) {
-            number = seconds;
-            unit = "second";
-        } else if (seconds >= 60 && seconds < 3600) {
-            number = seconds/60;
-            unit = "minute";
-        } else if (seconds >= 3600 && seconds < 86400) {
-            number = seconds/3600;
-            unit = "hour";
-        } else { //if (seconds <= 86400) {
+        if (seconds >= 86400) {
             number = seconds/86400;
             unit = "day";
+        } else if (seconds >= 3600) {
+            number = seconds/3600;
+            unit = "hour";
+        } else if (seconds >= 60) {
+            number = seconds/60;
+            unit = "minute";
+        } else {
+            number = seconds;
+            unit = "second";
         }
+
         if (number == 1) {
             return number + " " + unit + " ago";
         } else {
