@@ -25,6 +25,7 @@ public class Post {
     private int score;
     private ArrayList<Comment> comments;
     private HashMap<String, Integer> votes;
+    private int reports;
 
     public Post() {};
 
@@ -40,11 +41,21 @@ public class Post {
         this.latZone = Math.round(lat * 10) / 10.0;
         this.lngZone = Math.round(lng * 10) / 10.0;
         this.timestamp = new Date().getTime();
-        this.score = 0;
+        this.score = 1;
         this.comments = new ArrayList<>();
         this.votes = new HashMap<>();
+        votes.put(userId, 1);
+        this.reports = 0;
 
         //if link or icon were selected, set them in the create post method before uploading the object
+    }
+
+    public int getReports() {
+        return reports;
+    }
+
+    public void setReports(int reports) {
+        this.reports = reports;
     }
 
     public HashMap<String, Integer> getVotes() {

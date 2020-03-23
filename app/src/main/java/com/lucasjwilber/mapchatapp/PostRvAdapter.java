@@ -98,7 +98,12 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 postImage.setImageURI(post.getLink());
                 postText.setText(post.getText());
                 int numComments = post.getComments().size();
-                String commentCountText = numComments + (numComments == 1 ?" comment:" : " comments:");
+                String commentCountText = "";
+                if (numComments == 1) {
+                    commentCountText = numComments + " comment:";
+                } else if (numComments > 1) {
+                    commentCountText = numComments + " comments:";
+                }
                 commentCount.setText(commentCountText);
 
                 Log.i("ljw", "post votes: " + post.getVotes().size());

@@ -39,59 +39,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/create_post_button_background" />
 
-<!--        create post form-->
-        <LinearLayout
-            android:id="@+id/createPostForm"
-            android:layout_width="230dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:background="@drawable/rounded_corner_box_primarycolor"
-            android:clickable="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" >
-
-            <TextView
-                android:id="@+id/postLocationTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="Create a Post"
-                android:textAlignment="center"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-            <EditText
-                android:id="@+id/postTitleEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="15dp"
-                android:hint="Title"
-                android:textSize="18sp"
-                android:inputType="textPersonName" />
-            <EditText
-                android:id="@+id/postBodyEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="15dp"
-                android:hint="Write something"
-                android:textSize="18sp"
-                android:gravity="start|top"
-                android:inputType="textMultiLine" />
-            <Button
-                android:id="@+id/postSubmitButton"
-                android:layout_width="100dp"
-                android:layout_height="45dp"
-                android:layout_gravity="center"
-                android:layout_margin="5dp"
-                android:text="Post"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:background="@drawable/rounded_corner_box_accentcolor"
-                android:onClick="createPost" />
-        </LinearLayout>
-
         <!-- post recycler view-->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/postRecyclerView"

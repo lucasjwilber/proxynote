@@ -15,6 +15,7 @@ public class User {
     private int totalScore;
     private double lastLat;
     private double lastLng;
+    private int reports;
 
     public User() {};
 
@@ -27,6 +28,19 @@ public class User {
         this.posts = new LinkedList<>();
         this.isPaid = false;
         this.totalScore = 0;
+        this.reports = 0;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public int getReports() {
+        return reports;
+    }
+
+    public void setReports(int reports) {
+        this.reports = reports;
     }
 
     public String getUid() {

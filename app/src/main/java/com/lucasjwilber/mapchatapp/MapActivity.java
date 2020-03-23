@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -79,7 +80,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     FirebaseFirestore db;
     long postQueryLimit = 100;
     FirebaseUser user;
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 69;
+    public static final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     double postsRadius = 0.05;
     String currentUsername = "someone";
     String currentUserId = "some id";
@@ -110,26 +111,23 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         // get location permission if necessary, then get location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSIONS_REQUEST_LOCATION);
-        } else {
-            getUserLatLng();
-        }
+//        if (ContextCompat.checkSelfPermission(this,
+//                Manifest.permission.ACCESS_FINE_LOCATION)
+//                != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+//                    FINE_LOCATION_PERMISSION_REQUEST_CODE);
+//        } else {
+//            getUserLatLng();
+//        }
 
-        createPostForm = mapBinding.createPostForm;
-        userLocationTV = mapBinding.postLocationTextView;
+//        createPostForm = mapBinding.createPostForm;
+//        userLocationTV = mapBinding.postLocationTextView;
 
         // post recyclerview
         postRv = mapBinding.postRecyclerView;
         postRvLayoutManager = new LinearLayoutManager(this);
         postRv.setLayoutManager(postRvLayoutManager);
-//        Post testPost = new Post("fakeid", "lucas", "faketitle", "faketext", "6969 420 avenue", userLat, userLng);
-//        postRvAdapter = new PostRvAdapter(testPost, );
-//        postRv.setAdapter(postRvAdapter);
 
         postMarkerIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.post_icon));
         userMarkerIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.user_location_pin));
@@ -143,6 +141,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    FINE_LOCATION_PERMISSION_REQUEST_CODE);
+        } else {
+            getUserLatLng();
+        }
     }
 
     //    pop up method to show hamburger
@@ -169,7 +182,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 
         //location permission
-        if (requestCode == MY_PERMISSIONS_REQUEST_LOCATION) {
+        if (requestCode == FINE_LOCATION_PERMISSION_REQUEST_CODE) {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -236,13 +249,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void toggleFormVisibility(View v) {
-        if (createPostForm.getVisibility() == View.VISIBLE) {
-            createPostForm.setVisibility(View.GONE);
-        } else {
-            createPostForm.setVisibility(View.VISIBLE);
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
-        }
+//        if (createPostForm.getVisibility() == View.VISIBLE) {
+//            createPostForm.setVisibility(View.GONE);
+//        } else {
+//            createPostForm.setVisibility(View.VISIBLE);
+//            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
+//        }
         postRv.setVisibility(View.GONE);
+
+        Intent goToCreatePostAct = new Intent(this, CreatePostActivity.class);
+        goToCreatePostAct.putExtra("userLat", userLat);
+        goToCreatePostAct.putExtra("userLng", userLng);
+        goToCreatePostAct.putExtra("userCurrentAddress", userCurrentAddress);
+        startActivity(goToCreatePostAct);
     }
 
     @Override
@@ -254,52 +273,52 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         getPostsFromDbAndCreateMapMarkers();
     }
 
-    public void createPost(View v) {
-        //gather form data
-        EditText postTitleForm = mapBinding.postTitleEditText;
-        String postTitle = postTitleForm.getText().toString();
-        EditText postBodyForm = mapBinding.postBodyEditText;
-        String postBody = postBodyForm.getText().toString();
-
-        //create a Post object
-        Post post = new Post(
-                user.getUid(),
-                user.getDisplayName(),
-                postTitle,
-                postBody,
-                userCurrentAddress,
-                userLat,
-                userLng);
-        //set icon as required here
-        //set link as required here
-        //set any other post attributes here:
-
-        Log.i("ljw", "new post created: " + post.toString());
+//    public void createPost(View v) {
+//        //gather form data
+//        EditText postTitleForm = mapBinding.postTitleEditText;
+//        String postTitle = postTitleForm.getText().toString();
+//        EditText postBodyForm = mapBinding.postBodyEditText;
+//        String postBody = postBodyForm.getText().toString();
 //
-//        //push it to DB
-        db.collection("posts")
-                .document(post.getId())
-                .set(post)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.i("ljw", "successfully added new post to DB");
-                        //add the new post to the map now that it's in the db
-                        Marker marker = createMarkerWithPost(post);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.i("ljw", "Error adding post to db: " + e);
-                    }
-                });
-
-//      // hide form
-        createPostForm.setVisibility(View.GONE);
-        postTitleForm.setText("");
-        postBodyForm.setText("");
-    }
+//        //create a Post object
+//        Post post = new Post(
+//                user.getUid(),
+//                user.getDisplayName(),
+//                postTitle,
+//                postBody,
+//                userCurrentAddress,
+//                userLat,
+//                userLng);
+//        //set icon as required here
+//        //set link as required here
+//        //set any other post attributes here:
+//
+//        Log.i("ljw", "new post created: " + post.toString());
+////
+////        //push it to DB
+//        db.collection("posts")
+//                .document(post.getId())
+//                .set(post)
+//                .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                    @Override
+//                    public void onSuccess(Void aVoid) {
+//                        Log.i("ljw", "successfully added new post to DB");
+//                        //add the new post to the map now that it's in the db
+//                        Marker marker = createMarkerWithPost(post);
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Log.i("ljw", "Error adding post to db: " + e);
+//                    }
+//                });
+//
+////      // hide form
+//        createPostForm.setVisibility(View.GONE);
+//        postTitleForm.setText("");
+//        postBodyForm.setText("");
+//    }
 
     public void getPostsFromDbAndCreateMapMarkers() {
         // get only posts within a certain radius of the user
@@ -403,7 +422,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void onMapClick(LatLng arg0) {
-        createPostForm.setVisibility(View.GONE);
         postRv.setVisibility(View.GONE);
     }
 
@@ -411,12 +429,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         Log.i("ljw", "commentbutton clicked");
         EditText commentEditText = findViewById(R.id.postRvPostReplyBox);
 
-        if (currentSelectedPost.getId() == null) {
-            Log.i("ljw", "post has a null id so a DB query won't work");
+        if (commentEditText.getText().toString().equals("") || commentEditText.getText().toString().length() == 0) {
+            Log.i("ljw", "empty comment, not gonna add it to the post");
             return;
-        } else if (commentEditText.getText().equals("")) {
-            Log.i("ljw", "comment box is empty");
-            // TODO: toast
+        } else if (currentSelectedPost.getId() == null) {
+            Log.i("ljw", "post has a null id so a DB query won't work");
             return;
         }
 
@@ -477,7 +494,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             Log.i("ljw", "no post tagged to the clicked on marker, hmm");
             return true;
         }
-        createPostForm.setVisibility(View.GONE);
 
         currentSelectedMarker = marker;
         currentSelectedPost = (Post) marker.getTag();

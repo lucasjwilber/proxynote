@@ -16,6 +16,7 @@ public class Comment {
     private double distanceFromPost;
     private long score;
     private HashMap<String, Integer> votes;
+    private int reports;
 
     public Comment() {};
 
@@ -31,10 +32,11 @@ public class Comment {
         this.score = 0;
         this.distanceFromPost = distanceFromPost;
         this.votes = new HashMap<>();
+        this.reports = 0;
     }
 
     // for downloading comments
-    public Comment(String id, String userId, String username, String text, long timestamp, double lat, double lng, double distanceFromPost, long score, HashMap<String, Integer> votes) {
+    public Comment(String id, String userId, String username, String text, long timestamp, double lat, double lng, double distanceFromPost, long score, HashMap<String, Integer> votes, int reports) {
         this.id = id;
         this.userId = userId;
         this.username = username;
@@ -45,6 +47,15 @@ public class Comment {
         this.distanceFromPost = distanceFromPost;
         this.score = score;
         this.votes = votes;
+        this.reports = reports;
+    }
+
+    public int getReports() {
+        return reports;
+    }
+
+    public void setReports(int reports) {
+        this.reports = reports;
     }
 
     public HashMap<String, Integer> getVotes() {
