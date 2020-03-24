@@ -3,6 +3,7 @@ package com.lucasjwilber.mapchatapp;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
@@ -31,6 +32,8 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -88,6 +91,12 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
         ConstraintLayout l;
 
+        if (parent.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            RecyclerView rv = parent.findViewById(R.id.postRecyclerView);
+            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) rv.getLayoutParams();
+            marginLayoutParams.setMargins(250, 50, 250, 50);
+        }
+
         switch (viewType) {
             case POST_HEADER:
                 l = (ConstraintLayout) LayoutInflater.from(parent.getContext())
@@ -110,10 +119,9 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                     postInfo.setText(Html.fromHtml(getHtmlHeaderString(post.getTimestamp())));
                 }
 
-                if (post.getThumbnailUrl() != null && post.getThumbnailUrl().length() > 0) {
-                    String imageUrl = "https://firebasestorage.googleapis.com/v0/b/mapchatapp-b83bc.appspot.com/o/" + post.getThumbnailUrl() + "?alt=media&token=40ab8978-f593-4399-aeae-528284d4f8bb";
-                    Glide.with(parent).load(imageUrl).into(postImage);
-                    Log.i("ljw", "getting " + imageUrl + " from storage");
+                if (post.getImageUrl() != null && post.getImageUrl().length() > 0) {
+//                    StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl("gs://mapchatapp-b83bc.appspot.com/a9ddaded-ca26-4e91-9133-c2228652e67c");
+                    Glide.with(parent).load(post.getImageUrl()).into(postImage);
                 }
 
                 postText.setText(post.getText());

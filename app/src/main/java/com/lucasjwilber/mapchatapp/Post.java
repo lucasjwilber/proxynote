@@ -21,12 +21,12 @@ public class Post {
     private double lng;
     private double latZone;
     private double lngZone;
-    private String mediaLink;
     private String icon;
     private int score;
     private ArrayList<Comment> comments;
     private HashMap<String, Integer> votes;
-    private String thumbnailUrl;
+    private String imageUrl;
+    private String imageUUID;
 
     public Post() {};
 
@@ -50,12 +50,20 @@ public class Post {
         //if link or icon were selected, set them in the create post method before uploading the object
     }
 
-    public String getThumbnailUrl() {
-        return thumbnailUrl;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setThumbnailUrl(String thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getImageUUID() {
+        return imageUUID;
+    }
+
+    public void setImageUUID(String imageUUID) {
+        this.imageUUID = imageUUID;
     }
 
     public HashMap<String, Integer> getVotes() {
@@ -120,14 +128,6 @@ public class Post {
 
     public void setLocation(String location) {
         this.location = location;
-    }
-
-    public String getMediaLink() {
-        return mediaLink;
-    }
-
-    public void setMediaLink(String mediaLink) {
-        this.mediaLink = mediaLink;
     }
 
     public String getIcon() {

@@ -23,7 +23,7 @@
     <EditText
         android:id="@+id/postTitleEditText"
         android:layout_width="326dp"
-        android:layout_height="39dp"
+        android:layout_height="wrap_content"
         android:hint="Title"
         android:inputType="textPersonName"
         android:textSize="18sp"
@@ -39,7 +39,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:background="@drawable/rounded_corner_box_accentcolor"
         app:layout_constraintEnd_toEndOf="@+id/postTitleEditText"
         app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="@+id/postTitleEditText"
@@ -48,7 +47,7 @@
     <EditText
         android:id="@+id/postBodyEditText"
         android:layout_width="0dp"
-        android:layout_height="41dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:hint="Write something"
         android:inputType="textMultiLine"

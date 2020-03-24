@@ -144,12 +144,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -159,6 +153,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         } else {
             getUserLatLng();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mMap != null) mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
     }
 
     //    pop up method to show hamburger
@@ -196,7 +196,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         == PackageManager.PERMISSION_GRANTED) {
 
                     Log.i("ljw", "location permission granted, getting location...");
+
                     getUserLatLng();
+
                 }
 
             } else {
@@ -226,20 +228,24 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 public void handleMessage(Message input) {
                                     Log.i("ljw", "lat/lng for user is " + userLat + "/" + userLng);
 
-                                    //add a marker to display the user's location:
+                                    if (userMarker != null) {
+                                        userMarker.remove();
+                                    } else {
+                                        //center the map on the user
+                                        cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+                                        //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
+                                        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                                        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
+//                                        mMap.setMinZoomPreference(10f);
+                                        mMap.animateCamera(CameraUpdateFactory.zoomTo(15f));
+                                    }
+
                                     userMarker = mMap.addMarker(new MarkerOptions()
                                             .position(new LatLng(userLat, userLng))
                                             .title("My Location")
                                             .icon(userMarkerIcon)
                                             .snippet(userCurrentAddress));
 
-                                    //center the map on the user
-                                    cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-                                    //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
-                                    mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
-                                    mMap.setMinZoomPreference(10f);
-                                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15f));
                                 }
                             };
                             handler.obtainMessage().sendToTarget();
@@ -251,15 +257,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 });
     }
 
-    public void toggleFormVisibility(View v) {
-//        if (createPostForm.getVisibility() == View.VISIBLE) {
-//            createPostForm.setVisibility(View.GONE);
-//        } else {
-//            createPostForm.setVisibility(View.VISIBLE);
-//            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
-//        }
+    public void onCreatePostButtonClick(View v) {
         postRv.setVisibility(View.GONE);
-
         Intent goToCreatePostAct = new Intent(this, CreatePostActivity.class);
         goToCreatePostAct.putExtra("userLat", userLat);
         goToCreatePostAct.putExtra("userLng", userLng);

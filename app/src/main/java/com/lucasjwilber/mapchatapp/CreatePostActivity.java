@@ -17,8 +17,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,14 +26,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.lucasjwilber.mapchatapp.databinding.ActivityCreatePostBinding;
-import com.lucasjwilber.mapchatapp.databinding.ActivityMapBinding;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.UUID;
 
 public class CreatePostActivity extends AppCompatActivity {
@@ -51,8 +43,7 @@ public class CreatePostActivity extends AppCompatActivity {
     double userLng;
     public String userCurrentAddress;
     ImageView createPostImage;
-    Bitmap currentImageThumbnail;
-    String currentThumbnailUUID;
+    Bitmap currentImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,13 +64,11 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     public void createPost(View v) {
-        //gather form data
         EditText postTitleForm = binding.postTitleEditText;
         String postTitle = postTitleForm.getText().toString();
         EditText postBodyForm = binding.postBodyEditText;
         String postBody = postBodyForm.getText().toString();
 
-        //create a Post object
         Post post = new Post(
                 user.getUid(),
                 user.getDisplayName(),
@@ -89,16 +78,40 @@ public class CreatePostActivity extends AppCompatActivity {
                 userLat,
                 userLng);
 
-        if (currentImageThumbnail != null) {
-            currentThumbnailUUID = UUID.randomUUID().toString();
-            post.setThumbnailUrl(currentThumbnailUUID);
+        if (currentImage == null) {
+            uploadPost(post);
+        } else {
+            uploadImageAndPost(post);
         }
-        //TODO: set icon as required here
+    }
 
-        Log.i("ljw", "new post created: " + post.toString());
-//
-//      //push it to DB
-        //TODO: confirm user is signed in
+    private void uploadImageAndPost(Post post) {
+        String imageUUID = UUID.randomUUID().toString();
+        post.setImageUUID(imageUUID);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        currentImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] imageData = baos.toByteArray();
+        StorageReference imageRef = storageRef.child(imageUUID);
+        Log.i("ljw", "storage ref is " + imageRef + "\nurl is + " + imageRef.getDownloadUrl());
+
+        UploadTask uploadTask = imageRef.putBytes(imageData);
+        uploadTask.addOnSuccessListener(result -> {
+            Log.i("ljw", "uploaded image! \n" + result.toString());
+            imageRef.getDownloadUrl().addOnSuccessListener(url -> {
+                Log.i("ljw", "got image url: " + url.toString());
+                post.setImageUrl(url.toString());
+                uploadPost(post);
+            })
+            .addOnFailureListener(e -> {
+                Log.i("ljw", "error: " + e.toString());
+            });
+        }).addOnFailureListener(failure -> {
+            Log.i("ljw", "failure! :" + failure.toString());
+        });
+    }
+
+    public void uploadPost(Post post) {
         db.collection("posts")
                 .document(post.getId())
                 .set(post)
@@ -116,7 +129,6 @@ public class CreatePostActivity extends AppCompatActivity {
                         Log.i("ljw", "Error adding post to db: " + e);
                     }
                 });
-        uploadImage(currentThumbnailUUID);
     }
 
     public void cameraButtonClicked(View v) {
@@ -186,23 +198,8 @@ public class CreatePostActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
-            currentImageThumbnail = imageBitmap;
+            currentImage = imageBitmap;
             createPostImage.setImageBitmap(imageBitmap);
         }
     }
-
-    private void uploadImage(String uuid) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        currentImageThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] imageData = baos.toByteArray();
-        StorageReference imageRef = storageRef.child(uuid);
-        Log.i("ljw", "uploading image to " + uuid);
-        UploadTask uploadTask = imageRef.putBytes(imageData);
-        uploadTask.addOnSuccessListener(result -> {
-            Log.i("ljw", "success! \n" + result.toString());
-        }).addOnFailureListener(failure -> {
-            Log.i("ljw", "failure! :" + failure.toString());
-        });
-    }
-
 }
