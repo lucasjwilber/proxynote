@@ -25,10 +25,12 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -86,6 +88,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     String currentUserId = "some id";
     double userLat;
     double userLng;
+    Marker userMarker;
     LatLngBounds cameraBounds;
     public String userCurrentAddress = "somewhere";
     LinearLayout createPostForm;
@@ -224,7 +227,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                     Log.i("ljw", "lat/lng for user is " + userLat + "/" + userLng);
 
                                     //add a marker to display the user's location:
-                                    mMap.addMarker(new MarkerOptions()
+                                    userMarker = mMap.addMarker(new MarkerOptions()
                                             .position(new LatLng(userLat, userLng))
                                             .title("My Location")
                                             .icon(userMarkerIcon)
@@ -272,53 +275,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         // query db for posts near the user
         getPostsFromDbAndCreateMapMarkers();
     }
-
-//    public void createPost(View v) {
-//        //gather form data
-//        EditText postTitleForm = mapBinding.postTitleEditText;
-//        String postTitle = postTitleForm.getText().toString();
-//        EditText postBodyForm = mapBinding.postBodyEditText;
-//        String postBody = postBodyForm.getText().toString();
-//
-//        //create a Post object
-//        Post post = new Post(
-//                user.getUid(),
-//                user.getDisplayName(),
-//                postTitle,
-//                postBody,
-//                userCurrentAddress,
-//                userLat,
-//                userLng);
-//        //set icon as required here
-//        //set link as required here
-//        //set any other post attributes here:
-//
-//        Log.i("ljw", "new post created: " + post.toString());
-////
-////        //push it to DB
-//        db.collection("posts")
-//                .document(post.getId())
-//                .set(post)
-//                .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                    @Override
-//                    public void onSuccess(Void aVoid) {
-//                        Log.i("ljw", "successfully added new post to DB");
-//                        //add the new post to the map now that it's in the db
-//                        Marker marker = createMarkerWithPost(post);
-//                    }
-//                })
-//                .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        Log.i("ljw", "Error adding post to db: " + e);
-//                    }
-//                });
-//
-////      // hide form
-//        createPostForm.setVisibility(View.GONE);
-//        postTitleForm.setText("");
-//        postBodyForm.setText("");
-//    }
 
     public void getPostsFromDbAndCreateMapMarkers() {
         // get only posts within a certain radius of the user

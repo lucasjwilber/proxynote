@@ -1,9 +1,13 @@
 package com.lucasjwilber.mapchatapp;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
@@ -15,8 +19,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
+
+//import com.squareup.picasso.Picasso;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,10 +42,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private Post post;
     private String userId;
     private String distanceType;
-    Drawable upArrowColored;
-    Drawable downArrowColored;
-    Drawable upArrow;
-    Drawable downArrow;
+    private Drawable upArrowColored;
+    private Drawable downArrowColored;
+    private Drawable upArrow;
+    private Drawable downArrow;
 
     private static final int POST_HEADER = 0;
     private static final int POST_COMMENT = 1;
@@ -95,7 +109,13 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 } else {
                     postInfo.setText(Html.fromHtml(getHtmlHeaderString(post.getTimestamp())));
                 }
-                postImage.setImageURI(post.getLink());
+
+                if (post.getThumbnailUrl() != null && post.getThumbnailUrl().length() > 0) {
+                    String imageUrl = "https://firebasestorage.googleapis.com/v0/b/mapchatapp-b83bc.appspot.com/o/" + post.getThumbnailUrl() + "?alt=media&token=40ab8978-f593-4399-aeae-528284d4f8bb";
+                    Glide.with(parent).load(imageUrl).into(postImage);
+                    Log.i("ljw", "getting " + imageUrl + " from storage");
+                }
+
                 postText.setText(post.getText());
                 int numComments = post.getComments().size();
                 String commentCountText = "";

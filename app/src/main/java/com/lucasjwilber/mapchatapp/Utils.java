@@ -28,17 +28,17 @@ public class Utils {
             }
             long score = (long) map.get("score");
             HashMap<String, Integer> votes = (HashMap<String, Integer>) map.get("votes");
-            int reports;
-            if (map.get("reports") == null) {
-                reports = 0;
-            } else if (map.get("reports").getClass() == Long.class) {
-                Long r = (Long) map.get("reports");
-                reports = r.intValue();
-            } else {
-                reports = (int) map.get("reports");
-            }
+//            int reports;
+//            if (map.get("reports") == null) {
+//                reports = 0;
+//            } else if (map.get("reports").getClass() == Long.class) {
+//                Long r = (Long) map.get("reports");
+//                reports = r.intValue();
+//            } else {
+//                reports = (int) map.get("reports");
+//            }
 
-            comments.add(new Comment(id, userId, username, text, timestamp, lat, lng, distance, score, votes, reports));
+            comments.add(new Comment(id, userId, username, text, timestamp, lat, lng, distance, score, votes));
         }
         return comments;
     }

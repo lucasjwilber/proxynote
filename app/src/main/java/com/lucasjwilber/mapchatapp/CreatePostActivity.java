@@ -51,8 +51,8 @@ public class CreatePostActivity extends AppCompatActivity {
     double userLng;
     public String userCurrentAddress;
     ImageView createPostImage;
-    String currentImageUUID;
     Bitmap currentImageThumbnail;
+    String currentThumbnailUUID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +63,6 @@ public class CreatePostActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
-        //"gs://mapchatapp-b83bc.appspot.com"
         storageRef = storage.getReference();
         createPostImage = binding.createPostImage;
 
@@ -89,12 +88,16 @@ public class CreatePostActivity extends AppCompatActivity {
                 userCurrentAddress,
                 userLat,
                 userLng);
+
+        if (currentImageThumbnail != null) {
+            currentThumbnailUUID = UUID.randomUUID().toString();
+            post.setThumbnailUrl(currentThumbnailUUID);
+        }
         //TODO: set icon as required here
-        //TODO: set link as required here
 
         Log.i("ljw", "new post created: " + post.toString());
 //
-//        //push it to DB
+//      //push it to DB
         //TODO: confirm user is signed in
         db.collection("posts")
                 .document(post.getId())
@@ -103,6 +106,8 @@ public class CreatePostActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.i("ljw", "successfully added new post to DB");
+                        //TODO: toast;
+                        finish();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -111,9 +116,7 @@ public class CreatePostActivity extends AppCompatActivity {
                         Log.i("ljw", "Error adding post to db: " + e);
                     }
                 });
-
-        //TODO: toast;
-        finish();
+        uploadImage(currentThumbnailUUID);
     }
 
     public void cameraButtonClicked(View v) {
@@ -159,7 +162,6 @@ public class CreatePostActivity extends AppCompatActivity {
                 if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.CAMERA)
                         == PackageManager.PERMISSION_GRANTED) {
-
                     Log.i("ljw", "camera permission granted");
 
                     //launch camera
@@ -186,42 +188,21 @@ public class CreatePostActivity extends AppCompatActivity {
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             currentImageThumbnail = imageBitmap;
             createPostImage.setImageBitmap(imageBitmap);
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] imageData = baos.toByteArray();
-
-            String randId = UUID.randomUUID().toString();
-            StorageReference imageRef = storageRef.child(randId);
-            Log.i("ljw", randId);
-
-            UploadTask uploadTask = imageRef.putBytes(imageData);
-
-            uploadTask.addOnSuccessListener(result -> {
-                        Log.i("ljw", "success! \n" + result.toString());
-                    })
-                    .addOnFailureListener(failure -> {
-                        Log.i("ljw", "failure! :" + failure.toString());
-                    });
-
         }
-
-
-
     }
 
-//    private File createImageFile() throws IOException {
-////        // Create an image file name
-////        String imageFileName = UUID.randomUUID().toString();
-////        File image = File.createTempFile(
-////                UUID.randomUUID().toString(),  /* prefix */
-////                ".jpg",         /* suffix */
-////                storageDir      /* directory */
-////        );
-////
-////        // Save a file: path for use with ACTION_VIEW intents
-////        currentPhotoPath = image.getAbsolutePath();
-////        return image;
-////    }
+    private void uploadImage(String uuid) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        currentImageThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] imageData = baos.toByteArray();
+        StorageReference imageRef = storageRef.child(uuid);
+        Log.i("ljw", "uploading image to " + uuid);
+        UploadTask uploadTask = imageRef.putBytes(imageData);
+        uploadTask.addOnSuccessListener(result -> {
+            Log.i("ljw", "success! \n" + result.toString());
+        }).addOnFailureListener(failure -> {
+            Log.i("ljw", "failure! :" + failure.toString());
+        });
+    }
 
 }

@@ -5,6 +5,7 @@ import android.net.Uri;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,12 +21,12 @@ public class Post {
     private double lng;
     private double latZone;
     private double lngZone;
-    private Uri link;
+    private String mediaLink;
     private String icon;
     private int score;
     private ArrayList<Comment> comments;
     private HashMap<String, Integer> votes;
-    private int reports;
+    private String thumbnailUrl;
 
     public Post() {};
 
@@ -45,17 +46,16 @@ public class Post {
         this.comments = new ArrayList<>();
         this.votes = new HashMap<>();
         votes.put(userId, 1);
-        this.reports = 0;
 
         //if link or icon were selected, set them in the create post method before uploading the object
     }
 
-    public int getReports() {
-        return reports;
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
     }
 
-    public void setReports(int reports) {
-        this.reports = reports;
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
     }
 
     public HashMap<String, Integer> getVotes() {
@@ -122,12 +122,12 @@ public class Post {
         this.location = location;
     }
 
-    public Uri getLink() {
-        return link;
+    public String getMediaLink() {
+        return mediaLink;
     }
 
-    public void setLink(Uri link) {
-        this.link = link;
+    public void setMediaLink(String mediaLink) {
+        this.mediaLink = mediaLink;
     }
 
     public String getIcon() {
