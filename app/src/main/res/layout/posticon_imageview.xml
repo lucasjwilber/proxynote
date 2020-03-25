@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/postIconView"
+    android:layout_height="60dp"
+    android:layout_width="60dp"
+    android:background="@drawable/postoutline_yellow"
+    android:paddingTop="8dp"
+    android:paddingRight="12dp"
+    android:paddingBottom="12dp"
+    android:paddingLeft="12dp"
+    android:onClick="onIconClick"
+    >
+</ImageView>

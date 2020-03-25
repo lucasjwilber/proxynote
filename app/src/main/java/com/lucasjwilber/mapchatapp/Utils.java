@@ -1,6 +1,13 @@
 package com.lucasjwilber.mapchatapp;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
+
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -120,6 +127,69 @@ public class Utils {
             return number + " " + unit + " ago";
         } else {
             return number + " " + unit + "s ago";
+        }
+    }
+
+    private static Bitmap getBitmap(int drawableRes, Context context) {
+        //TODO: try removing the .getResources() bit:
+        Drawable drawable = context.getResources().getDrawable(drawableRes);
+        Canvas canvas = new Canvas();
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
+    static BitmapDescriptor getPostIcon(int code, Context context) {
+        switch (code) {
+            case 127867:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_127867, context));
+            case 127881:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_127881, context));
+            case 128064:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128064, context));
+            case 128076:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128076, context));
+            case 128077:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128077, context));
+            case 128078:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128078, context));
+            case 128293:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128293, context));
+            case 128405:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128405, context));
+            case 128514:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128514, context));
+            case 128517:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128517, context));
+            case 128521:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128521, context));
+            case 128522:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128522, context));
+            case 128525:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128525, context));
+            case 128526:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128526, context));
+            case 128528:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128528, context));
+            case 128557:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128557, context));
+            case 128580:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128580, context));
+            case 128591:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128591, context));
+            case 129300:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_129300, context));
+            case 129314:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_129314, context));
+            case 129315:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_129315, context));
+            case 9996:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_9996, context));
+            case 0:
+            default:
+                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_default, context));
         }
     }
 

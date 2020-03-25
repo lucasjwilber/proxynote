@@ -1,43 +1,24 @@
 package com.lucasjwilber.mapchatapp;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 //import com.squareup.picasso.Picasso;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 
 public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHolder> {
@@ -56,10 +37,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     PostRvAdapter(Post post, Context context, String userId) {
         this.post = post;
         this.userId = userId;
-        upArrowColored = context.getDrawable(R.drawable.up_arrow_colored);
-        downArrowColored = context.getDrawable(R.drawable.down_arrow_colored);
-        upArrow = context.getDrawable(R.drawable.up_arrow);
-        downArrow = context.getDrawable(R.drawable.down_arrow);
+        upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
+        downArrowColored = context.getDrawable(R.drawable.arrow_down_colored);
+        upArrow = context.getDrawable(R.drawable.arrow_up);
+        downArrow = context.getDrawable(R.drawable.arrow_down);
 
         SharedPreferences prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");

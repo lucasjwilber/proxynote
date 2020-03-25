@@ -21,7 +21,7 @@ public class Post {
     private double lng;
     private double latZone;
     private double lngZone;
-    private String icon;
+    private int icon;
     private int score;
     private ArrayList<Comment> comments;
     private HashMap<String, Integer> votes;
@@ -130,11 +130,11 @@ public class Post {
         this.location = location;
     }
 
-    public String getIcon() {
+    public int getIcon() {
         return icon;
     }
 
-    public void setIcon(String icon) {
+    public void setIcon(int icon) {
         this.icon = icon;
     }
 

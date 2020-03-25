@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Intent;
@@ -44,6 +46,11 @@ public class CreatePostActivity extends AppCompatActivity {
     public String userCurrentAddress;
     ImageView createPostImage;
     Bitmap currentImage;
+    private RecyclerView iconRv;
+    private RecyclerView.Adapter iconRvAdapter;
+    private RecyclerView.LayoutManager iconRvLayoutManager;
+    LinearLayoutManager HorizontalLayout;
+    private int selectedIcon = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +63,15 @@ public class CreatePostActivity extends AppCompatActivity {
         user = FirebaseAuth.getInstance().getCurrentUser();
         storageRef = storage.getReference();
         createPostImage = binding.createPostImage;
+
+        iconRv = findViewById(R.id.postIconRv);
+        HorizontalLayout = new LinearLayoutManager(
+                CreatePostActivity.this,
+                LinearLayoutManager.HORIZONTAL,
+                false);
+        iconRv.setLayoutManager(HorizontalLayout);
+        iconRvAdapter = new IconSelectAdapter(this);
+        iconRv.setAdapter(iconRvAdapter);
 
         Intent intent = getIntent();
         userLat = intent.getDoubleExtra("userLat", userLat);
@@ -77,6 +93,8 @@ public class CreatePostActivity extends AppCompatActivity {
                 userCurrentAddress,
                 userLat,
                 userLng);
+
+        if (selectedIcon != 0) post.setIcon(selectedIcon);
 
         if (currentImage == null) {
             uploadPost(post);
@@ -202,4 +220,10 @@ public class CreatePostActivity extends AppCompatActivity {
             createPostImage.setImageBitmap(imageBitmap);
         }
     }
+
+    public void onIconClick(View v) {
+        Log.i("ljw", "selected icon code is " + v.getTag().toString());
+        selectedIcon = (int) v.getTag();
+    }
+
 }

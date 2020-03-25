@@ -30,7 +30,7 @@
         android:id="@+id/postRvHeaderVoteUpBtn"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:background="@drawable/up_arrow"
+        android:background="@drawable/arrow_up"
         android:onClick="onPostVoteClicked"
         app:layout_constraintStart_toStartOf="@+id/postRvPostInfo"
         app:layout_constraintTop_toBottomOf="@+id/postRvPostInfo" />
@@ -50,7 +50,7 @@
         android:id="@+id/postRvHeaderVoteDownBtn"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:background="@drawable/down_arrow"
+        android:background="@drawable/arrow_down"
         android:onClick="onPostVoteClicked"
         app:layout_constraintEnd_toEndOf="@+id/postRvHeaderVoteUpBtn"
         app:layout_constraintHorizontal_bias="0.0"

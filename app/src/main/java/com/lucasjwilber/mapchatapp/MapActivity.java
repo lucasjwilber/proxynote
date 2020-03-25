@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -22,15 +21,11 @@ import android.os.Message;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -45,17 +40,13 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.lucasjwilber.mapchatapp.databinding.ActivityMapBinding;
-import com.lucasjwilber.mapchatapp.databinding.PostLayoutBinding;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -76,7 +67,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnCameraIdleListener {
 
     private ActivityMapBinding mapBinding;
-    private PostLayoutBinding postViewBinding;
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     FirebaseFirestore db;
@@ -91,10 +81,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     Marker userMarker;
     LatLngBounds cameraBounds;
     public String userCurrentAddress = "somewhere";
-    LinearLayout createPostForm;
     TextView userLocationTV;
-    BitmapDescriptor postMarkerIcon;
     BitmapDescriptor userMarkerIcon;
+    BitmapDescriptor postIconYellow;
+    BitmapDescriptor postIconYellowOrange;
+    BitmapDescriptor postIconOrange;
+    BitmapDescriptor postIconOrangeRed;
+    BitmapDescriptor postIconRed;
     Post currentSelectedPost;
     Marker currentSelectedMarker;
     private RecyclerView postRv;
@@ -110,30 +103,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         View view = mapBinding.getRoot();
         setContentView(view);
 
-        postViewBinding = PostLayoutBinding.inflate(getLayoutInflater());
-
-        // get location permission if necessary, then get location
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-//        if (ContextCompat.checkSelfPermission(this,
-//                Manifest.permission.ACCESS_FINE_LOCATION)
-//                != PackageManager.PERMISSION_GRANTED) {
-//            ActivityCompat.requestPermissions(this,
-//                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-//                    FINE_LOCATION_PERMISSION_REQUEST_CODE);
-//        } else {
-//            getUserLatLng();
-//        }
-
-//        createPostForm = mapBinding.createPostForm;
-//        userLocationTV = mapBinding.postLocationTextView;
 
         // post recyclerview
         postRv = mapBinding.postRecyclerView;
         postRvLayoutManager = new LinearLayoutManager(this);
         postRv.setLayoutManager(postRvLayoutManager);
 
-        postMarkerIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.post_icon));
         userMarkerIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.user_location_pin));
+        postIconYellow = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_yellow));
+        postIconYellowOrange = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_yelloworange));
+        postIconOrange = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_orange));
+        postIconOrangeRed = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_orangered));
+        postIconRed = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_red));
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -144,6 +125,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        // get location permission if necessary, then get location
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -325,13 +308,34 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
 
     public Marker createMarkerWithPost(Post post) {
-        Marker marker = mMap.addMarker(new MarkerOptions()
+        Marker borderMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(post.getLat(), post.getLng()))
                 .anchor(0, 1)
-                .icon(postMarkerIcon)
+                .zIndex(1.0f)
         );
-        marker.setTag(post);
-        return marker;
+        borderMarker.setTag(post);
+
+        int score = post.getScore();
+        if (score >= 20) {
+            borderMarker.setIcon(postIconRed);
+        } else if (score >= 15) {
+            borderMarker.setIcon(postIconOrangeRed);
+        } else if (score >= 10) {
+            borderMarker.setIcon(postIconOrange);
+        } else if (score >= 5) {
+            borderMarker.setIcon(postIconYellowOrange);
+        } else {
+            borderMarker.setIcon(postIconYellow);
+        }
+
+        Marker iconMarker = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(post.getLat(), post.getLng()))
+                .anchor(-0.4f, 1.575f)
+        );
+        iconMarker.setIcon(Utils.getPostIcon(post.getIcon(), this));
+
+
+        return borderMarker;
     }
 
     public void getUsersFormattedAddress() {
@@ -482,32 +486,32 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             if (usersPreviousVote == -1) {
                 usersNewVote = 0;
                 scoreChange = 1;
-                down.setBackground(getDrawable(R.drawable.down_arrow));
+                down.setBackground(getDrawable(R.drawable.arrow_down));
             } else if (usersPreviousVote == 0) {
                 usersNewVote = -1;
                 scoreChange = -1;
-                down.setBackground(getDrawable(R.drawable.down_arrow_colored));
+                down.setBackground(getDrawable(R.drawable.arrow_down_colored));
             } else { //if (usersPreviousVote == 1)
                 usersNewVote = -1;
                 scoreChange = -2;
-                down.setBackground(getDrawable(R.drawable.down_arrow));
-                up.setBackground(getDrawable(R.drawable.up_arrow));
+                down.setBackground(getDrawable(R.drawable.arrow_down));
+                up.setBackground(getDrawable(R.drawable.arrow_up));
             }
         }
         if (v.getId() == R.id.postRvHeaderVoteUpBtn) {
             if (usersPreviousVote == -1) {
                 usersNewVote = 1;
                 scoreChange = 2;
-                down.setBackground(getDrawable(R.drawable.down_arrow));
-                up.setBackground(getDrawable(R.drawable.up_arrow_colored));
+                down.setBackground(getDrawable(R.drawable.arrow_down));
+                up.setBackground(getDrawable(R.drawable.arrow_up_colored));
             } else if (usersPreviousVote == 0) {
                 usersNewVote = 1;
                 scoreChange = 1;
-                up.setBackground(getDrawable(R.drawable.up_arrow_colored));
+                up.setBackground(getDrawable(R.drawable.arrow_up_colored));
             } else { //if (usersPreviousVote == 1)
                 usersNewVote = 0;
                 scoreChange = -1;
-                up.setBackground(getDrawable(R.drawable.up_arrow));
+                up.setBackground(getDrawable(R.drawable.arrow_up));
             }
         }
         Log.i("ljw", "score change is " + scoreChange);
