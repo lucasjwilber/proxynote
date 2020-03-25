@@ -51,6 +51,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager iconRvLayoutManager;
     LinearLayoutManager HorizontalLayout;
     private int selectedIcon = 0;
+    ImageView selectedIconView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -223,7 +224,10 @@ public class CreatePostActivity extends AppCompatActivity {
 
     public void onIconClick(View v) {
         Log.i("ljw", "selected icon code is " + v.getTag().toString());
+        if (selectedIconView != null) selectedIconView.setBackground(null);
+        selectedIconView = (ImageView) v;
         selectedIcon = (int) v.getTag();
+        v.setBackground(getDrawable(R.drawable.selected_icon_bg));
     }
 
 }

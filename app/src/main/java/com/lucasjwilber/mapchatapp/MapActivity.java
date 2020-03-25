@@ -83,11 +83,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public String userCurrentAddress = "somewhere";
     TextView userLocationTV;
     BitmapDescriptor userMarkerIcon;
-    BitmapDescriptor postIconYellow;
-    BitmapDescriptor postIconYellowOrange;
-    BitmapDescriptor postIconOrange;
-    BitmapDescriptor postIconOrangeRed;
-    BitmapDescriptor postIconRed;
+    BitmapDescriptor postOutlineYellow;
+    BitmapDescriptor postOutlineYellowOrange;
+    BitmapDescriptor postOutlineOrange;
+    BitmapDescriptor postOutlineOrangeRed;
+    BitmapDescriptor postOutlineRed;
+    BitmapDescriptor postOutlineBrown;
     Post currentSelectedPost;
     Marker currentSelectedMarker;
     private RecyclerView postRv;
@@ -110,11 +111,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postRv.setLayoutManager(postRvLayoutManager);
 
         userMarkerIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.user_location_pin));
-        postIconYellow = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_yellow));
-        postIconYellowOrange = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_yelloworange));
-        postIconOrange = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_orange));
-        postIconOrangeRed = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_orangered));
-        postIconRed = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_red));
+        postOutlineYellow = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_yellow));
+        postOutlineYellowOrange = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_yelloworange));
+        postOutlineOrange = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_orange));
+        postOutlineOrangeRed = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_orangered));
+        postOutlineRed = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_red));
+        postOutlineBrown = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_brown));
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -311,28 +313,30 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         Marker borderMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(post.getLat(), post.getLng()))
                 .anchor(0, 1)
-                .zIndex(1.0f)
         );
-        borderMarker.setTag(post);
 
         int score = post.getScore();
         if (score >= 20) {
-            borderMarker.setIcon(postIconRed);
+            borderMarker.setIcon(postOutlineRed);
         } else if (score >= 15) {
-            borderMarker.setIcon(postIconOrangeRed);
+            borderMarker.setIcon(postOutlineOrangeRed);
         } else if (score >= 10) {
-            borderMarker.setIcon(postIconOrange);
+            borderMarker.setIcon(postOutlineOrange);
         } else if (score >= 5) {
-            borderMarker.setIcon(postIconYellowOrange);
+            borderMarker.setIcon(postOutlineYellowOrange);
+        } else if (score <= -5) {
+            borderMarker.setIcon(postOutlineBrown);
         } else {
-            borderMarker.setIcon(postIconYellow);
+            borderMarker.setIcon(postOutlineYellow);
         }
 
         Marker iconMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(post.getLat(), post.getLng()))
                 .anchor(-0.4f, 1.575f)
+                .zIndex(1.0f)
         );
         iconMarker.setIcon(Utils.getPostIcon(post.getIcon(), this));
+        iconMarker.setTag(post);
 
 
         return borderMarker;

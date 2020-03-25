@@ -61,10 +61,8 @@ public class IconSelectAdapter extends RecyclerView.Adapter<IconSelectAdapter.Ic
     @Override
     public void onBindViewHolder(IconViewholder holder, int position) {
         holder.imageView.setImageDrawable(icons[position]);
-        Log.i("ljw", "position " + position);
         switch (position) {
             case 0:
-                Log.i("ljw", "at " + 0);
                 holder.imageView.setTag(127867);
                 break;
             case 1:
@@ -84,7 +82,6 @@ public class IconSelectAdapter extends RecyclerView.Adapter<IconSelectAdapter.Ic
                 break;
             case 6:
                 holder.imageView.setTag(128293);
-                Log.i("ljw", "at " + 6);
                 break;
             case 7:
                 holder.imageView.setTag(128405);
@@ -97,7 +94,6 @@ public class IconSelectAdapter extends RecyclerView.Adapter<IconSelectAdapter.Ic
                 break;
             case 10:
                 holder.imageView.setTag(128521);
-                Log.i("ljw", "at " + 10);
                 break;
             case 11:
                 holder.imageView.setTag(128522);

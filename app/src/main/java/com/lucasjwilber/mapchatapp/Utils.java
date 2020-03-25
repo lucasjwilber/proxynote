@@ -2,8 +2,10 @@ package com.lucasjwilber.mapchatapp;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -131,7 +133,6 @@ public class Utils {
     }
 
     private static Bitmap getBitmap(int drawableRes, Context context) {
-        //TODO: try removing the .getResources() bit:
         Drawable drawable = context.getResources().getDrawable(drawableRes);
         Canvas canvas = new Canvas();
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
