@@ -1,6 +1,5 @@
 package com.lucasjwilber.mapchatapp;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -19,8 +18,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -30,6 +27,8 @@ import com.google.firebase.storage.UploadTask;
 import com.lucasjwilber.mapchatapp.databinding.ActivityCreatePostBinding;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class CreatePostActivity extends AppCompatActivity {
@@ -134,20 +133,42 @@ public class CreatePostActivity extends AppCompatActivity {
         db.collection("posts")
                 .document(post.getId())
                 .set(post)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.i("ljw", "successfully added new post to DB");
-                        //TODO: toast;
-                        finish();
-                    }
+                .addOnSuccessListener(result -> {
+                    Log.i("ljw", "successfully added new post to DB");
+                    //TODO: toast?
+
+                    //add post to user's list
+                    db.collection("users")
+                            .document(user.getUid())
+                            .get()
+                            .addOnSuccessListener(userData -> {
+                                User user = userData.toObject(User.class);
+                                assert user != null;
+                                List<PostDescriptor> postDescriptors = user.getPostDescriptors();
+                                postDescriptors.add(new PostDescriptor(
+                                        post.getId(),
+                                        post.getTitle(),
+                                        post.getTimestamp(),
+                                        post.getScore(),
+                                        post.getIcon(),
+                                        post.getLocation()
+                                ));
+
+                                db.collection("users")
+                                        .document(user.getUid())
+                                        .update("postDescriptors", postDescriptors)
+                                        .addOnSuccessListener(result2 -> {
+                                            Log.i("ljw", "successfully updated user's post descriptors list");
+                                        })
+                                        .addOnFailureListener(e -> Log.i("ljw", "Error updating user's post descriptors list " + e));
+
+                            })
+                            .addOnFailureListener(e -> Log.i("ljw", "Error getting user: " + e));
+
+                    finish();
+
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.i("ljw", "Error adding post to db: " + e);
-                    }
-                });
+                .addOnFailureListener(e -> Log.i("ljw", "Error adding post to db: " + e));
     }
 
     public void cameraButtonClicked(View v) {

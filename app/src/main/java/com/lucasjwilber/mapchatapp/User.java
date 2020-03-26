@@ -1,6 +1,6 @@
 package com.lucasjwilber.mapchatapp;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
@@ -9,7 +9,7 @@ public class User {
     private String lastName;
     private String username;
     private String email;
-    private List<Post> posts;
+    private List<PostDescriptor> postDescriptors;
     private long timeOfLastPost;
     private boolean isPaid;
     private int totalScore;
@@ -25,7 +25,7 @@ public class User {
         this.username = username;
         this.email = email;
         this.uid = uid;
-        this.posts = new LinkedList<>();
+        this.postDescriptors = new ArrayList<>();
         this.isPaid = false;
         this.totalScore = 0;
         this.reports = 0;
@@ -95,12 +95,12 @@ public class User {
         this.lastLng = lastLng;
     }
 
-    public List<Post> getPosts() {
-        return posts;
+    public List<PostDescriptor> getPostDescriptors() {
+        return postDescriptors;
     }
 
-    public void setPosts(List<Post> posts) {
-        this.posts = posts;
+    public void setPostDescriptors(List<PostDescriptor> postDescriptors) {
+        this.postDescriptors = postDescriptors;
     }
 
     public String getFirstName() {

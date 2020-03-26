@@ -417,20 +417,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         db.collection("posts")
                 .document(currentSelectedPost.getId())
                 .update("comments", comments)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Log.i("ljw", "successfully added a comment");
-                        postRvAdapter.notifyDataSetChanged();
-                        commentEditText.setText("");
-                    }
+                .addOnCompleteListener(task -> {
+                    Log.i("ljw", "successfully added a comment");
+                    postRvAdapter.notifyDataSetChanged();
+                    commentEditText.setText("");
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.i("ljw", "failed adding a comment because " + e.toString());
-                    }
-                });
+                .addOnFailureListener(e -> Log.i("ljw", "failed adding a comment because " + e.toString()));
     }
 
     private Bitmap getBitmap(int drawableRes) {
@@ -445,6 +437,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
+        if (item.toString().equals("Profile")) {
+            Intent goToProfile = new Intent(this, UserProfileActivity.class);
+            goToProfile.putExtra("userId", currentUserId);
+            startActivity(goToProfile);
+        } else if (item.toString().equals("Settings")) {
+            //display settings modal
+        }
         return false;
     }
 

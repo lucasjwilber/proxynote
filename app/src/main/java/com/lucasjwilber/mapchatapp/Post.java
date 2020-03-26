@@ -34,6 +34,7 @@ public class Post {
         this.id = UUID.randomUUID().toString();
         this.userId = userId;
         this.username = username;
+        //TODO: if title contains [delimination string used in postStrings recyclerview in profile activity] replace it with somethign else here
         this.title = title;
         this.text = text;
         this.location = location;

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UserProfileActivity">
+
+    <TextView
+        android:id="@+id/profileUsername"
+        android:layout_width="153dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="username" />
+
+    <TextView
+        android:id="@+id/profileScore"
+        android:layout_width="44dp"
+        android:layout_height="37dp"
+        android:layout_marginStart="64dp"
+        app:layout_constraintBottom_toBottomOf="@+id/profileUsername"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/profileUsername"
+        app:layout_constraintVertical_bias="0.0"
+        tools:text="Score" />
+
+    <EditText
+        android:id="@+id/profileEditUsername"
+        android:layout_width="156dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="80dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name"
+        app:layout_constraintBottom_toBottomOf="@+id/profileUsername"
+        app:layout_constraintEnd_toEndOf="@+id/profileUsername"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/profileUsername"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/profileEditUsernameBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="Change Username"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/profileUsername"
+        app:layout_constraintTop_toBottomOf="@+id/profileUsername" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/profileAllPostsRv"
+        android:layout_width="270dp"
+        android:layout_height="132dp"
+        android:layout_marginTop="127dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profileUsername" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/profileOnePostRv"
+        android:layout_width="0dp"
+        android:layout_height="282dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/profileAllPostsRv"
+        app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
+        app:layout_constraintTop_toBottomOf="@+id/profileAllPostsRv"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/allPostsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Posts:"
+        app:layout_constraintBottom_toTopOf="@+id/profileAllPostsRv"
+        app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv" />
+</androidx.constraintlayout.widget.ConstraintLayout>

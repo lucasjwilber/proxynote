@@ -16,6 +16,7 @@ public class IconSelectAdapter extends RecyclerView.Adapter<IconSelectAdapter.Ic
 
     public IconSelectAdapter(Context context) {
 
+        //when adding new icons be sure to update onBindViewholder() below and getPostIcon() in Utils
         icons = new Drawable[]{
                 context.getDrawable(R.drawable.posticon_127867),
                 context.getDrawable(R.drawable.posticon_127881),
@@ -52,6 +53,7 @@ public class IconSelectAdapter extends RecyclerView.Adapter<IconSelectAdapter.Ic
 
     }
 
+    //TODO: do i need the viewType parameter here?
     @Override
     public IconViewholder onCreateViewHolder(ViewGroup parent, int viewType) {
         ImageView iconView = (ImageView) LayoutInflater.from(parent.getContext()).inflate(R.layout.posticon_imageview, parent, false);

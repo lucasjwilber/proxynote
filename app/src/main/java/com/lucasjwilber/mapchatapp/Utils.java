@@ -2,11 +2,8 @@ package com.lucasjwilber.mapchatapp;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.util.Base64;
-import android.util.Log;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -130,6 +127,10 @@ public class Utils {
         } else {
             return number + " " + unit + "s ago";
         }
+    }
+
+    static String getFormattedTime(long timestamp) {
+        return new java.util.Date(timestamp).toString();
     }
 
     private static Bitmap getBitmap(int drawableRes, Context context) {
