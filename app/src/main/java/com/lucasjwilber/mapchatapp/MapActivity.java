@@ -39,7 +39,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -335,7 +334,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .anchor(-0.4f, 1.575f)
                 .zIndex(1.0f)
         );
-        iconMarker.setIcon(Utils.getPostIcon(post.getIcon(), this));
+        iconMarker.setIcon(Utils.getPostIconBitmapDescriptor(post.getIcon(), this));
         iconMarker.setTag(post);
 
 

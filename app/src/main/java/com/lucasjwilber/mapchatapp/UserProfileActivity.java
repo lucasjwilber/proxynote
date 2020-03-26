@@ -22,6 +22,7 @@ import org.w3c.dom.Text;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -81,7 +82,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
     }
 
-    //list of post titles RV:
+    //list of post descriptors RV:
     public class PostSelectAdapter extends RecyclerView.Adapter<PostSelectAdapter.PostTitleViewholder>
             implements View.OnClickListener {
 
@@ -109,6 +110,8 @@ public class UserProfileActivity extends AppCompatActivity {
                             Log.i("ljw", "got post!");
                             Post post = response.toObject(Post.class);
                             Log.i("ljw", "found post " + post.getId());
+                            ArrayList list = (ArrayList) response.getData().get("comments");
+                            post.setComments(Utils.turnMapsIntoListOfComments(list));
 
                             cachedPosts.put(postId, post);
 
@@ -138,7 +141,7 @@ public class UserProfileActivity extends AppCompatActivity {
             ConstraintLayout l;
 
             l = (ConstraintLayout) LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.postrv_comment, parent, false);
+                    .inflate(R.layout.post_descriptor_layout, parent, false);
             return new PostSelectAdapter.PostTitleViewholder(l);
         }
 
@@ -146,24 +149,22 @@ public class UserProfileActivity extends AppCompatActivity {
         public void onBindViewHolder(PostTitleViewholder holder, int position) {
 
             PostDescriptor data = userPostDescriptors.get(position);
-            int score = data.getScore();
+            String score = Integer.toString(data.getScore());
             String title = data.getTitle();
             int icon = data.getIcon();
             long time = data.getTimestamp();
             String location = data.getLocation();
 
-            TextView dateAndLocation = holder.constraintLayout.findViewById(R.id.postRvCommentHeader);
-            StringBuilder dalText = new StringBuilder();
-            dalText.append(time + location);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                dateAndLocation.setText(Html.fromHtml(dalText.toString(), Html.FROM_HTML_MODE_COMPACT));
-            } else {
-                dateAndLocation.setText(Html.fromHtml(dalText.toString()));
-            }
+            ImageView iconView = holder.constraintLayout.findViewById(R.id.postdescriptorIcon);
+            TextView scoreView = holder.constraintLayout.findViewById(R.id.postdescriptorScore);
+            TextView timeAndLocationView = holder.constraintLayout.findViewById(R.id.postdescriptorTimeAndLocation);
+            TextView titleView = holder.constraintLayout.findViewById(R.id.postdescriptorTitle);
 
-            TextView scoreEmojiAndTitle = holder.constraintLayout.findViewById(R.id.postRvCommentText);
-            String seatText = score + title + icon;
-            scoreEmojiAndTitle.setText(seatText);
+            iconView.setImageBitmap(Utils.getPostIconBitmap(icon, getApplicationContext()));
+            scoreView.setText(score);
+            String timeAndLocationText = new Date(time) + ", " + location;
+            timeAndLocationView.setText(timeAndLocationText);
+            titleView.setText(title);
 
             holder.constraintLayout.setTag(data.getId());
         }
