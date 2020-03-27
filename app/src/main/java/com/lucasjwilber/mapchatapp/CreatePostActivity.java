@@ -100,7 +100,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 userLat,
                 userLng);
 
-        if (selectedIcon != 0) post.setIcon(selectedIcon);
+        post.setIcon(selectedIcon);
 
         if (currentImage == null) {
             uploadPost(post);
@@ -150,24 +150,28 @@ public class CreatePostActivity extends AppCompatActivity {
                             .addOnSuccessListener(userData -> {
                                 User user = userData.toObject(User.class);
                                 assert user != null;
-                                List<PostDescriptor> postDescriptors = user.getPostDescriptors();
-                                postDescriptors.add(new PostDescriptor(
-                                        post.getId(),
-                                        post.getTitle(),
-                                        post.getTimestamp(),
-                                        post.getScore(),
-                                        post.getIcon(),
-                                        post.getLocation()
-                                ));
+                                if (user.getPostDescriptors() == null) {
+                                    Log.i("ljw", "user doesn't have a postDescriptors field!");
+                                } else {
+                                    List<PostDescriptor> postDescriptors = user.getPostDescriptors();
+                                    postDescriptors.add(new PostDescriptor(
+                                            post.getId(),
+                                            post.getTitle(),
+                                            post.getTimestamp(),
+                                            post.getScore(),
+                                            post.getIcon(),
+                                            post.getLocation()
+                                    ));
 
-                                db.collection("users")
-                                        .document(user.getUid())
-                                        .update("postDescriptors", postDescriptors,
-                                                "totalScore", user.getTotalScore() + 1)
-                                        .addOnSuccessListener(result2 -> {
-                                            Log.i("ljw", "successfully updated user's post descriptors list");
-                                        })
-                                        .addOnFailureListener(e -> Log.i("ljw", "Error updating user's post descriptors list " + e));
+                                    db.collection("users")
+                                            .document(user.getUid())
+                                            .update("postDescriptors", postDescriptors,
+                                                    "totalScore", user.getTotalScore() + 1)
+                                            .addOnSuccessListener(result2 -> {
+                                                Log.i("ljw", "successfully updated user's post descriptors list");
+                                            })
+                                            .addOnFailureListener(e -> Log.i("ljw", "Error updating user's post descriptors list " + e));
+                                }
 
                             })
                             .addOnFailureListener(e -> Log.i("ljw", "Error getting user: " + e));
@@ -402,13 +406,6 @@ public class CreatePostActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return icons.length;
-        }
-
-        public int getSelectedIcon() {
-            return selectedIcon;
-        }
-        public void setSelectedIcon(int icon) {
-            selectedIcon = icon;
         }
 
     }

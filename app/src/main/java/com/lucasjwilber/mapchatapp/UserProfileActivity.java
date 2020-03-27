@@ -81,17 +81,18 @@ public class UserProfileActivity extends AppCompatActivity {
                     userScoreView.setText(userScoreText);
                     List<PostDescriptor> userPostDescriptors = user.getPostDescriptors();
 
-                    if (userPostDescriptors.size() > 0) {
+                    if (userPostDescriptors == null || userPostDescriptors.size() == 0) {
+                        Log.i("ljw", "user hasn't made any posts, or possibly doesn't have a postDescriptors list");
+                        TextView noPosts = findViewById(R.id.profileNoCommentsYet);
+                        String noPostsText = user.getUsername() + " hasn't made any posts yet.";
+                        noPosts.setText(noPostsText);
+                        noPosts.setVisibility(View.VISIBLE);
+                    } else {
                         postDescriptorsRv = findViewById(R.id.profileAllPostsRv);
                         postDescriptorsRvLayoutManager = new LinearLayoutManager(this);
                         postDescriptorsRv.setLayoutManager(postDescriptorsRvLayoutManager);
                         postDescriptorsRvAdapter = new PostSelectAdapter(userPostDescriptors);
                         postDescriptorsRv.setAdapter(postDescriptorsRvAdapter);
-                    } else {
-                        TextView noPosts = findViewById(R.id.profileNoCommentsYet);
-                        String noPostsText = user.getUsername() + " hasn't made any posts yet.";
-                        noPosts.setText(noPostsText);
-                        noPosts.setVisibility(View.VISIBLE);
                     }
                 })
                 .addOnFailureListener(e -> Log.i("ljw", "error getting user: " + e.toString()));
@@ -129,6 +130,10 @@ public class UserProfileActivity extends AppCompatActivity {
                         .addOnSuccessListener(response -> {
                             Log.i("ljw", "got post!");
                             Post post = response.toObject(Post.class);
+                            if (post == null) {
+                                Log.i("ljw", "post not found. may have been deleted from the post collection but not the user object");
+                                return;
+                            }
                             Log.i("ljw", "found post " + post.getId());
                             ArrayList list = (ArrayList) response.getData().get("comments");
                             post.setComments(Utils.turnMapsIntoListOfComments(list));
