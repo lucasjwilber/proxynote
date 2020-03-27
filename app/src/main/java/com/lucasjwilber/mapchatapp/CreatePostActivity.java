@@ -137,7 +137,7 @@ public class CreatePostActivity extends AppCompatActivity {
                     Log.i("ljw", "successfully added new post to DB");
                     //TODO: toast?
 
-                    //add post to user's list
+                    //add post to user's list and +1 their total score
                     db.collection("users")
                             .document(user.getUid())
                             .get()
@@ -156,7 +156,8 @@ public class CreatePostActivity extends AppCompatActivity {
 
                                 db.collection("users")
                                         .document(user.getUid())
-                                        .update("postDescriptors", postDescriptors)
+                                        .update("postDescriptors", postDescriptors,
+                                                "totalScore", user.getTotalScore() + 1)
                                         .addOnSuccessListener(result2 -> {
                                             Log.i("ljw", "successfully updated user's post descriptors list");
                                         })
@@ -248,7 +249,7 @@ public class CreatePostActivity extends AppCompatActivity {
         if (selectedIconView != null) selectedIconView.setBackground(null);
         selectedIconView = (ImageView) v;
         selectedIcon = (int) v.getTag();
-        v.setBackground(getDrawable(R.drawable.selected_icon_bg));
+        v.setBackground(getDrawable(R.drawable.postoutline_accent));
     }
 
 }

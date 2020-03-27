@@ -11,7 +11,7 @@
         android:id="@+id/createPostHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
+        android:layout_marginBottom="8dp"
         android:text="Create a Post"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -19,19 +19,11 @@
         app:layout_constraintEnd_toEndOf="@+id/postTitleEditText"
         app:layout_constraintStart_toStartOf="@+id/postTitleEditText" />
 
-    <TextView
-        android:id="@+id/iconLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Icon"
-        app:layout_constraintBottom_toTopOf="@+id/postIconRv"
-        app:layout_constraintStart_toStartOf="@+id/postIconRv" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/postIconRv"
         android:layout_width="0dp"
-        android:layout_height="60dp"
-        android:layout_marginBottom="28dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="8dp"
         android:scrollbars="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/postTitleEditText"
         app:layout_constraintEnd_toEndOf="@+id/postTitleEditText"
@@ -43,45 +35,47 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Title"
-        app:layout_constraintBottom_toTopOf="@+id/postTitleEditText"
-        app:layout_constraintStart_toStartOf="@+id/postTitleEditText" />
+        app:layout_constraintEnd_toStartOf="@+id/postTitleEditText"
+        app:layout_constraintTop_toTopOf="@+id/postTitleEditText" />
 
     <EditText
         android:id="@+id/postTitleEditText"
         android:layout_width="326dp"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginBottom="5dp"
         android:inputType="textPersonName"
         android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/createPostImage"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.494"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.237" />
+        app:layout_constraintHorizontal_bias="0.588"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/createPostImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/postTitleEditText"
-        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="@+id/postTitleEditText"
-        app:layout_constraintTop_toBottomOf="@+id/postTitleEditText" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.461" />
 
     <TextView
         android:id="@+id/textLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:text="Text"
-        app:layout_constraintBottom_toTopOf="@+id/postBodyEditText"
-        app:layout_constraintStart_toStartOf="@+id/postBodyEditText" />
+        app:layout_constraintEnd_toStartOf="@+id/postBodyEditText"
+        app:layout_constraintTop_toBottomOf="@+id/createPostImage" />
+
 
     <EditText
         android:id="@+id/postBodyEditText"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_height="80dp"
+        android:layout_marginTop="5dp"
         android:inputType="textMultiLine"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="@+id/postTitleEditText"
@@ -89,42 +83,43 @@
         app:layout_constraintStart_toStartOf="@+id/postTitleEditText"
         app:layout_constraintTop_toBottomOf="@+id/createPostImage" />
 
-    <TextView
-        android:id="@+id/cameraLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Add an image"
-        app:layout_constraintBottom_toTopOf="@+id/cameraButton"
-        app:layout_constraintStart_toStartOf="@+id/cameraButton" />
-
     <Button
         android:id="@+id/cameraButton"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:layout_marginTop="24dp"
-        android:background="@drawable/camera"
-        android:backgroundTintMode="add"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:background="@drawable/rounded_corner_box_accentcolor"
+        android:paddingStart="5dp"
+        android:paddingTop="10dp"
+        android:drawableStart="@drawable/camera"
         android:onClick="cameraButtonClicked"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/postBodyEditText"
+        app:layout_constraintBottom_toBottomOf="@+id/postSubmitButton"
+        app:layout_constraintEnd_toStartOf="@+id/postSubmitButton"
+        app:layout_constraintHorizontal_bias="0.347"
+        app:layout_constraintStart_toStartOf="@+id/postBodyEditText"
+        app:layout_constraintTop_toTopOf="@+id/postSubmitButton"
         app:srcCompat="@color/colorAccent" />
-
 
     <Button
         android:id="@+id/postSubmitButton"
         android:layout_width="100dp"
         android:layout_height="45dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/rounded_corner_box_accentcolor"
         android:onClick="createPost"
         android:text="Post"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/postBodyEditText"
-        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintHorizontal_bias="0.765"
         app:layout_constraintStart_toStartOf="@+id/postBodyEditText"
-        app:layout_constraintTop_toBottomOf="@+id/cameraButton" />
+        app:layout_constraintTop_toBottomOf="@+id/postBodyEditText" />
+
+    <TextView
+        android:id="@+id/iconSelectLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Icon"
+        app:layout_constraintEnd_toStartOf="@+id/postIconRv"
+        app:layout_constraintTop_toTopOf="@+id/postIconRv" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

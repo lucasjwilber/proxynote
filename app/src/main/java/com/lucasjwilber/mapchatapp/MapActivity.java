@@ -93,6 +93,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private RecyclerView postRv;
     private RecyclerView.Adapter postRvAdapter;
     private RecyclerView.LayoutManager postRvLayoutManager;
+    boolean mapHasBeenSetUp;
 
 
     @Override
@@ -135,14 +136,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     FINE_LOCATION_PERMISSION_REQUEST_CODE);
         } else {
-            getUserLatLng();
+            getUserLatLng(true);
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (mMap != null) mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
     }
 
     //    pop up method to show hamburger
@@ -158,8 +158,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         mMap = googleMap;
         //remove the directions/gps buttons
         mMap.getUiSettings().setMapToolbarEnabled(false);
-//        PostInfoWindowAdapter windowAdapter = new PostInfoWindowAdapter(getApplicationContext());
-//        mMap.setInfoWindowAdapter(windowAdapter);
         mMap.setOnMarkerClickListener(this::onMarkerClick);
         mMap.setOnMapClickListener(this::onMapClick);
         mMap.setOnCameraIdleListener(this::onCameraIdle);
@@ -167,7 +165,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-
         //location permission
         if (requestCode == FINE_LOCATION_PERMISSION_REQUEST_CODE) {
             // If request is cancelled, the result arrays are empty.
@@ -178,20 +175,16 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
-
                     Log.i("ljw", "location permission granted, getting location...");
-
-                    getUserLatLng();
-
+                    getUserLatLng(true);
                 }
-
             } else {
                 Log.i("ljw", "location permission denied");
             }
         }
     }
 
-    public void getUserLatLng() {
+    public void getUserLatLng(boolean centerOnUser) {
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, location -> {
                     Log.i("ljw", "successfully got location");
@@ -201,44 +194,48 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         userLng = location.getLongitude();
                         Log.i("ljw", "lat: " + userLat + "\nlong: " + userLng);
 
-                        AsyncTask.execute(() -> {
-
-                            // call geocode to get formatted address
-//                            getUsersFormattedAddress();
-
-                            //update map on main thread
-                            Handler handler = new Handler(Looper.getMainLooper()) {
-                                @Override
-                                public void handleMessage(Message input) {
-                                    Log.i("ljw", "lat/lng for user is " + userLat + "/" + userLng);
-
-                                    if (userMarker != null) {
-                                        userMarker.remove();
-                                    } else {
-                                        //center the map on the user
-                                        cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-                                        //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
-                                        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                                        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
-//                                        mMap.setMinZoomPreference(10f);
-                                        mMap.animateCamera(CameraUpdateFactory.zoomTo(15f));
-                                    }
-
-                                    userMarker = mMap.addMarker(new MarkerOptions()
-                                            .position(new LatLng(userLat, userLng))
-                                            .title("My Location")
-                                            .icon(userMarkerIcon)
-                                            .snippet(userCurrentAddress));
-
-                                }
-                            };
-                            handler.obtainMessage().sendToTarget();
-                        });
+                        if (!mapHasBeenSetUp) mapViewSetup();
+                        if (centerOnUser) mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
                     }
                 })
                 .addOnFailureListener(this, error -> {
                     Log.i("ljw", "error getting location:\n" + error.toString());
                 });
+    }
+
+    public void mapViewSetup() {
+        AsyncTask.execute(() -> {
+            //update map on main thread
+            Handler handler = new Handler(Looper.getMainLooper()) {
+                @Override
+                public void handleMessage(Message input) {
+                    //center the map on the user
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
+                    cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+                    //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
+                    mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+//                                        mMap.setMinZoomPreference(10f);
+
+                    if (userMarker != null) userMarker.remove();
+                    userMarker = mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(userLat, userLng))
+                            .title("My Location")
+                            .icon(userMarkerIcon)
+                            .snippet(userCurrentAddress));
+
+                    //sleep for a moment because zooming and centering the camera at the same time
+                    // causes an issue where the camera ends up zoomed on the wrong location.
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15f));
+                }
+            };
+            handler.obtainMessage().sendToTarget();
+            mapHasBeenSetUp = true;
+        });
     }
 
     public void onCreatePostButtonClick(View v) {

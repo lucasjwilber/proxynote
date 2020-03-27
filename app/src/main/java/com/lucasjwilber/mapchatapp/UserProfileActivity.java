@@ -33,6 +33,8 @@ public class UserProfileActivity extends AppCompatActivity {
     String userId;
     HashMap<String, Post> cachedPosts;
 
+    private TextView userScoreView;
+    private TextView usernameView;
     private RecyclerView stringsRv;
     private RecyclerView.Adapter stringsRvAdapter;
     private RecyclerView.LayoutManager stringsRvLayoutManager;
@@ -55,6 +57,8 @@ public class UserProfileActivity extends AppCompatActivity {
         postRv = findViewById(R.id.profileOnePostRv);
         postRvLayoutManager = new LinearLayoutManager(this);
         postRv.setLayoutManager(postRvLayoutManager);
+        usernameView = findViewById(R.id.profileUsername);
+        userScoreView = findViewById(R.id.profileScore);
 
         db = FirebaseFirestore.getInstance();
 
@@ -68,8 +72,8 @@ public class UserProfileActivity extends AppCompatActivity {
                     currentUser = user;
 
                     assert user != null;
-                    Log.i("ljw", user.toString());
-                    Log.i("ljw", user.getPostDescriptors().toString());
+                    usernameView.setText(user.getUsername());
+                    userScoreView.setText(Integer.toString(user.getTotalScore()));
                     List<PostDescriptor> userPosts = user.getPostDescriptors();
 
                     stringsRv = findViewById(R.id.profileAllPostsRv);
