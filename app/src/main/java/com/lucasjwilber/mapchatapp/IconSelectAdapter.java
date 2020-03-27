@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 public class IconSelectAdapter extends RecyclerView.Adapter<IconSelectAdapter.IconViewholder> {
 
     private Drawable[] icons;
+    int selectedIcon;
 
     public IconSelectAdapter(Context context) {
 
@@ -139,6 +140,13 @@ public class IconSelectAdapter extends RecyclerView.Adapter<IconSelectAdapter.Ic
     @Override
     public int getItemCount() {
         return icons.length;
+    }
+
+    public int getSelectedIcon() {
+        return selectedIcon;
+    }
+    public void setSelectedIcon(int icon) {
+        selectedIcon = icon;
     }
 
 }

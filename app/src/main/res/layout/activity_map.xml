@@ -10,7 +10,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/mapLayout" >
 
         <ImageButton
             android:id="@+id/menuButton"
@@ -47,7 +48,7 @@
             android:layout_marginLeft="50dp"
             android:layout_marginRight="50dp"
             android:visibility="gone"
-            android:background="@drawable/rounded_corner_box_primarycolor"
+            android:background="@drawable/rounded_square_primarycolor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
@@ -35,13 +36,14 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private TextView userScoreView;
     private TextView usernameView;
-    private RecyclerView stringsRv;
-    private RecyclerView.Adapter stringsRvAdapter;
-    private RecyclerView.LayoutManager stringsRvLayoutManager;
+    private RecyclerView postDescriptorsRv;
+    private RecyclerView.Adapter postDescriptorsRvAdapter;
+    private RecyclerView.LayoutManager postDescriptorsRvLayoutManager;
     FirebaseFirestore db;
     private RecyclerView postRv;
     private RecyclerView.Adapter postRvAdapter;
     private RecyclerView.LayoutManager postRvLayoutManager;
+    View selectedDescriptorView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,14 +75,24 @@ public class UserProfileActivity extends AppCompatActivity {
 
                     assert user != null;
                     usernameView.setText(user.getUsername());
-                    userScoreView.setText(Integer.toString(user.getTotalScore()));
-                    List<PostDescriptor> userPosts = user.getPostDescriptors();
+                    String userScoreText = "(" +
+                            user.getTotalScore() +
+                            (user.getTotalScore() == 1 || user.getTotalScore() == -1 ? " point)" : " points)");
+                    userScoreView.setText(userScoreText);
+                    List<PostDescriptor> userPostDescriptors = user.getPostDescriptors();
 
-                    stringsRv = findViewById(R.id.profileAllPostsRv);
-                    stringsRvLayoutManager = new LinearLayoutManager(this);
-                    stringsRv.setLayoutManager(stringsRvLayoutManager);
-                    stringsRvAdapter = new PostSelectAdapter(userPosts);
-                    stringsRv.setAdapter(stringsRvAdapter);
+                    if (userPostDescriptors.size() > 0) {
+                        postDescriptorsRv = findViewById(R.id.profileAllPostsRv);
+                        postDescriptorsRvLayoutManager = new LinearLayoutManager(this);
+                        postDescriptorsRv.setLayoutManager(postDescriptorsRvLayoutManager);
+                        postDescriptorsRvAdapter = new PostSelectAdapter(userPostDescriptors);
+                        postDescriptorsRv.setAdapter(postDescriptorsRvAdapter);
+                    } else {
+                        TextView noPosts = findViewById(R.id.profileNoCommentsYet);
+                        String noPostsText = user.getUsername() + " hasn't made any posts yet.";
+                        noPosts.setText(noPostsText);
+                        noPosts.setVisibility(View.VISIBLE);
+                    }
                 })
                 .addOnFailureListener(e -> Log.i("ljw", "error getting user: " + e.toString()));
 
@@ -100,6 +112,10 @@ public class UserProfileActivity extends AppCompatActivity {
         public void onClick(View v) {
             Log.i("ljw", "clicked on post " + v.getTag());
             String postId = v.getTag().toString();
+
+            if (selectedDescriptorView != null) selectedDescriptorView.setBackground(null);
+            selectedDescriptorView = v;
+            v.setBackground(getDrawable(R.drawable.rounded_square_filled_accentcolor));
 
             if (cachedPosts.containsKey(postId)) {
                 Log.i("ljw", "getting post from cache instead of firestore");
@@ -122,6 +138,24 @@ public class UserProfileActivity extends AppCompatActivity {
                             //set postRv to this post
                             postRvAdapter = new PostRvAdapter(post, getApplicationContext(), userId);
                             postRv.setAdapter(postRvAdapter);
+
+                            //set border color of postRv
+                            if (post.getScore() >= 20) {
+                                postRv.setBackground(getDrawable(R.drawable.rounded_square_red));
+                            } else if (post.getScore() >= 15) {
+                                postRv.setBackground(getDrawable(R.drawable.rounded_square_orangered));
+                            } else if (post.getScore() >= 10) {
+                                postRv.setBackground(getDrawable(R.drawable.rounded_square_orange));
+                            } else if (post.getScore() >= 5) {
+                                postRv.setBackground(getDrawable(R.drawable.rounded_square_yelloworange));
+                            } else if (post.getScore() <= -5) {
+                                postRv.setBackground(getDrawable(R.drawable.rounded_square_brown));
+                            } else {
+                                postRv.setBackground(getDrawable(R.drawable.rounded_square_primarycolor));
+                            }
+
+                            postDescriptorsRv.setMinimumHeight(100);
+
                             postRvAdapter.notifyDataSetChanged();
 
                         })
@@ -153,7 +187,7 @@ public class UserProfileActivity extends AppCompatActivity {
         public void onBindViewHolder(PostTitleViewholder holder, int position) {
 
             PostDescriptor data = userPostDescriptors.get(position);
-            String score = Integer.toString(data.getScore());
+            int score = data.getScore();
             String title = data.getTitle();
             int icon = data.getIcon();
             long time = data.getTimestamp();
@@ -165,7 +199,21 @@ public class UserProfileActivity extends AppCompatActivity {
             TextView titleView = holder.constraintLayout.findViewById(R.id.postdescriptorTitle);
 
             iconView.setImageBitmap(Utils.getPostIconBitmap(icon, getApplicationContext()));
-            scoreView.setText(score);
+            if (score >= 20) {
+                iconView.setBackground(getDrawable(R.drawable.postoutline_red));
+            } else if (score >= 15) {
+                iconView.setBackground(getDrawable(R.drawable.postoutline_orangered));
+            } else if (score >= 10) {
+                iconView.setBackground(getDrawable(R.drawable.postoutline_orange));
+            } else if (score >= 5) {
+                iconView.setBackground(getDrawable(R.drawable.postoutline_yelloworange));
+            } else if (score <= -5) {
+                iconView.setBackground(getDrawable(R.drawable.postoutline_brown));
+            } else {
+                iconView.setBackground(getDrawable(R.drawable.postoutline_yellow));
+            }
+
+            scoreView.setText(Integer.toString(score));
             String timeAndLocationText = new Date(time) + ", " + location;
             timeAndLocationView.setText(timeAndLocationText);
             titleView.setText(title);

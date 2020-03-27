@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Html;
+import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -72,11 +73,19 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
         ConstraintLayout l;
 
-        if (parent.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            RecyclerView rv = parent.findViewById(R.id.postRecyclerView);
-            ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) rv.getLayoutParams();
-            marginLayoutParams.setMargins(250, 50, 250, 50);
-        }
+//        if (parent.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            Log.i("ljw", "parent is " + parent.getId());
+//            Log.i("ljw", "map is " + R.id.mapLayout);
+//            if (parent == parent.getLayoutlayout.activity_map) {
+//                RecyclerView rv = parent.findViewById(R.id.postRecyclerView);
+//                ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) rv.getLayoutParams();
+//                marginLayoutParams.setMargins(250, 50, 250, 50);
+//            } else if (parent.getId() == R.id.userProfileLayout) {
+//                RecyclerView rv = parent.findViewById(R.id.profileOnePostRv);
+//                ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) rv.getLayoutParams();
+//                marginLayoutParams.setMargins(250, 50, 250, 50);
+//            }
+//        }
 
         switch (viewType) {
             case POST_HEADER:

@@ -493,7 +493,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             } else { //if (usersPreviousVote == 1)
                 usersNewVote = -1;
                 scoreChange = -2;
-                down.setBackground(getDrawable(R.drawable.arrow_down));
+                down.setBackground(getDrawable(R.drawable.arrow_down_colored));
                 up.setBackground(getDrawable(R.drawable.arrow_up));
             }
         }
