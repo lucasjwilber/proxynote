@@ -19,6 +19,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -120,7 +122,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) currentUserId = user.getUid();
+//        if (user != null) currentUserId = user.getUid();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -143,14 +145,46 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onResume() {
         super.onResume();
+
+        //TODO: check if user came here from login. if so, update vars based on new auth status.
     }
 
-    //    pop up method to show hamburger
-    public void showPopup(View v) {
+    public void showMenu(View v) {
         PopupMenu popup = new PopupMenu(this, v);
-        popup.setOnMenuItemClickListener(this);
-        popup.inflate(R.menu.hamburger_menu_contents);
+        popup.setOnMenuItemClickListener(this::onMenuItemClick);
+        popup.inflate(R.menu.hamburger_menu);
+
+        Menu menu = popup.getMenu();
+        if (user == null) {
+            menu.getItem(0).setVisible(false);
+        } else {
+            menu.getItem(3).setTitle("Log Out");
+        }
         popup.show();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+//        if (item.toString().equals("Profile")) {
+        if (item.getItemId() == R.id.menuProfile) {
+            Intent goToProfile = new Intent(this, UserProfileActivity.class);
+            goToProfile.putExtra("userId", user.getUid());
+            startActivity(goToProfile);
+        } else if (item.getItemId() == R.id.menuSettings) {
+
+        } else if (item.getItemId() == R.id.menuHelp) {
+
+        } else if (item.getItemId() == R.id.menuLoginLogout) {
+            if (user == null) { //go to login/signup page
+                Intent i = new Intent(this, LoginActivity.class);
+                startActivity(i);
+            } else { //log out
+                FirebaseAuth.getInstance().signOut();
+                Log.i("ljw", "user logged out");
+                user = null;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -239,6 +273,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void onCreatePostButtonClick(View v) {
+        if (user == null) {
+            //TODO: modal with "sign in to post"
+            return;
+        }
+
         postRv.setVisibility(View.GONE);
         Intent goToCreatePostAct = new Intent(this, CreatePostActivity.class);
         goToCreatePostAct.putExtra("userLat", userLat);
@@ -302,8 +341,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     }
                 });
     }
-
-
 
     public Marker createMarkerWithPost(Post post) {
         Marker borderMarker = mMap.addMarker(new MarkerOptions()
@@ -385,6 +422,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void addCommentToPost(View v) {
+        if (user == null) {
+            //TODO: modal with "sign in to comment"
+            return;
+        }
+
         Log.i("ljw", "commentbutton clicked");
         EditText commentEditText = findViewById(R.id.postRvPostReplyBox);
 
@@ -432,18 +474,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        if (item.toString().equals("Profile")) {
-            Intent goToProfile = new Intent(this, UserProfileActivity.class);
-            goToProfile.putExtra("userId", currentUserId);
-            startActivity(goToProfile);
-        } else if (item.toString().equals("Settings")) {
-            //display settings modal
-        }
-        return false;
-    }
-
-    @Override
     public boolean onMarkerClick(Marker marker) {
         Log.i("ljw", "clicked on a marker");
 
@@ -455,7 +485,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         currentSelectedMarker = marker;
         currentSelectedPost = (Post) marker.getTag();
-        postRvAdapter = new PostRvAdapter(post, getApplicationContext(), currentUserId);
+        postRvAdapter = new PostRvAdapter(post, getApplicationContext(), (user != null ? user.getUid() : null));
         postRv.setAdapter(postRvAdapter);
         postRv.setVisibility(View.VISIBLE);
 
@@ -464,6 +494,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void onPostVoteClicked(View v) {
+        if (user == null) {
+            //TODO: modal with "sign in to vote"
+            return;
+        }
+
         // need to disable the button until the firestore transaction is complete, otherwise users
         // could cast multiple votes by spamming the button
         // TODO: move this into Utils

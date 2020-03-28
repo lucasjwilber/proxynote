@@ -26,6 +26,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
     private Post post;
     private String userId;
+    private boolean userIsSignedIn;
     private String distanceType;
     private Drawable upArrowColored;
     private Drawable downArrowColored;
@@ -37,7 +38,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
     PostRvAdapter(Post post, Context context, String userId) {
         this.post = post;
-        this.userId = userId;
+        if (userId != null) {
+            userIsSignedIn = true;
+            this.userId = userId;
+        }
         upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
         downArrowColored = context.getDrawable(R.drawable.arrow_down_colored);
         upArrow = context.getDrawable(R.drawable.arrow_up);
@@ -126,14 +130,13 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
                 Log.i("ljw", "post votes: " + post.getVotes().size());
 
-                if (post.getVotes().containsKey(userId)) {
-                    Log.i("ljw", "post contains a user vote");
-                    if (post.getVotes().get(userId) > 0) {
-                        Log.i("ljw", "upvote should be colored");
-                        upvoteButton.setBackground(upArrowColored);
-                    } else if (post.getVotes().get(userId) < 0) {
-                        Log.i("ljw", "downvote should be colored");
-                        downvoteButton.setBackground(downArrowColored);
+                if (userIsSignedIn) {
+                    if (post.getVotes().containsKey(userId)) {
+                        if (post.getVotes().get(userId) > 0) {
+                            upvoteButton.setBackground(upArrowColored);
+                        } else if (post.getVotes().get(userId) < 0) {
+                            downvoteButton.setBackground(downArrowColored);
+                        }
                     }
                 }
                 return new PostViewHolder(l);

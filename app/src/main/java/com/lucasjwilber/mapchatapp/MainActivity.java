@@ -29,12 +29,12 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            Log.i("ljw", "current user is null");
-        } else {
-            Log.i("ljw", "current user is" + currentUser.getEmail());
-        }
+//        FirebaseUser currentUser = mAuth.getCurrentUser();
+//        if (currentUser == null) {
+//            Log.i("ljw", "current user is null");
+//        } else {
+//            Log.i("ljw", "current user is" + currentUser.getEmail());
+//        }
 
 //        SharedPreferences prefs = getApplicationContext().getSharedPreferences("settings", Context.MODE_PRIVATE);
 //        SharedPreferences.Editor editor = prefs.edit().putString("distanceType", "imperial");
@@ -43,8 +43,7 @@ public class MainActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable(){
             @Override
             public void run(){
-                Intent intent = new Intent(MainActivity.this,
-                        currentUser == null ? LoginActivity.class : MapActivity.class);
+                Intent intent = new Intent(MainActivity.this, MapActivity.class);
                 startActivity(intent);
                 finish();
             }
