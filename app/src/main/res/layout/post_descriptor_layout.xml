@@ -62,6 +62,8 @@
         android:layout_height="0dp"
         android:background="?android:attr/selectableItemBackground"
         android:drawableLeft="@drawable/delete"
+        android:visibility="gone"
+        android:onClick="onDeleteButtonClick"
         app:layout_constraintBottom_toBottomOf="@+id/postdescriptorScore"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/postdescriptorScore"

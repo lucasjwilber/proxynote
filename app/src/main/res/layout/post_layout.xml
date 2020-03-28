@@ -21,6 +21,7 @@
         android:layout_height="18dp"
         android:background="?android:attr/selectableItemBackground"
         android:textColor="@color/colorAccent"
+        android:onClick="onReportButtonClick"
         android:padding="0dp"
         android:text="report"
         android:textSize="10sp"

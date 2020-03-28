@@ -278,7 +278,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                     //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
-                    mMap.setMapType(sharedPreferences.getInt("mapType", GoogleMap.MAP_TYPE_SATELLITE));
+                    mMap.setMapType(sharedPreferences.getInt("mapType", GoogleMap.MAP_TYPE_HYBRID));
                     // mMap.setMinZoomPreference(10f);
 
                     if (userMarker != null) userMarker.remove();
@@ -526,131 +526,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         return false;
     }
 
-    public void onPostVoteClicked(View v) {
-//        if (user == null) {
-//            //TODO: modal with "sign in to vote"
-//            return;
-//        }
-//
-//        // need to disable the button until the firestore transaction is complete, otherwise users
-//        // could cast multiple votes by spamming the button
-//        // TODO: move this into Utils
-//        v.setEnabled(false);
-//        int usersPreviousVote = 0;
-//        int currentScore = currentSelectedPost.getScore();
-//        HashMap<String, Integer> voteMap = currentSelectedPost.getVotes();
-//        if (voteMap.containsKey(user.getUid())) {
-//            usersPreviousVote = voteMap.get(user.getUid());
-//        }
-//
-//        Button up = findViewById(R.id.postRvHeaderVoteUpBtn);
-//        Button down = findViewById(R.id.postRvHeaderVoteDownBtn);
-//        int usersNewVote = 0;
-//        int scoreChange = 0;
-//
-//        if (v.getId() == R.id.postRvHeaderVoteDownBtn) {
-//            if (usersPreviousVote == -1) {
-//                usersNewVote = 0;
-//                scoreChange = 1;
-//                down.setBackground(getDrawable(R.drawable.arrow_down));
-//            } else if (usersPreviousVote == 0) {
-//                usersNewVote = -1;
-//                scoreChange = -1;
-//                down.setBackground(getDrawable(R.drawable.arrow_down_colored));
-//            } else { //if (usersPreviousVote == 1)
-//                usersNewVote = -1;
-//                scoreChange = -2;
-//                down.setBackground(getDrawable(R.drawable.arrow_down_colored));
-//                up.setBackground(getDrawable(R.drawable.arrow_up));
-//            }
-//        }
-//        if (v.getId() == R.id.postRvHeaderVoteUpBtn) {
-//            if (usersPreviousVote == -1) {
-//                usersNewVote = 1;
-//                scoreChange = 2;
-//                down.setBackground(getDrawable(R.drawable.arrow_down));
-//                up.setBackground(getDrawable(R.drawable.arrow_up_colored));
-//            } else if (usersPreviousVote == 0) {
-//                usersNewVote = 1;
-//                scoreChange = 1;
-//                up.setBackground(getDrawable(R.drawable.arrow_up_colored));
-//            } else { //if (usersPreviousVote == 1)
-//                usersNewVote = 0;
-//                scoreChange = -1;
-//                up.setBackground(getDrawable(R.drawable.arrow_up));
-//            }
-//        }
-//
-//        TextView scoreView = findViewById(R.id.postRvHeaderScore);
-//        currentSelectedPost.setScore(currentScore + scoreChange);
-//        String scoreViewText = Long.toString(currentScore + scoreChange);
-//        scoreView.setText(scoreViewText);
-//
-//        voteMap.put(user.getUid(), usersNewVote);
-//        int finalScoreChange = scoreChange;
-//
-//        // get the current score in firestore first
-//        int finalScoreChange1 = scoreChange;
-//        db.collection("posts")
-//                .document(currentSelectedPost.getId())
-//                .get()
-//                .addOnCompleteListener(task -> {
-//                    Post post = task.getResult().toObject(Post.class);
-//
-//                    db.collection("posts")
-//                            .document(currentSelectedPost.getId())
-//                            .update("score", post.getScore() + finalScoreChange,
-//                                    "votes", voteMap)
-//                            .addOnCompleteListener(task1 -> {
-//                                Log.i("ljw", "successfully updated score");
-//
-//                                //update the post creator's total score field:
-//                                db.collection("users")
-//                                        .document(currentSelectedPost.getUserId())
-//                                        .get()
-//                                        .addOnCompleteListener(task2 -> {
-//                                            Log.i("ljw", "got post creator for score update");
-//                                            User user = task2.getResult().toObject(User.class);
-//                                            int userScore = user.getTotalScore();
-//
-//                                            //update the postDescriptor for this post:
-//                                            List<PostDescriptor> postDescriptors = user.getPostDescriptors();
-//                                            for (PostDescriptor pd : postDescriptors) {
-//                                                if (pd.id.equals(post.getId())) {
-//                                                    pd.setScore(pd.getScore() + finalScoreChange);
-//                                                }
-//                                            }
-//
-//                                            db.collection("users")
-//                                                    .document(currentSelectedPost.getUserId())
-//                                                    .update("totalScore", userScore + finalScoreChange,
-//                                                            "postDescriptors", postDescriptors)
-//                                                    .addOnCompleteListener(task3 -> {
-//                                                        Log.i("ljw", "updated post user's score and the postDescriptor successfully");
-//                                                    })
-//                                                    .addOnFailureListener(e -> {
-//                                                        Log.i("ljw", "couldn't update user's score: " + e.toString());
-//                                                    });
-//
-//
-//                                        })
-//                                        .addOnFailureListener(e -> {
-//                                            Log.i("ljw", "failed getting user: " + e.toString());
-//                                        });
-//
-//
-//                                v.setEnabled(true);
-//                            })
-//                            .addOnFailureListener(e -> {
-//                                Log.i("ljw", "failed updating score: " + e.toString());
-//                                v.setEnabled(true);
-//                            });
-//                })
-//                .addOnFailureListener(e -> {
-//                    Log.i("ljw", "error getting post to update its score: " + e.toString());
-//                    v.setEnabled(true);
-//                });
+    public void onReportButtonClick(View v) {
+        Log.i("ljw", "clickety clack");
     }
-
 
 }

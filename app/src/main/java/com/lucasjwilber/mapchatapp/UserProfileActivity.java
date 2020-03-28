@@ -44,7 +44,8 @@ public class UserProfileActivity extends AppCompatActivity {
     private RecyclerView postRv;
     private RecyclerView.Adapter postRvAdapter;
     private RecyclerView.LayoutManager postRvLayoutManager;
-    View selectedDescriptorView;
+    ConstraintLayout selectedDV;
+    Button selectedDVdelBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,8 +102,7 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     //list of post descriptors RV:
-    public class PostSelectAdapter extends RecyclerView.Adapter<PostSelectAdapter.PostTitleViewholder>
-            implements View.OnClickListener {
+    public class PostSelectAdapter extends RecyclerView.Adapter<PostSelectAdapter.PostTitleViewholder> {
 
         List<PostDescriptor> userPostDescriptors;
 
@@ -110,14 +110,19 @@ public class UserProfileActivity extends AppCompatActivity {
             this.userPostDescriptors = userPostDescriptors;
         }
 
-        @Override
-        public void onClick(View v) {
-            Log.i("ljw", "clicked on post " + v.getTag());
-            String postId = v.getTag().toString();
 
-            if (selectedDescriptorView != null) selectedDescriptorView.setBackground(null);
-            selectedDescriptorView = v;
-            v.setBackgroundColor(getResources().getColor(R.color.lightgray));
+        public void onPostDescriptorClicked(ConstraintLayout cl, Button b) {
+            Log.i("ljw", "clicked on post " + cl.getTag());
+            String postId = cl.getTag().toString();
+
+            if (selectedDV != null) {
+                selectedDV.setBackground(null);
+                selectedDVdelBtn.setVisibility(View.GONE);
+            }
+            selectedDV = cl;
+            selectedDVdelBtn = b;
+            cl.setBackgroundColor(getResources().getColor(R.color.lightgray));
+            b.setVisibility(View.VISIBLE);
 
             if (cachedPosts.containsKey(postId)) {
                 Log.i("ljw", "getting post from cache instead of firestore");
@@ -155,7 +160,7 @@ public class UserProfileActivity extends AppCompatActivity {
             PostTitleViewholder(ConstraintLayout view) {
                 super(view);
                 constraintLayout = view;
-                view.setOnClickListener(PostSelectAdapter.this::onClick);
+//                view.setOnClickListener(PostSelectAdapter.this::onClick);
             }
 
         }
@@ -179,10 +184,14 @@ public class UserProfileActivity extends AppCompatActivity {
             long time = data.getTimestamp();
             String location = data.getLocation();
 
+
             ImageView iconView = holder.constraintLayout.findViewById(R.id.postdescriptorIcon);
             TextView scoreView = holder.constraintLayout.findViewById(R.id.postdescriptorScore);
             TextView timeAndLocationView = holder.constraintLayout.findViewById(R.id.postdescriptorTimeAndLocation);
             TextView titleView = holder.constraintLayout.findViewById(R.id.postdescriptorTitle);
+            Button deleteButton = holder.constraintLayout.findViewById(R.id.deletePostButton);
+            ConstraintLayout cl = holder.constraintLayout;
+            holder.constraintLayout.setOnClickListener(v -> onPostDescriptorClicked(cl, deleteButton));
 
             iconView.setImageBitmap(Utils.getPostIconBitmap(icon, getApplicationContext()));
             if (score >= 20) {
@@ -214,7 +223,14 @@ public class UserProfileActivity extends AppCompatActivity {
 
     }
 
-    public void onReportButtonClick() {
+    public void onReportButtonClick(View v) {
+        Log.i("ljw", "clickety clack");
+        //display create-report modal
+    }
+
+    public void onDeleteButtonClick(View v) {
+        //display "are you sure" modal
+        //delete post
 
     }
 
