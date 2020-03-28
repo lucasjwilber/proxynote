@@ -25,13 +25,4 @@
         app:layout_constraintStart_toStartOf="@+id/mapTypeSpinner"
         app:layout_constraintTop_toBottomOf="@+id/mapTypeSpinner" />
 
-    <Button
-        android:id="@+id/loginLogoutButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Login"
-        app:layout_constraintEnd_toEndOf="@+id/distanceTypeSpinner"
-        app:layout_constraintTop_toBottomOf="@+id/distanceTypeSpinner" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

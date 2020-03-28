@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -97,6 +99,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private RecyclerView.Adapter postRvAdapter;
     private RecyclerView.LayoutManager postRvLayoutManager;
     boolean mapHasBeenSetUp;
+    SharedPreferences sharedPreferences;
 
 
     @Override
@@ -123,7 +126,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
-//        if (user != null) currentUserId = user.getUid();
+        sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -141,13 +145,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         } else {
             getUserLatLng(true);
         }
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        //TODO: check if user came here from login. if so, update vars based on new auth status.
     }
 
     public void showMenu(View v) {
@@ -161,31 +165,56 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         } else {
             menu.getItem(3).setTitle("Log Out");
         }
+        menu.getItem(0).setIcon(getDrawable(R.drawable.posticon_128064));
         popup.show();
     }
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-//        if (item.toString().equals("Profile")) {
-        if (item.getItemId() == R.id.menuProfile) {
-            Intent goToProfile = new Intent(this, UserProfileActivity.class);
-            goToProfile.putExtra("userId", user.getUid());
-            startActivity(goToProfile);
-        } else if (item.getItemId() == R.id.menuSettings) {
+        SharedPreferences.Editor editor;
 
-        } else if (item.getItemId() == R.id.menuHelp) {
+        switch (item.getItemId()) {
+            case R.id.menuProfile:
+                Intent goToProfile = new Intent(this, UserProfileActivity.class);
+                goToProfile.putExtra("userId", user.getUid());
+                startActivity(goToProfile);
+                return true;
+            case R.id.menuHelp:
+                return true;
+            case R.id.menuLoginLogout:
+                if (user == null) { //go to login/signup page
+                    Intent i = new Intent(this, LoginActivity.class);
+                    startActivity(i);
+                } else { //log out
+                    FirebaseAuth.getInstance().signOut();
+                    Log.i("ljw", "user logged out");
+                    user = null;
+                }
+                return true;
+            case R.id.mapTypeNormal:
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                editor = sharedPreferences.edit().putInt("mapType", GoogleMap.MAP_TYPE_NORMAL);
+                editor.apply();
+                return true;
+            case R.id.mapTypeSatellite:
+                mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                editor = sharedPreferences.edit().putInt("mapType", GoogleMap.MAP_TYPE_SATELLITE);
+                editor.apply();
+                return true;
+            case R.id.mapTypeHybrid:
+                mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                editor = sharedPreferences.edit().putInt("mapType", GoogleMap.MAP_TYPE_HYBRID);
+                editor.apply();
+                return true;
+            case R.id.mapTypeTerrain:
+                mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                editor = sharedPreferences.edit().putInt("mapType", GoogleMap.MAP_TYPE_TERRAIN);
+                editor.apply();
+                return true;
 
-        } else if (item.getItemId() == R.id.menuLoginLogout) {
-            if (user == null) { //go to login/signup page
-                Intent i = new Intent(this, LoginActivity.class);
-                startActivity(i);
-            } else { //log out
-                FirebaseAuth.getInstance().signOut();
-                Log.i("ljw", "user logged out");
-                user = null;
-            }
+            default:
+                return false;
         }
-        return false;
     }
 
     @Override
@@ -248,8 +277,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                     //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
-                    mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-//                                        mMap.setMinZoomPreference(10f);
+                    mMap.setMapType(sharedPreferences.getInt("mapType", GoogleMap.MAP_TYPE_TERRAIN));
+                    // mMap.setMinZoomPreference(10f);
 
                     if (userMarker != null) userMarker.remove();
                     userMarker = mMap.addMarker(new MarkerOptions()
