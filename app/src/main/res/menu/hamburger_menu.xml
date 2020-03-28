@@ -13,27 +13,22 @@
     <item
         android:id="@+id/settingsMapType"
         android:orderInCategory="1"
-        android:icon="@drawable/posticon_127881"
         android:title="Change map type" >
         <menu>
             <item
                 android:id="@+id/mapTypeNormal"
-                android:icon="@drawable/posticon_127867"
                 android:title="Normal" >
             </item>
             <item
                 android:id="@+id/mapTypeSatellite"
-                android:icon="@drawable/posticon_127867"
                 android:title="Satellite" >
             </item>
             <item
                 android:id="@+id/mapTypeHybrid"
-                android:icon="@drawable/posticon_127867"
                 android:title="Hybrid" >
             </item>
             <item
                 android:id="@+id/mapTypeTerrain"
-                android:icon="@drawable/posticon_127867"
                 android:title="Terrain" >
             </item>
         </menu>

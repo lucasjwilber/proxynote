@@ -38,70 +38,94 @@ public class LoginActivity extends AppCompatActivity {
     EditText usernameET;
     EditText emailET;
     EditText passwordET;
-    TextView confirmPwLabel;
+    TextView confirmPwCLabel;
+    TextView confirmPwPLabel;
     EditText confirmPwET;
     Button forgotPwBtn;
-    Button submitLoginBtn;
-    Button submitSignupBtn;
+    Button submitBtn;
+    Button toggleBtn;
+    TextView toggleLabel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // set up view references
-        {
-            firstNameLabel = findViewById(R.id.loginActFirstNameLabel);
-            firstNameET = findViewById(R.id.loginActFirstNameEditText);
-            lastNameLabel = findViewById(R.id.loginActLastNameLabel);
-            lastNameET = findViewById(R.id.loginActLastNameEditText);
-            usernameLabel = findViewById(R.id.loginActUsernameLabel);
-            usernameET = findViewById(R.id.loginActUsernameEditText);
-            emailET = findViewById(R.id.loginActEmailEditText);
-            passwordET = findViewById(R.id.loginActPasswordEditText);
-            confirmPwLabel = findViewById(R.id.loginActConfirmPasswordLabel);
-            confirmPwET = findViewById(R.id.loginActConfirmPasswordEditText);
-            forgotPwBtn = findViewById(R.id.loginActForgotPwBtn);
-            submitLoginBtn = findViewById(R.id.loginActSubmitLoginBtn);
-            submitSignupBtn = findViewById(R.id.loginActSubmitSignupBtn);
-        }
-
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        firstNameLabel = findViewById(R.id.loginActFirstNameLabel);
+        firstNameET = findViewById(R.id.loginActFirstNameEditText);
+        lastNameLabel = findViewById(R.id.loginActLastNameLabel);
+        lastNameET = findViewById(R.id.loginActLastNameEditText);
+        usernameLabel = findViewById(R.id.loginActUsernameLabel);
+        usernameET = findViewById(R.id.loginActUsernameEditText);
+        emailET = findViewById(R.id.loginActEmailEditText);
+        passwordET = findViewById(R.id.loginActPasswordEditText);
+        confirmPwCLabel = findViewById(R.id.loginActConfirmPasswordCLabel);
+        confirmPwPLabel = findViewById(R.id.loginActConfirmPasswordPLabel);
+        confirmPwET = findViewById(R.id.loginActConfirmPasswordEditText);
+//        forgotPwBtn = findViewById(R.id.loginActForgotPwBtn);
+        submitBtn = findViewById(R.id.loginActSubmitButton);
+        toggleBtn = findViewById(R.id.loginActToggleButton);
+        toggleLabel = findViewById(R.id.loginToggleLabel);
     }
 
     public void loginSignupToggle(View v) {
-        // if login form is already shown and login is clicked or vice versa, return:
-        if (v == findViewById(R.id.loginActLoginBtn) && loginShown) return;
-        if (v == findViewById(R.id.loginActSignupBtn) && !loginShown) return;
+        String submitBtnText = loginShown ? "SIGN UP" : "LOGIN";
+        String toggleBtnText = loginShown ? "LOGIN" : "SIGN UP";
+        String toggleLabelText = loginShown ? "Already have an account?" : "Don't have an account?";
+        submitBtn.setText(submitBtnText);
+        toggleBtn.setText(toggleBtnText);
+        toggleLabel.setText(toggleLabelText);
 
-        int loginDisplay;
-        int signupDisplay;
-        // depending on which form is shown now, determine which fields need to be shown/hidden:
-        if (loginShown) {
-            loginDisplay = View.GONE;
-            signupDisplay = View.VISIBLE;
-        } else {
-            loginDisplay = View.VISIBLE;
-            signupDisplay = View.GONE;
-        }
+        int visibility = loginShown ? View.VISIBLE : View.GONE;
+        firstNameLabel.setVisibility(visibility);
+        firstNameET.setVisibility(visibility);
+        lastNameLabel.setVisibility(visibility);
+        lastNameET.setVisibility(visibility);
+        usernameLabel.setVisibility(visibility);
+        usernameET.setVisibility(visibility);
+        confirmPwCLabel.setVisibility(visibility);
+        confirmPwPLabel.setVisibility(visibility);
+        confirmPwET.setVisibility(visibility);
 
-        // show/hide stuff
-        firstNameLabel.setVisibility(signupDisplay);
-        firstNameET.setVisibility(signupDisplay);
-        lastNameLabel.setVisibility(signupDisplay);
-        lastNameET.setVisibility(signupDisplay);
-        usernameLabel.setVisibility(signupDisplay);
-        usernameET.setVisibility(signupDisplay);
-        confirmPwLabel.setVisibility(signupDisplay);
-        confirmPwET.setVisibility(signupDisplay);
-        forgotPwBtn.setVisibility(loginDisplay);
-        submitLoginBtn.setVisibility(loginDisplay);
-        submitSignupBtn.setVisibility(signupDisplay);
         loginShown = !loginShown;
     }
 
-    public void signupSubmit(View v) {
+    public void onLoginOrSignupSubmit(View v) {
+        if (loginShown) {
+            loginSubmit();
+        } else {
+            signupSubmit();
+        }
+    }
+
+    public void loginSubmit() {
+        String email = emailET.getText().toString();
+        String password = passwordET.getText().toString();
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.i("ljw", "signInWithEmail:success");
+                            user = mAuth.getCurrentUser();
+                            Intent intent = new Intent(LoginActivity.this, MapActivity.class);
+                            startActivity(intent);
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.i("ljw", "signInWithEmail:failure", task.getException());
+                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    public void signupSubmit() {
         String firstName = firstNameET.getText().toString();
         String lastName = lastNameET.getText().toString();
         String username = usernameET.getText().toString();
@@ -157,30 +181,6 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.i("ljw", "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
-
-    public void loginSubmit(View v) {
-        String email = emailET.getText().toString();
-        String password = passwordET.getText().toString();
-
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.i("ljw", "signInWithEmail:success");
-                            user = mAuth.getCurrentUser();
-                            Intent intent = new Intent(LoginActivity.this, MapActivity.class);
-                            startActivity(intent);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.i("ljw", "signInWithEmail:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }

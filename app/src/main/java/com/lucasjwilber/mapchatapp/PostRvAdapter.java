@@ -32,11 +32,12 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private Drawable downArrowColored;
     private Drawable upArrow;
     private Drawable downArrow;
+    private RecyclerView postRecyclerView;
 
     private static final int POST_HEADER = 0;
     private static final int POST_COMMENT = 1;
 
-    PostRvAdapter(Post post, Context context, String userId) {
+    PostRvAdapter(Post post, Context context, String userId, RecyclerView recyclerView) {
         this.post = post;
         if (userId != null) {
             userIsSignedIn = true;
@@ -50,8 +51,20 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         SharedPreferences prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");
 
-        Log.i("ljw", "post comments = " + post.getComments().toString());
-        Log.i("ljw", "made PostRvAdapter with post that has title " + post.getTitle());
+        //set border color of this based on the post score
+        if (post.getScore() >= 20) {
+            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_red));
+        } else if (post.getScore() >= 15) {
+            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_orangered));
+        } else if (post.getScore() >= 10) {
+            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_orange));
+        } else if (post.getScore() >= 5) {
+            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_yelloworange));
+        } else if (post.getScore() <= -5) {
+            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_brown));
+        } else {
+            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_primarycolor));
+        }
     }
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
@@ -184,5 +197,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     public String getHtmlHeaderString(long timestamp) {
         return "<i><b>" + post.getUsername() + "</b>, " + Utils.getHowLongAgo(timestamp) + "</i>";
     }
+
+
 
 }

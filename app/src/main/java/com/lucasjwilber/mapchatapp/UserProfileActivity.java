@@ -120,7 +120,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
             if (cachedPosts.containsKey(postId)) {
                 Log.i("ljw", "getting post from cache instead of firestore");
-                postRvAdapter = new PostRvAdapter(Objects.requireNonNull(cachedPosts.get(postId)), getApplicationContext(), userId);
+                postRvAdapter = new PostRvAdapter(Objects.requireNonNull(cachedPosts.get(postId)), getApplicationContext(), userId, postRv);
                 postRv.setAdapter(postRvAdapter);
                 postRvAdapter.notifyDataSetChanged();
             } else {
@@ -139,29 +139,9 @@ public class UserProfileActivity extends AppCompatActivity {
                             post.setComments(Utils.turnMapsIntoListOfComments(list));
 
                             cachedPosts.put(postId, post);
-
-                            //set postRv to this post
-                            postRvAdapter = new PostRvAdapter(post, getApplicationContext(), userId);
+                            postRvAdapter = new PostRvAdapter(post, getApplicationContext(), userId, postRv);
                             postRv.setAdapter(postRvAdapter);
-
-                            //set border color of postRv
-                            if (post.getScore() >= 20) {
-                                postRv.setBackground(getDrawable(R.drawable.rounded_square_red));
-                            } else if (post.getScore() >= 15) {
-                                postRv.setBackground(getDrawable(R.drawable.rounded_square_orangered));
-                            } else if (post.getScore() >= 10) {
-                                postRv.setBackground(getDrawable(R.drawable.rounded_square_orange));
-                            } else if (post.getScore() >= 5) {
-                                postRv.setBackground(getDrawable(R.drawable.rounded_square_yelloworange));
-                            } else if (post.getScore() <= -5) {
-                                postRv.setBackground(getDrawable(R.drawable.rounded_square_brown));
-                            } else {
-                                postRv.setBackground(getDrawable(R.drawable.rounded_square_primarycolor));
-                            }
-
                             postDescriptorsRv.setMinimumHeight(100);
-
-                            postRvAdapter.notifyDataSetChanged();
 
                         })
                         .addOnFailureListener(e -> Log.i("ljw", "error getting post: " + e.toString()));
@@ -232,4 +212,5 @@ public class UserProfileActivity extends AppCompatActivity {
         }
 
     }
+
 }

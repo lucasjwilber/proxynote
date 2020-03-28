@@ -277,7 +277,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                     //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
-                    mMap.setMapType(sharedPreferences.getInt("mapType", GoogleMap.MAP_TYPE_TERRAIN));
+                    mMap.setMapType(sharedPreferences.getInt("mapType", GoogleMap.MAP_TYPE_SATELLITE));
                     // mMap.setMinZoomPreference(10f);
 
                     if (userMarker != null) userMarker.remove();
@@ -517,7 +517,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         currentSelectedMarker = marker;
         currentSelectedPost = (Post) marker.getTag();
-        postRvAdapter = new PostRvAdapter(post, getApplicationContext(), (user != null ? user.getUid() : null));
+        postRvAdapter = new PostRvAdapter(post, getApplicationContext(), (user != null ? user.getUid() : null), postRv);
         postRv.setAdapter(postRvAdapter);
         postRv.setVisibility(View.VISIBLE);
 
@@ -592,6 +592,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         int finalScoreChange = scoreChange;
 
         // get the current score in firestore first
+        int finalScoreChange1 = scoreChange;
         db.collection("posts")
                 .document(currentSelectedPost.getId())
                 .get()
@@ -611,25 +612,35 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                         .get()
                                         .addOnCompleteListener(task2 -> {
                                             Log.i("ljw", "got post creator for score update");
-                                            User creator = task2.getResult().toObject(User.class);
-                                            int creatorScore = creator.getTotalScore();
+                                            User user = task2.getResult().toObject(User.class);
+                                            int userScore = user.getTotalScore();
+
+                                            //update the postDescriptor for this post:
+                                            List<PostDescriptor> postDescriptors = user.getPostDescriptors();
+                                            for (PostDescriptor pd : postDescriptors) {
+                                                if (pd.id.equals(post.getId())) {
+                                                    pd.setScore(pd.getScore() + finalScoreChange);
+                                                }
+                                            }
 
                                             db.collection("users")
                                                     .document(currentSelectedPost.getUserId())
-                                                    .update("totalScore", creatorScore + finalScoreChange)
+                                                    .update("totalScore", userScore + finalScoreChange,
+                                                            "postDescriptors", postDescriptors)
                                                     .addOnCompleteListener(task3 -> {
-                                                        Log.i("ljw", "updated post creator's score successfully");
+                                                        Log.i("ljw", "updated post user's score and the postDescriptor successfully");
                                                     })
                                                     .addOnFailureListener(e -> {
-                                                        Log.i("ljw", "couldn't update creator's score: " + e.toString());
+                                                        Log.i("ljw", "couldn't update user's score: " + e.toString());
                                                     });
+
 
                                         })
                                         .addOnFailureListener(e -> {
                                             Log.i("ljw", "failed getting user: " + e.toString());
                                         });
 
-                                postRvAdapter.notifyDataSetChanged();
+
                                 v.setEnabled(true);
                             })
                             .addOnFailureListener(e -> {
