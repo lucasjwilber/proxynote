@@ -45,6 +45,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.lucasjwilber.mapchatapp.databinding.ActivityMapBinding;
@@ -71,7 +72,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     FirebaseFirestore db;
-    long postQueryLimit = 100;
+    long postQueryLimit = 500;
     FirebaseUser user;
     public static final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     double postsRadius = 0.05;
@@ -317,6 +318,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         latZone + 0.2f,
                         latZone + 0.3f,
                         latZone + 0.4f))
+                .orderBy("lng")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(postQueryLimit)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
