@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -116,11 +117,11 @@ public class UserProfileActivity extends AppCompatActivity {
 
             if (selectedDescriptorView != null) selectedDescriptorView.setBackground(null);
             selectedDescriptorView = v;
-            v.setBackground(getDrawable(R.drawable.rounded_square_filled_accentcolor));
+            v.setBackgroundColor(getResources().getColor(R.color.lightgray));
 
             if (cachedPosts.containsKey(postId)) {
                 Log.i("ljw", "getting post from cache instead of firestore");
-                postRvAdapter = new PostRvAdapter(Objects.requireNonNull(cachedPosts.get(postId)), getApplicationContext(), userId, postRv);
+                postRvAdapter = new PostRvAdapter(Objects.requireNonNull(cachedPosts.get(postId)), getApplicationContext(), userId, postRv, db);
                 postRv.setAdapter(postRvAdapter);
                 postRvAdapter.notifyDataSetChanged();
             } else {
@@ -139,7 +140,7 @@ public class UserProfileActivity extends AppCompatActivity {
                             post.setComments(Utils.turnMapsIntoListOfComments(list));
 
                             cachedPosts.put(postId, post);
-                            postRvAdapter = new PostRvAdapter(post, getApplicationContext(), userId, postRv);
+                            postRvAdapter = new PostRvAdapter(post, UserProfileActivity.this, userId, postRv, db);
                             postRv.setAdapter(postRvAdapter);
                             postDescriptorsRv.setMinimumHeight(100);
 
@@ -210,6 +211,10 @@ public class UserProfileActivity extends AppCompatActivity {
         public int getItemCount() {
             return userPostDescriptors.size();
         }
+
+    }
+
+    public void onReportButtonClick() {
 
     }
 

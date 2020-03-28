@@ -1,11 +1,11 @@
 package com.lucasjwilber.mapchatapp;
 
 public class Report {
-    String id;
-    String reason;
-    String explanation;
-    Post post;
-    Comment comment;
+    private String id;
+    private String reason;
+    private String explanation;
+    private Post post;
+    private Comment comment;
 
     public Report() {};
 

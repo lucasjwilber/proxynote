@@ -84,6 +84,16 @@
         app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
         app:layout_constraintTop_toTopOf="@+id/profileAllPostsRv" />
 
+    <TextView
+        android:id="@+id/test"
+        android:layout_width="152dp"
+        android:layout_height="196dp"
+        android:text="test"
+        android:textSize="33sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

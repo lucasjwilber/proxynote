@@ -1,5 +1,6 @@
 package com.lucasjwilber.mapchatapp;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -9,6 +10,7 @@ import android.text.Html;
 import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,25 +22,38 @@ import androidx.recyclerview.widget.RecyclerView;
 //import com.squareup.picasso.Picasso;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.List;
 
 
 public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHolder> {
 
     private Post post;
     private String userId;
+    private Context context;
+    private RecyclerView recyclerView;
     private boolean userIsSignedIn;
     private String distanceType;
     private Drawable upArrowColored;
     private Drawable downArrowColored;
+    private Button upvoteButton;
+    private Button downvoteButton;
+    private TextView postScore;
     private Drawable upArrow;
     private Drawable downArrow;
-    private RecyclerView postRecyclerView;
+    private FirebaseFirestore db;
 
     private static final int POST_HEADER = 0;
     private static final int POST_COMMENT = 1;
 
-    PostRvAdapter(Post post, Context context, String userId, RecyclerView recyclerView) {
+    PostRvAdapter(Post post, Context context, String userId, RecyclerView recyclerView, FirebaseFirestore db) {
         this.post = post;
+        this.context = context;
+        this.userId = userId;
+        this.recyclerView = recyclerView;
+        this.db = db;
         if (userId != null) {
             userIsSignedIn = true;
             this.userId = userId;
@@ -108,13 +123,16 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             case POST_HEADER:
                 l = (ConstraintLayout) LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.post_layout, parent, false);
-                TextView postTitle = l.findViewById(R.id.postRvHeaderTitle);
-                TextView postScore = l.findViewById(R.id.postRvHeaderScore);
+                upvoteButton = l.findViewById(R.id.postRvHeaderVoteUpBtn);
+                upvoteButton.setOnClickListener(v -> onVoteButtonClick(upvoteButton));
+                downvoteButton = l.findViewById(R.id.postRvHeaderVoteDownBtn);
+                downvoteButton.setOnClickListener(v -> onVoteButtonClick(downvoteButton));
+                postScore = l.findViewById(R.id.postRvHeaderScore);
                 TextView postInfo = l.findViewById(R.id.postRvPostInfo);
+                TextView postTitle = l.findViewById(R.id.postRvHeaderTitle);
+                Button reportButton = l.findViewById(R.id.postRvHeaderReportBtn);
                 ImageView postImage = l.findViewById(R.id.postRvPostImage);
                 TextView postText = l.findViewById(R.id.postRvPostText);
-                Button upvoteButton = l.findViewById(R.id.postRvHeaderVoteUpBtn);
-                Button downvoteButton = l.findViewById(R.id.postRvHeaderVoteDownBtn);
                 TextView commentCount = l.findViewById(R.id.postCommentCount);
 
                 postTitle.setText(post.getTitle());
@@ -127,7 +145,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 }
 
                 if (post.getImageUrl() != null && post.getImageUrl().length() > 0) {
-//                    StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl("gs://mapchatapp-b83bc.appspot.com/a9ddaded-ca26-4e91-9133-c2228652e67c");
                     Glide.with(parent).load(post.getImageUrl()).into(postImage);
                 }
 
@@ -198,6 +215,130 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         return "<i><b>" + post.getUsername() + "</b>, " + Utils.getHowLongAgo(timestamp) + "</i>";
     }
 
+    public void onVoteButtonClick(Button b) {
+        if (!userIsSignedIn) {
+            //TODO: modal with "sign in to vote"
+            return;
+        }
+        // need to disable the button until the firestore transaction is complete, otherwise users
+        // could cast multiple votes by spamming the button
+        b.setEnabled(false);
+        int usersPreviousVote = 0;
+        int currentScore = post.getScore();
+        HashMap<String, Integer> voteMap = post.getVotes();
+        if (voteMap.containsKey(userId)) {
+            usersPreviousVote = voteMap.get(userId);
+        }
 
+//        Button up = findViewById(R.id.postRvHeaderVoteUpBtn);
+//        Button down = findViewById(R.id.postRvHeaderVoteDownBtn);
+        int usersNewVote = 0;
+        int scoreChange = 0;
+
+//        if (b.getId() == R.id.postRvHeaderVoteDownBtn) {
+        if (b == downvoteButton) {
+            if (usersPreviousVote == -1) {
+                usersNewVote = 0;
+                scoreChange = 1;
+                downvoteButton.setBackground(context.getDrawable(R.drawable.arrow_down));
+            } else if (usersPreviousVote == 0) {
+                usersNewVote = -1;
+                scoreChange = -1;
+                downvoteButton.setBackground(context.getDrawable(R.drawable.arrow_down_colored));
+            } else { //if (usersPreviousVote == 1)
+                usersNewVote = -1;
+                scoreChange = -2;
+                downvoteButton.setBackground(context.getDrawable(R.drawable.arrow_down_colored));
+                upvoteButton.setBackground(context.getDrawable(R.drawable.arrow_up));
+            }
+        }
+//        if (v.getId() == R.id.postRvHeaderVoteUpBtn) {
+        if (b == upvoteButton) {
+            if (usersPreviousVote == -1) {
+                usersNewVote = 1;
+                scoreChange = 2;
+                downvoteButton.setBackground(context.getDrawable(R.drawable.arrow_down));
+                upvoteButton.setBackground(context.getDrawable(R.drawable.arrow_up_colored));
+            } else if (usersPreviousVote == 0) {
+                usersNewVote = 1;
+                scoreChange = 1;
+                upvoteButton.setBackground(context.getDrawable(R.drawable.arrow_up_colored));
+            } else { //if (usersPreviousVote == 1)
+                usersNewVote = 0;
+                scoreChange = -1;
+                upvoteButton.setBackground(context.getDrawable(R.drawable.arrow_up));
+            }
+        }
+
+
+        post.setScore(currentScore + scoreChange);
+        String scoreViewText = Long.toString(currentScore + scoreChange);
+        postScore.setText(scoreViewText);
+
+        voteMap.put(userId, usersNewVote);
+        int finalScoreChange = scoreChange;
+
+        // get the current score in firestore first
+        int finalScoreChange1 = scoreChange;
+        db.collection("posts")
+                .document(post.getId())
+                .get()
+                .addOnCompleteListener(task -> {
+                    Post post = task.getResult().toObject(Post.class);
+
+                    db.collection("posts")
+                            .document(post.getId())
+                            .update("score", post.getScore() + finalScoreChange,
+                                    "votes", voteMap)
+                            .addOnCompleteListener(task1 -> {
+                                Log.i("ljw", "successfully updated score");
+
+                                //update the post creator's total score field:
+                                db.collection("users")
+                                        .document(post.getUserId())
+                                        .get()
+                                        .addOnCompleteListener(task2 -> {
+                                            Log.i("ljw", "got post creator for score update");
+                                            User user = task2.getResult().toObject(User.class);
+                                            int userScore = user.getTotalScore();
+
+                                            //update the postDescriptor for this post:
+                                            List<PostDescriptor> postDescriptors = user.getPostDescriptors();
+                                            for (PostDescriptor pd : postDescriptors) {
+                                                if (pd.id.equals(post.getId())) {
+                                                    pd.setScore(pd.getScore() + finalScoreChange);
+                                                }
+                                            }
+
+                                            db.collection("users")
+                                                    .document(post.getUserId())
+                                                    .update("totalScore", userScore + finalScoreChange,
+                                                            "postDescriptors", postDescriptors)
+                                                    .addOnCompleteListener(task3 -> {
+                                                        Log.i("ljw", "updated post user's score and the postDescriptor successfully");
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.i("ljw", "couldn't update user's score: " + e.toString());
+                                                    });
+
+
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Log.i("ljw", "failed getting user: " + e.toString());
+                                        });
+
+
+                                b.setEnabled(true);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.i("ljw", "failed updating score: " + e.toString());
+                                b.setEnabled(true);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.i("ljw", "error getting post to update its score: " + e.toString());
+                    b.setEnabled(true);
+                });
+    }
 
 }

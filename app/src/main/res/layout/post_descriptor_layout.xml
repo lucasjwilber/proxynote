@@ -4,20 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    android:padding="4dp" >
+    android:layout_marginBottom="10dp" >
 
     <TextView
         android:id="@+id/postdescriptorTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="TextView"
         android:textAlignment="viewStart"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/deletePostButton"
         app:layout_constraintStart_toEndOf="@+id/postdescriptorScore"
-        app:layout_constraintTop_toBottomOf="@+id/postdescriptorTimeAndLocation" />
+        app:layout_constraintTop_toBottomOf="@+id/postdescriptorTimeAndLocation"
+        tools:text="title" />
 
     <TextView
         android:id="@+id/postdescriptorScore"
@@ -52,8 +51,20 @@
         android:layout_height="wrap_content"
         android:textSize="12sp"
         android:textStyle="italic"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/deletePostButton"
         app:layout_constraintStart_toStartOf="@+id/postdescriptorTitle"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="time and place" />
+
+    <Button
+        android:id="@+id/deletePostButton"
+        android:layout_width="30dp"
+        android:layout_height="0dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:drawableLeft="@drawable/delete"
+        app:layout_constraintBottom_toBottomOf="@+id/postdescriptorScore"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/postdescriptorScore"
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
