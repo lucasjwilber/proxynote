@@ -46,6 +46,8 @@ public class UserProfileActivity extends AppCompatActivity {
     private RecyclerView.LayoutManager postRvLayoutManager;
     ConstraintLayout selectedDV;
     Button selectedDVdelBtn;
+    ConstraintLayout cl;
+    String selectedPostId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +65,7 @@ public class UserProfileActivity extends AppCompatActivity {
         postRv.setLayoutManager(postRvLayoutManager);
         usernameView = findViewById(R.id.profileUsername);
         userScoreView = findViewById(R.id.profileScore);
+        cl = findViewById(R.id.profileDeletePostModal);
 
         db = FirebaseFirestore.getInstance();
 
@@ -113,7 +116,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
         public void onPostDescriptorClicked(ConstraintLayout cl, Button b) {
             Log.i("ljw", "clicked on post " + cl.getTag());
-            String postId = cl.getTag().toString();
+            selectedPostId = cl.getTag().toString();
 
             if (selectedDV != null) {
                 selectedDV.setBackground(null);
@@ -124,14 +127,14 @@ public class UserProfileActivity extends AppCompatActivity {
             cl.setBackgroundColor(getResources().getColor(R.color.lightgray));
             b.setVisibility(View.VISIBLE);
 
-            if (cachedPosts.containsKey(postId)) {
+            if (cachedPosts.containsKey(selectedPostId)) {
                 Log.i("ljw", "getting post from cache instead of firestore");
-                postRvAdapter = new PostRvAdapter(Objects.requireNonNull(cachedPosts.get(postId)), getApplicationContext(), userId, postRv, db);
+                postRvAdapter = new PostRvAdapter(Objects.requireNonNull(cachedPosts.get(selectedPostId)), getApplicationContext(), userId, postRv, db);
                 postRv.setAdapter(postRvAdapter);
                 postRvAdapter.notifyDataSetChanged();
             } else {
                 db.collection("posts")
-                        .document(postId)
+                        .document(selectedPostId)
                         .get()
                         .addOnSuccessListener(response -> {
                             Log.i("ljw", "got post!");
@@ -144,7 +147,7 @@ public class UserProfileActivity extends AppCompatActivity {
                             ArrayList list = (ArrayList) response.getData().get("comments");
                             post.setComments(Utils.turnMapsIntoListOfComments(list));
 
-                            cachedPosts.put(postId, post);
+                            cachedPosts.put(selectedPostId, post);
                             postRvAdapter = new PostRvAdapter(post, UserProfileActivity.this, userId, postRv, db);
                             postRv.setAdapter(postRvAdapter);
                             postDescriptorsRv.setMinimumHeight(100);
@@ -229,9 +232,51 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     public void onDeleteButtonClick(View v) {
-        //display "are you sure" modal
-        //delete post
+        cl.setVisibility(View.VISIBLE);
+    }
+    public void yesDelete(View v) {
+        db.collection("posts")
+                .document(selectedPostId)
+                .delete()
+                .addOnSuccessListener(result -> {
+                    Log.i("ljw", "post deleted!");
 
+                    //delete post descriptor
+                    db.collection("users")
+                            .document(userId)
+                            .get()
+                            .addOnSuccessListener(result2 -> {
+                                Log.i("ljw", "got user to delete their postdescriptor");
+                                User user = result2.toObject(User.class);
+                                List<PostDescriptor> usersNewPDs = new ArrayList<>();
+                                int postScore = 0;
+                                for (PostDescriptor pd : user.getPostDescriptors()) {
+                                    if (!pd.getId().equals(selectedPostId)) {
+                                        usersNewPDs.add(pd);
+                                    } else {
+                                        postScore = pd.getScore();
+                                    }
+                                }
+
+                                db.collection("users")
+                                        .document(userId)
+                                        .update("postDescriptors", usersNewPDs,
+                                                "totalScore", user.getTotalScore() - postScore)
+                                        .addOnSuccessListener(result3 -> {
+                                            Log.i("ljw", "successfully removed the deleted post's PD");
+                                            //TODO: toast "post deleted"
+                                        })
+                                        .addOnFailureListener(e -> Log.i("ljw", "error removing the deleted post's PD: " + e.toString()));
+
+                            })
+                            .addOnFailureListener(e -> Log.i("ljw", "error getting user to delete this PD"));
+                })
+                .addOnFailureListener(e -> Log.i("ljw", "error deleting post: " + e.toString()));
+
+        cl.setVisibility(View.GONE);
+    }
+    public void noDelete(View v) {
+        cl.setVisibility(View.GONE);
     }
 
 }

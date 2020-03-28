@@ -62,6 +62,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -100,6 +101,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private RecyclerView.LayoutManager postRvLayoutManager;
     boolean mapHasBeenSetUp;
     SharedPreferences sharedPreferences;
+    List<Marker> postMarkers;
 
 
     @Override
@@ -110,11 +112,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         View view = mapBinding.getRoot();
         setContentView(view);
 
-
         // post recyclerview
         postRv = mapBinding.postRecyclerView;
         postRvLayoutManager = new LinearLayoutManager(this);
         postRv.setLayoutManager(postRvLayoutManager);
+        postMarkers = new LinkedList<>();
 
         userMarkerIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.user_location_pin));
         postOutlineYellow = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_yellow));
@@ -151,8 +153,16 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onResume() {
         super.onResume();
-
         getUserLatLng(false);
+        refreshData(null);
+    }
+
+    public void refreshData(View v) {
+        //remove old markers
+        if (mMap != null) {
+            for (Marker m : postMarkers) m.remove();
+            getPostsFromDbAndCreateMapMarkers();
+        }
     }
 
     public void showMenu(View v) {
@@ -375,7 +385,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 });
     }
 
-    public Marker createMarkerWithPost(Post post) {
+    public void createMarkerWithPost(Post post) {
         Marker borderMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(post.getLat(), post.getLng()))
                 .anchor(0, 1)
@@ -404,8 +414,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         iconMarker.setIcon(Utils.getPostIconBitmapDescriptor(post.getIcon(), this));
         iconMarker.setTag(post);
 
-
-        return borderMarker;
+        postMarkers.add(borderMarker);
+        postMarkers.add(iconMarker);
     }
 
     public void getUsersFormattedAddress() {

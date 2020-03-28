@@ -44,7 +44,7 @@
         android:layout_marginStart="12dp"
         android:layout_marginTop="56dp"
         android:layout_marginEnd="12dp"
-        android:background="@drawable/rectangle_black"
+        android:background="@drawable/rounded_square_black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -84,16 +84,59 @@
         app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
         app:layout_constraintTop_toTopOf="@+id/profileAllPostsRv" />
 
-    <TextView
-        android:id="@+id/test"
-        android:layout_width="152dp"
-        android:layout_height="196dp"
-        android:text="test"
-        android:textSize="33sp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/profileDeletePostModal"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="25dp"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:background="@drawable/rounded_square_black"
+        app:layout_constraintBottom_toBottomOf="@+id/profileAllPostsRv"
+        app:layout_constraintEnd_toEndOf="@+id/profileAllPostsRv"
+        app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
+        app:layout_constraintTop_toTopOf="@+id/profileAllPostsRv">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Are you sure you want to delete this post?"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Are you sure you want to delete this post?" />
+
+        <Button
+            android:id="@+id/yesDeleteButton"
+            android:layout_width="60dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="40dp"
+            android:background="@drawable/rounded_square_accentcolor"
+            android:onClick="yesDelete"
+            android:text="Yes"
+            android:textColor="@color/colorAccent"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/textView2"
+            app:layout_constraintTop_toBottomOf="@+id/textView2"
+            tools:text="Yes" />
+
+        <Button
+            android:id="@+id/noDeleteButton"
+            android:layout_width="60dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="40dp"
+            android:background="@drawable/rounded_square_accentcolor"
+            android:onClick="noDelete"
+            android:text="No"
+            android:textColor="@color/colorAccent"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/textView2"
+            app:layout_constraintTop_toBottomOf="@+id/textView2"
+            tools:text="No" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
