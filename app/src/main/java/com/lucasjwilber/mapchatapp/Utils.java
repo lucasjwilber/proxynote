@@ -67,24 +67,7 @@ public class Utils {
     static String getHowFarAway(double d, String type) {
         double dDistance;
         int iDistance;
-        if (type.equals("imperial")) {
-            dDistance = d * 0.8684;
-            if (dDistance < 0.18939393939) { //dDistance < 1000 feet
-                iDistance = (int) Math.round(dDistance * 5280);
-                return iDistance + " feet away";
-            } else if (dDistance < 10){
-                //round the first decimal and remove the others
-                dDistance = Math.round(dDistance * 10);
-                dDistance = dDistance / 10;
-                return dDistance + " miles away";
-            } else { // if (dDistance >= 10)
-                // round it and remove decimals
-                dDistance = Math.round(dDistance * 10);
-                dDistance = dDistance / 10;
-                iDistance = (int) dDistance;
-                return iDistance + " miles away";
-            }
-        } else { // if (type.equals("metric")
+        if (type.equals("metric")) {
             dDistance = d * 1.609344;
             if (dDistance < 0.1) {
                 iDistance = (int) Math.round(dDistance * 1000);
@@ -100,6 +83,23 @@ public class Utils {
                 dDistance = dDistance / 10;
                 iDistance = (int) dDistance;
                 return iDistance + " km away";
+            }
+        } else { //if (type.equals("imperial")) {
+            dDistance = d * 0.8684;
+            if (dDistance < 0.18939393939) { //dDistance < 1000 feet
+                iDistance = (int) Math.round(dDistance * 5280);
+                return iDistance + " feet away";
+            } else if (dDistance < 10){
+                //round the first decimal and remove the others
+                dDistance = Math.round(dDistance * 10);
+                dDistance = dDistance / 10;
+                return dDistance + " miles away";
+            } else { // if (dDistance >= 10)
+                // round it and remove decimals
+                dDistance = Math.round(dDistance * 10);
+                dDistance = dDistance / 10;
+                iDistance = (int) dDistance;
+                return iDistance + " miles away";
             }
         }
     }

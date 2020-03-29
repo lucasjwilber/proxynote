@@ -11,26 +11,49 @@
         android:title="Profile" />
 
     <item
-        android:id="@+id/settingsMapType"
+        android:id="@+id/menuSettings"
         android:orderInCategory="1"
-        android:title="Change map type" >
+        android:title="Settings" >
         <menu>
             <item
-                android:id="@+id/mapTypeNormal"
-                android:title="Normal" >
+                android:id="@+id/settingsMapType"
+                android:orderInCategory="1"
+                android:title="Change map type" >
+                <menu>
+                    <item
+                        android:id="@+id/mapTypeNormal"
+                        android:title="Normal" >
+                    </item>
+                    <item
+                        android:id="@+id/mapTypeSatellite"
+                        android:title="Satellite" >
+                    </item>
+                    <item
+                        android:id="@+id/mapTypeHybrid"
+                        android:title="Hybrid" >
+                    </item>
+                    <item
+                        android:id="@+id/mapTypeTerrain"
+                        android:title="Terrain" >
+                    </item>
+                </menu>
             </item>
             <item
-                android:id="@+id/mapTypeSatellite"
-                android:title="Satellite" >
+                android:id="@+id/settingsDistanceType"
+                android:orderInCategory="2"
+                android:title="Change distance type" >
+                <menu>
+                    <item
+                        android:id="@+id/distanceTypeImperial"
+                        android:title="Imperial" >
+                    </item>
+                    <item
+                        android:id="@+id/distanceTypeMetric"
+                        android:title="Metric" >
+                    </item>
+                </menu>
             </item>
-            <item
-                android:id="@+id/mapTypeHybrid"
-                android:title="Hybrid" >
-            </item>
-            <item
-                android:id="@+id/mapTypeTerrain"
-                android:title="Terrain" >
-            </item>
+
         </menu>
     </item>
 

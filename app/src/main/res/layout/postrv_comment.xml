@@ -10,13 +10,14 @@
 
     <TextView
         android:id="@+id/postRvCommentHeader"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:textSize="12sp"
+        android:textStyle="italic"
+        android:paddingStart="6dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.195"
+        app:layout_constraintStart_toEndOf="@+id/commentUsername"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -26,8 +27,20 @@
         android:layout_marginTop="4dp"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="@+id/postRvCommentHeader"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/postRvCommentHeader"
         app:layout_constraintTop_toBottomOf="@+id/postRvCommentHeader" />
+
+    <TextView
+        android:id="@+id/commentUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="username"
+        android:textColor="@color/colorAccent"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="username" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

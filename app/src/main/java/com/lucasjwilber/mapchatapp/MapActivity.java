@@ -222,7 +222,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 editor = sharedPreferences.edit().putInt("mapType", GoogleMap.MAP_TYPE_TERRAIN);
                 editor.apply();
                 return true;
-
+            case R.id.distanceTypeImperial:
+                editor = sharedPreferences.edit().putString("distanceType", "imperial");
+                editor.apply();
+                return true;
+            case R.id.distanceTypeMetric:
+                editor = sharedPreferences.edit().putString("distanceType", "metric");
+                editor.apply();
+                return true;
             default:
                 return false;
         }

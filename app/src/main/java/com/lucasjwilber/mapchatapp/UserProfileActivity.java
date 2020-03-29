@@ -18,6 +18,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.w3c.dom.Text;
@@ -31,8 +33,10 @@ import java.util.Objects;
 
 public class UserProfileActivity extends AppCompatActivity {
 
-    User currentUser;
-    String userId;
+    User thisProfileOwner;
+    String thisProfileOwnerId;
+    FirebaseUser currentUser;
+    String currentUserId;
     HashMap<String, Post> cachedPosts;
 
     private TextView userScoreView;
@@ -48,17 +52,23 @@ public class UserProfileActivity extends AppCompatActivity {
     Button selectedDVdelBtn;
     ConstraintLayout cl;
     String selectedPostId;
+    boolean userIsOnTheirOwnProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
 
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            currentUserId = currentUser.getUid();
+        }
+
         cachedPosts = new HashMap<>();
 
         Intent intent = getIntent();
-        userId = intent.getStringExtra("userId");
-        Log.i("ljw", "userId is " + userId);
+        thisProfileOwnerId = intent.getStringExtra("userId");
+        Log.i("ljw", "userId is " + thisProfileOwnerId);
 
         postRv = findViewById(R.id.profileOnePostRv);
         postRvLayoutManager = new LinearLayoutManager(this);
@@ -70,13 +80,16 @@ public class UserProfileActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         db.collection("users")
-                .document(userId)
+                .document(thisProfileOwnerId)
                 .get()
                 .addOnSuccessListener(result -> {
                     Log.i("ljw", "successfully got user:\n" + result.toString());
                     User user = result.toObject(User.class);
 
-                    currentUser = user;
+                    thisProfileOwner = user;
+                    if (thisProfileOwnerId.equals(currentUserId)) {
+                        userIsOnTheirOwnProfile = true;
+                    }
 
                     assert user != null;
                     usernameView.setText(user.getUsername());
@@ -113,49 +126,6 @@ public class UserProfileActivity extends AppCompatActivity {
             this.userPostDescriptors = userPostDescriptors;
         }
 
-
-        public void onPostDescriptorClicked(ConstraintLayout cl, Button b) {
-            Log.i("ljw", "clicked on post " + cl.getTag());
-            selectedPostId = cl.getTag().toString();
-
-            if (selectedDV != null) {
-                selectedDV.setBackground(null);
-                selectedDVdelBtn.setVisibility(View.GONE);
-            }
-            selectedDV = cl;
-            selectedDVdelBtn = b;
-            cl.setBackgroundColor(getResources().getColor(R.color.lightgray));
-            b.setVisibility(View.VISIBLE);
-
-            if (cachedPosts.containsKey(selectedPostId)) {
-                Log.i("ljw", "getting post from cache instead of firestore");
-                postRvAdapter = new PostRvAdapter(Objects.requireNonNull(cachedPosts.get(selectedPostId)), getApplicationContext(), userId, postRv, db);
-                postRv.setAdapter(postRvAdapter);
-                postRvAdapter.notifyDataSetChanged();
-            } else {
-                db.collection("posts")
-                        .document(selectedPostId)
-                        .get()
-                        .addOnSuccessListener(response -> {
-                            Log.i("ljw", "got post!");
-                            Post post = response.toObject(Post.class);
-                            if (post == null) {
-                                Log.i("ljw", "post not found. may have been deleted from the post collection but not the user object");
-                                return;
-                            }
-                            Log.i("ljw", "found post " + post.getId());
-                            ArrayList list = (ArrayList) response.getData().get("comments");
-                            post.setComments(Utils.turnMapsIntoListOfComments(list));
-
-                            cachedPosts.put(selectedPostId, post);
-                            postRvAdapter = new PostRvAdapter(post, UserProfileActivity.this, userId, postRv, db);
-                            postRv.setAdapter(postRvAdapter);
-                            postDescriptorsRv.setMinimumHeight(100);
-
-                        })
-                        .addOnFailureListener(e -> Log.i("ljw", "error getting post: " + e.toString()));
-            }
-        }
 
         public class PostTitleViewholder extends RecyclerView.ViewHolder {
             ConstraintLayout constraintLayout;
@@ -224,6 +194,50 @@ public class UserProfileActivity extends AppCompatActivity {
             return userPostDescriptors.size();
         }
 
+        public void onPostDescriptorClicked(ConstraintLayout cl, Button b) {
+            Log.i("ljw", "clicked on post " + cl.getTag());
+            selectedPostId = cl.getTag().toString();
+
+            if (selectedDV != null) {
+                selectedDV.setBackground(null);
+                selectedDVdelBtn.setVisibility(View.GONE);
+            }
+            selectedDV = cl;
+            selectedDVdelBtn = b;
+            cl.setBackgroundColor(getResources().getColor(R.color.lightgray));
+
+            if (userIsOnTheirOwnProfile) b.setVisibility(View.VISIBLE);
+
+            if (cachedPosts.containsKey(selectedPostId)) {
+                Log.i("ljw", "getting post from cache instead of firestore");
+                postRvAdapter = new PostRvAdapter(Objects.requireNonNull(cachedPosts.get(selectedPostId)), getApplicationContext(), thisProfileOwnerId, postRv, db);
+                postRv.setAdapter(postRvAdapter);
+                postRvAdapter.notifyDataSetChanged();
+            } else {
+                db.collection("posts")
+                        .document(selectedPostId)
+                        .get()
+                        .addOnSuccessListener(response -> {
+                            Log.i("ljw", "got post!");
+                            Post post = response.toObject(Post.class);
+                            if (post == null) {
+                                Log.i("ljw", "post not found. may have been deleted from the post collection but not the user object");
+                                return;
+                            }
+                            Log.i("ljw", "found post " + post.getId());
+                            ArrayList list = (ArrayList) response.getData().get("comments");
+                            post.setComments(Utils.turnMapsIntoListOfComments(list));
+
+                            cachedPosts.put(selectedPostId, post);
+                            postRvAdapter = new PostRvAdapter(post, UserProfileActivity.this, thisProfileOwnerId, postRv, db);
+                            postRv.setAdapter(postRvAdapter);
+                            postDescriptorsRv.setMinimumHeight(100);
+
+                        })
+                        .addOnFailureListener(e -> Log.i("ljw", "error getting post: " + e.toString()));
+            }
+        }
+
     }
 
     public void onReportButtonClick(View v) {
@@ -232,9 +246,12 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     public void onDeleteButtonClick(View v) {
+        if (!userIsOnTheirOwnProfile) return;
         cl.setVisibility(View.VISIBLE);
     }
     public void yesDelete(View v) {
+        if (!userIsOnTheirOwnProfile) return;
+
         db.collection("posts")
                 .document(selectedPostId)
                 .delete()
@@ -243,13 +260,14 @@ public class UserProfileActivity extends AppCompatActivity {
 
                     //delete post descriptor
                     db.collection("users")
-                            .document(userId)
+                            .document(thisProfileOwnerId)
                             .get()
                             .addOnSuccessListener(result2 -> {
                                 Log.i("ljw", "got user to delete their postdescriptor");
                                 User user = result2.toObject(User.class);
                                 List<PostDescriptor> usersNewPDs = new ArrayList<>();
                                 int postScore = 0;
+                                assert user != null;
                                 for (PostDescriptor pd : user.getPostDescriptors()) {
                                     if (!pd.getId().equals(selectedPostId)) {
                                         usersNewPDs.add(pd);
@@ -258,8 +276,12 @@ public class UserProfileActivity extends AppCompatActivity {
                                     }
                                 }
 
+                                selectedDV.removeAllViews();
+                                postRv.setAdapter(null);
+                                postRv.setBackground(null);
+
                                 db.collection("users")
-                                        .document(userId)
+                                        .document(thisProfileOwnerId)
                                         .update("postDescriptors", usersNewPDs,
                                                 "totalScore", user.getTotalScore() - postScore)
                                         .addOnSuccessListener(result3 -> {
