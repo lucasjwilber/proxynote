@@ -23,6 +23,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -45,8 +47,6 @@ public class CreatePostActivity extends AppCompatActivity {
     FirebaseUser user;
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageRef;
-    double userLat;
-    double userLng;
     public String userCurrentAddress;
     ImageView createPostImage;
     Bitmap currentImage;
@@ -81,8 +81,6 @@ public class CreatePostActivity extends AppCompatActivity {
         iconRv.setAdapter(iconRvAdapter);
 
         Intent intent = getIntent();
-        userLat = intent.getDoubleExtra("userLat", userLat);
-        userLng = intent.getDoubleExtra("userLng", userLng);
         userCurrentAddress = intent.getStringExtra("userCurrentAddress");
     }
 
@@ -98,22 +96,45 @@ public class CreatePostActivity extends AppCompatActivity {
             Utils.showToast(CreatePostActivity.this, "Post text is required.");
         }
 
-        Post post = new Post(
-                user.getUid(),
-                user.getDisplayName(),
-                postTitle,
-                postBody,
-                userCurrentAddress,
-                userLat,
-                userLng);
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(CreatePostActivity.this);
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    Log.i("ljw", "successfully got location");
+                    // Got last known location. In some rare situations this can be null.
 
-        post.setIcon(selectedIcon);
+                    //todo: get formatted address too
 
-        if (currentImage == null) {
-            uploadPost(post);
-        } else {
-            uploadImageAndPost(post);
-        }
+                    double userLat;
+                    double userLng;
+                    if (location != null) {
+                        userLat = location.getLatitude();
+                        userLng = location.getLongitude();
+                        Log.i("ljw", "lat: " + userLat + "\nlong: " + userLng);
+
+                        Post post = new Post(
+                                user.getUid(),
+                                user.getDisplayName(),
+                                postTitle,
+                                postBody,
+                                userCurrentAddress,
+                                userLat,
+                                userLng);
+
+                        post.setIcon(selectedIcon);
+
+                        if (currentImage == null) {
+                            uploadPost(post);
+                        } else {
+                            uploadImageAndPost(post);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Utils.showToast(CreatePostActivity.this, "Unable to get your location.");
+                    Log.i("ljw", "failed getting location: " + e.toString());
+                });
+
+
     }
 
     private void uploadImageAndPost(Post post) {

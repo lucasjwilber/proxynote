@@ -415,7 +415,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                                 .addOnFailureListener(e -> Log.i("ljw", "error getting user from db: " + e.toString()));
                     }
                 })
-                .addOnFailureListener(e -> Log.i("ljw", "error getting location: " + e.toString()));
+                .addOnFailureListener(e -> {
+                    Utils.showToast(context, "Unable to get your location.");
+                    Log.i("ljw", "error getting location: " + e.toString());
+                });
 
     }
 

@@ -325,9 +325,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         postRv.setVisibility(View.GONE);
         Intent goToCreatePostAct = new Intent(this, CreatePostActivity.class);
-        goToCreatePostAct.putExtra("userLat", userLat);
-        goToCreatePostAct.putExtra("userLng", userLng);
-        goToCreatePostAct.putExtra("userCurrentAddress", userCurrentAddress);
         startActivity(goToCreatePostAct);
     }
 
