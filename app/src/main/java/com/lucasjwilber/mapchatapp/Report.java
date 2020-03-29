@@ -1,25 +1,20 @@
 package com.lucasjwilber.mapchatapp;
 
 public class Report {
+    //the id format is "[post/comment id]|[reporting user id]",
+    //this is so that if a user reports a post multiple times, their last report is overwritten
     private String id;
     private String reason;
     private String explanation;
-    private Post post;
-    private Comment comment;
+    private String postId;
 
     public Report() {};
 
-    public Report(String id, String reason, String explanation, Post post) {
+    public Report(String id, String reason, String explanation, String postId) {
         this.id = id;
         this.reason = reason;
         this.explanation = explanation;
-        this.post = post;
-    }
-    public Report(String id, String reason, String explanation, Comment comment) {
-        this.id = id;
-        this.reason = reason;
-        this.explanation = explanation;
-        this.comment = comment;
+        this.postId = postId;
     }
 
     public String getId() {
@@ -46,19 +41,11 @@ public class Report {
         this.explanation = explanation;
     }
 
-    public Post getPost() {
-        return post;
+    public String getPostId() {
+        return postId;
     }
 
-    public void setPost(Post post) {
-        this.post = post;
-    }
-
-    public Comment getComment() {
-        return comment;
-    }
-
-    public void setComment(Comment comment) {
-        this.comment = comment;
+    public void setPostId(String postId) {
+        this.postId = postId;
     }
 }

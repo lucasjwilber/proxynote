@@ -38,13 +38,13 @@ public class UserProfileActivity extends AppCompatActivity {
     FirebaseUser currentUser;
     String currentUserId;
     HashMap<String, Post> cachedPosts;
+    FirebaseFirestore db;
 
     private TextView userScoreView;
     private TextView usernameView;
     private RecyclerView postDescriptorsRv;
     private RecyclerView.Adapter postDescriptorsRvAdapter;
     private RecyclerView.LayoutManager postDescriptorsRvLayoutManager;
-    FirebaseFirestore db;
     private RecyclerView postRv;
     private RecyclerView.Adapter postRvAdapter;
     private RecyclerView.LayoutManager postRvLayoutManager;

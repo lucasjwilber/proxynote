@@ -147,5 +147,4 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="username" />
 
-
 </androidx.constraintlayout.widget.ConstraintLayout>

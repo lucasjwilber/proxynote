@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Parcelable;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -134,6 +136,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 postUsername.setText(post.getUsername());
                 postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
                 postTimeAndPlace.setText(Utils.getHowLongAgo(post.getTimestamp()));
+                reportButton.setOnClickListener(v -> onReportButtonClicked());
                 postTitle.setText(post.getTitle());
                 String postScoreText = Long.toString(post.getScore());
                 postScore.setText(postScoreText);
@@ -333,6 +336,16 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         Intent goToProfile = new Intent(context, UserProfileActivity.class);
         goToProfile.putExtra("userId", userId);
         context.startActivity(goToProfile);
+    }
+
+    private void onReportButtonClicked() {
+        if (!userIsSignedIn) {
+            //todo: toast
+            return;
+        }
+        Intent goToReportActivity = new Intent(context, ReportActivity.class);
+        goToReportActivity.putExtra("postId", post.getId());
+        context.startActivity(goToReportActivity);
     }
 
 }

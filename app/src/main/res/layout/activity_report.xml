@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAFAFA"
+    tools:context=".ReportActivity" >
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/reportLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <RadioGroup
+            android:id="@+id/reportTypeRG"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginBottom="10dp" >
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Report post for:" />
+
+            <RadioButton
+                android:id="@+id/reportRBspam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Spam"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout_editor_absoluteX="29dp" />
+
+            <RadioButton
+                android:id="@+id/reportRBpersonalInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Personal Information"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout_editor_absoluteX="33dp" />
+
+            <RadioButton
+                android:id="@+id/reportRBthreat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Threatening"
+                tools:layout_editor_absoluteX="35dp"
+                tools:layout_editor_absoluteY="90dp" />
+
+            <RadioButton
+                android:id="@+id/reportRBvulgar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vulgar or Offensive Content"
+                tools:layout_editor_absoluteX="35dp"
+                tools:layout_editor_absoluteY="90dp" />
+
+            <RadioButton
+                android:id="@+id/reportRBother"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Other"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout_editor_absoluteX="134dp" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/reportAIlabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Additional Information (optional):"
+            app:layout_constraintStart_toStartOf="@+id/reportTypeRG"
+            app:layout_constraintTop_toBottomOf="@+id/reportTypeRG" />
+
+        <EditText
+            android:id="@+id/reportAdditionalText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:ems="10"
+            app:layout_constraintStart_toStartOf="@+id/reportAIlabel"
+            app:layout_constraintTop_toBottomOf="@+id/reportAIlabel" />
+
+
+        <Button
+            android:id="@+id/reportSubmitButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/rounded_square_filled_accentcolor"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="Report Post"
+            android:textColor="#FFFFFF"
+            android:onClick="onReportSubmit"
+            app:layout_constraintEnd_toEndOf="@+id/reportAdditionalText"
+            app:layout_constraintHorizontal_bias="0.509"
+            app:layout_constraintStart_toStartOf="@+id/reportAdditionalText"
+            app:layout_constraintTop_toBottomOf="@+id/reportAdditionalText" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Report Post"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
