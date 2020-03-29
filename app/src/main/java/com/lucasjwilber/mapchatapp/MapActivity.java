@@ -22,10 +22,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -61,7 +59,6 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -471,48 +468,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postRv.setVisibility(View.GONE);
     }
 
-    public void addCommentToPost(View v) {
-        if (user == null) {
-            //TODO: modal with "sign in to comment"
-            return;
-        }
-
-        Log.i("ljw", "commentbutton clicked");
-        EditText commentEditText = findViewById(R.id.postRvPostReplyBox);
-
-        if (commentEditText.getText().toString().equals("") || commentEditText.getText().toString().length() == 0) {
-            Log.i("ljw", "empty comment, not gonna add it to the post");
-            return;
-        } else if (currentSelectedPost.getId() == null) {
-            Log.i("ljw", "post has a null id so a DB query won't work");
-            return;
-        }
-
-        double distanceFromPost = Utils.getDistance(userLat, userLng, currentSelectedPost.getLat(), currentSelectedPost.getLng());
-
-        Comment comment = new Comment(user.getUid(),
-                user.getDisplayName(),
-                commentEditText.getText().toString(),
-                userLat,
-                userLng,
-                distanceFromPost);
-
-        List<Comment> comments = currentSelectedPost.getComments();
-        comments.add(comment);
-        Log.i("ljw", comments.toString());
-
-        //get post by id from firestore
-        db.collection("posts")
-                .document(currentSelectedPost.getId())
-                .update("comments", comments)
-                .addOnCompleteListener(task -> {
-                    Log.i("ljw", "successfully added a comment");
-                    postRvAdapter.notifyDataSetChanged();
-                    commentEditText.setText("");
-                })
-                .addOnFailureListener(e -> Log.i("ljw", "failed adding a comment because " + e.toString()));
-    }
-
     private Bitmap getBitmap(int drawableRes) {
         Drawable drawable = getResources().getDrawable(drawableRes);
         Canvas canvas = new Canvas();
@@ -535,7 +490,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         currentSelectedMarker = marker;
         currentSelectedPost = (Post) marker.getTag();
-        postRvAdapter = new PostRvAdapter(post, MapActivity.this, (user != null ? user.getUid() : null), postRv, db);
+        postRvAdapter = new PostRvAdapter(
+                post,
+                MapActivity.this,
+                (user != null ? user.getUid() : null),
+                postRv,
+                db
+        );
         postRv.setAdapter(postRvAdapter);
         postRv.setVisibility(View.VISIBLE);
 

@@ -34,10 +34,8 @@ public class ReportActivity extends AppCompatActivity {
     public void onReportSubmit(View v) {
         RadioGroup reportTypeRG = findViewById(R.id.reportTypeRG);
         String reason;
+        Log.i("ljw", "checked rb is " + reportTypeRG.getCheckedRadioButtonId());
         switch (reportTypeRG.getCheckedRadioButtonId()) {
-            default:
-                //todo: toast "please select an option"
-                return;
             case R.id.reportRBspam:
                 reason = "spam";
                 break;
@@ -53,6 +51,10 @@ public class ReportActivity extends AppCompatActivity {
             case R.id.reportRBother:
                 reason = "other";
                 break;
+            case -1:
+            default:
+                Utils.showToast(ReportActivity.this, "Please select a reason for reporting.");
+                return;
         }
         EditText additionalInfoTV = findViewById(R.id.reportAdditionalText);
         String additionalInfo = additionalInfoTV.getText().toString();
@@ -64,7 +66,7 @@ public class ReportActivity extends AppCompatActivity {
                 .set(report)
                 .addOnSuccessListener(success -> {
                     Log.i("ljw", "successfully added report to db");
-                    //todo: toast
+                    Utils.showToast(ReportActivity.this, "Report submitted");
                     finish();
                 })
                 .addOnFailureListener(e -> Log.i("ljw", "error uploading report: " + e.toString()));

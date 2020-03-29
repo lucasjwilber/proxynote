@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -245,6 +247,15 @@ public class Utils {
             default:
                 return getBitmap(R.drawable.posticon_default, context);
         }
+    }
+
+    public static void showToast(Context context, String message) {
+        Toast toast = Toast.makeText(context,
+                message,
+                Toast.LENGTH_SHORT);
+        View toastView = toast.getView();
+        toastView.setBackground(context.getResources().getDrawable(R.drawable.rounded_square_black));
+        toast.show();
     }
 
 }

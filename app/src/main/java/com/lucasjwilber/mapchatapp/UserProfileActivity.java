@@ -210,7 +210,12 @@ public class UserProfileActivity extends AppCompatActivity {
 
             if (cachedPosts.containsKey(selectedPostId)) {
                 Log.i("ljw", "getting post from cache instead of firestore");
-                postRvAdapter = new PostRvAdapter(Objects.requireNonNull(cachedPosts.get(selectedPostId)), getApplicationContext(), thisProfileOwnerId, postRv, db);
+                postRvAdapter = new PostRvAdapter(
+                        Objects.requireNonNull(cachedPosts.get(selectedPostId)),
+                        getApplicationContext(),
+                        thisProfileOwnerId,
+                        postRv,
+                        db);
                 postRv.setAdapter(postRvAdapter);
                 postRvAdapter.notifyDataSetChanged();
             } else {
@@ -286,7 +291,7 @@ public class UserProfileActivity extends AppCompatActivity {
                                                 "totalScore", user.getTotalScore() - postScore)
                                         .addOnSuccessListener(result3 -> {
                                             Log.i("ljw", "successfully removed the deleted post's PD");
-                                            //TODO: toast "post deleted"
+                                            Utils.showToast(UserProfileActivity.this, "Post deleted.");
                                         })
                                         .addOnFailureListener(e -> Log.i("ljw", "error removing the deleted post's PD: " + e.toString()));
 

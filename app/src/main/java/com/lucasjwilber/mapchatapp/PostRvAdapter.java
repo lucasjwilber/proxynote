@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -19,6 +20,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -28,7 +33,7 @@ import java.util.List;
 public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHolder> {
 
     private Post post;
-    private String userId;
+    private String currentUserId;
     private Context context;
     private RecyclerView recyclerView;
     private boolean userIsSignedIn;
@@ -41,19 +46,20 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private Drawable upArrow;
     private Drawable downArrow;
     private FirebaseFirestore db;
+    private EditText addCommentBox;
 
     private static final int POST_HEADER = 0;
     private static final int POST_COMMENT = 1;
 
-    PostRvAdapter(Post post, Context context, String userId, RecyclerView recyclerView, FirebaseFirestore db) {
+    PostRvAdapter(Post post, Context context, String currentUserId, RecyclerView recyclerView, FirebaseFirestore db) {
         this.post = post;
         this.context = context;
-        this.userId = userId;
+        this.currentUserId = currentUserId;
         this.recyclerView = recyclerView;
         this.db = db;
-        if (userId != null) {
+        if (currentUserId != null) {
             userIsSignedIn = true;
-            this.userId = userId;
+            this.currentUserId = currentUserId;
         }
         upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
         downArrowColored = context.getDrawable(R.drawable.arrow_down_colored);
@@ -131,6 +137,9 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 Button reportButton = l.findViewById(R.id.postRvHeaderReportBtn);
                 ImageView postImage = l.findViewById(R.id.postRvPostImage);
                 TextView postText = l.findViewById(R.id.postRvPostText);
+                addCommentBox = l.findViewById(R.id.postRvPostReplyBox);
+                Button addCommentButton = l.findViewById(R.id.postRvPostReplyButton);
+                addCommentButton.setOnClickListener(v -> addCommentToPost(addCommentBox.getText().toString()));
                 TextView commentCount = l.findViewById(R.id.postCommentCount);
 
                 postUsername.setText(post.getUsername());
@@ -158,10 +167,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 Log.i("ljw", "post votes: " + post.getVotes().size());
 
                 if (userIsSignedIn) {
-                    if (post.getVotes().containsKey(userId)) {
-                        if (post.getVotes().get(userId) > 0) {
+                    if (post.getVotes().containsKey(currentUserId)) {
+                        if (post.getVotes().get(currentUserId) > 0) {
                             upvoteButton.setBackground(upArrowColored);
-                        } else if (post.getVotes().get(userId) < 0) {
+                        } else if (post.getVotes().get(currentUserId) < 0) {
                             downvoteButton.setBackground(downArrowColored);
                         }
                     }
@@ -217,8 +226,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         int usersPreviousVote = 0;
         int currentScore = post.getScore();
         HashMap<String, Integer> voteMap = post.getVotes();
-        if (voteMap.containsKey(userId)) {
-            usersPreviousVote = voteMap.get(userId);
+        if (voteMap.containsKey(currentUserId)) {
+            usersPreviousVote = voteMap.get(currentUserId);
         }
 
 //        Button up = findViewById(R.id.postRvHeaderVoteUpBtn);
@@ -266,7 +275,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         String scoreViewText = Long.toString(currentScore + scoreChange);
         postScore.setText(scoreViewText);
 
-        voteMap.put(userId, usersNewVote);
+        voteMap.put(currentUserId, usersNewVote);
         int finalScoreChange = scoreChange;
 
         // get the current score in firestore first
@@ -340,12 +349,75 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
     private void onReportButtonClicked() {
         if (!userIsSignedIn) {
-            //todo: toast
+            Utils.showToast(context, "You must be signed in to report a post.");
             return;
         }
         Intent goToReportActivity = new Intent(context, ReportActivity.class);
         goToReportActivity.putExtra("postId", post.getId());
         context.startActivity(goToReportActivity);
     }
+
+    public void addCommentToPost(String commentText) {
+        Log.i("ljw", commentText);
+        if (!userIsSignedIn) {
+            //TODO: modal with "sign in to comment"
+            return;
+        } else if (commentText.equals("") || commentText.length() == 0) {
+            Utils.showToast(context, "Please write a comment first.");
+            return;
+        }
+
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    Log.i("ljw", "successfully got location");
+                    // Got last known location. In some rare situations this can be null.
+                    double userLat;
+                    double userLng;
+                    if (location != null) {
+                        userLat = location.getLatitude();
+                        userLng = location.getLongitude();
+                        Log.i("ljw", "lat: " + userLat + "\nlong: " + userLng);
+
+                        //get user from "users"
+                        db.collection("users")
+                                .document(currentUserId)
+                                .get()
+                                .addOnSuccessListener(result -> {
+                                    Log.i("ljw", "got user from db");
+                                    User user = result.toObject(User.class);
+                                    assert user != null;
+
+                                    double distanceFromPost = Utils.getDistance(userLat, userLng, post.getLat(), post.getLng());
+
+                                    Comment comment = new Comment(
+                                            currentUserId,
+                                            user.getUsername(),
+                                            commentText,
+                                            userLat,
+                                            userLng,
+                                            distanceFromPost);
+
+                                    List<Comment> comments = post.getComments();
+                                    comments.add(comment);
+                                    Log.i("ljw", comments.toString());
+
+                                    //get post by id from firestore
+                                    db.collection("posts")
+                                            .document(post.getId())
+                                            .update("comments", comments)
+                                            .addOnCompleteListener(task -> {
+                                                Log.i("ljw", "successfully added a comment");
+                                                addCommentBox.setText("");
+                                            })
+                                            .addOnFailureListener(e -> Log.i("ljw", "failed adding a comment because " + e.toString()));
+                                })
+                                .addOnFailureListener(e -> Log.i("ljw", "error getting user from db: " + e.toString()));
+                    }
+                })
+                .addOnFailureListener(e -> Log.i("ljw", "error getting location: " + e.toString()));
+
+    }
+
 
 }

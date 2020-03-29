@@ -92,6 +92,12 @@ public class CreatePostActivity extends AppCompatActivity {
         EditText postBodyForm = binding.postBodyEditText;
         String postBody = postBodyForm.getText().toString();
 
+        if (postTitle.equals("") || postTitle.length() == 0) {
+            Utils.showToast(CreatePostActivity.this, "A post title is required.");
+        } else if (postBody.equals("") || postBody.length() == 0) {
+            Utils.showToast(CreatePostActivity.this, "Post text is required.");
+        }
+
         Post post = new Post(
                 user.getUid(),
                 user.getDisplayName(),
@@ -142,7 +148,6 @@ public class CreatePostActivity extends AppCompatActivity {
                 .set(post)
                 .addOnSuccessListener(result -> {
                     Log.i("ljw", "successfully added new post to DB");
-                    //TODO: toast?
 
                     //add post to user's list and +1 their total score
                     db.collection("users")
@@ -191,7 +196,7 @@ public class CreatePostActivity extends AppCompatActivity {
             Log.i("ljw", "package manager says this device has a camera. going to try to use it...");
             checkVersionLaunchCamera();
         } else {
-            //TODO: toast
+            Utils.showToast(CreatePostActivity.this, "This device doesn't have a compatible camera.");
             Log.i("ljw", "this device doesn't have a camera to use.");
         }
     }
@@ -312,7 +317,6 @@ public class CreatePostActivity extends AppCompatActivity {
 
         }
 
-        //TODO: do i need the viewType parameter here?
         @Override
         public IconSelectAdapter.IconViewholder onCreateViewHolder(ViewGroup parent, int viewType) {
             ImageView iconView = (ImageView) LayoutInflater.from(parent.getContext()).inflate(R.layout.posticon_imageview, parent, false);
