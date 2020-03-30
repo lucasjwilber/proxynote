@@ -4,9 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.os.Parcelable;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -22,8 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -47,6 +43,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private Drawable downArrow;
     private FirebaseFirestore db;
     private EditText addCommentBox;
+    private ProgressBar replyLoadingSpinner;
 
     private static final int POST_HEADER = 0;
     private static final int POST_COMMENT = 1;
@@ -69,20 +66,20 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         SharedPreferences prefs = context.getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");
 
-        //set border color of this based on the post score
-        if (post.getScore() >= 20) {
-            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_red));
-        } else if (post.getScore() >= 15) {
-            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_orangered));
-        } else if (post.getScore() >= 10) {
-            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_orange));
-        } else if (post.getScore() >= 5) {
-            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_yelloworange));
-        } else if (post.getScore() <= -5) {
-            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_brown));
-        } else {
-            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_primarycolor));
-        }
+//        //set border color of this based on the post score
+//        if (post.getScore() >= 20) {
+//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_red));
+//        } else if (post.getScore() >= 15) {
+//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_orangered));
+//        } else if (post.getScore() >= 10) {
+//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_orange));
+//        } else if (post.getScore() >= 5) {
+//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_yelloworange));
+//        } else if (post.getScore() <= -5) {
+//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_brown));
+//        } else {
+//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_primarycolor));
+//        }
     }
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
@@ -141,6 +138,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 Button addCommentButton = l.findViewById(R.id.postRvPostReplyButton);
                 addCommentButton.setOnClickListener(v -> addCommentToPost(addCommentBox.getText().toString()));
                 TextView commentCount = l.findViewById(R.id.postCommentCount);
+                replyLoadingSpinner = l.findViewById(R.id.replySubmitProgressBar);
 
                 postUsername.setText(post.getUsername());
                 postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
@@ -366,6 +364,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             Utils.showToast(context, "Please write a comment first.");
             return;
         }
+        replyLoadingSpinner.setVisibility(View.VISIBLE);
 
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         fusedLocationClient.getLastLocation()
@@ -409,15 +408,23 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                                             .addOnCompleteListener(task -> {
                                                 Log.i("ljw", "successfully added a comment");
                                                 addCommentBox.setText("");
+                                                replyLoadingSpinner.setVisibility(View.GONE);
                                             })
-                                            .addOnFailureListener(e -> Log.i("ljw", "failed adding a comment because " + e.toString()));
+                                            .addOnFailureListener(e -> {
+                                                Log.i("ljw", "failed adding a comment because " + e.toString());
+                                                replyLoadingSpinner.setVisibility(View.GONE);
+                                            });
                                 })
-                                .addOnFailureListener(e -> Log.i("ljw", "error getting user from db: " + e.toString()));
+                                .addOnFailureListener(e -> {
+                                    Log.i("ljw", "error getting user from db: " + e.toString());
+                                    replyLoadingSpinner.setVisibility(View.GONE);
+                                });
                     }
                 })
                 .addOnFailureListener(e -> {
                     Utils.showToast(context, "Unable to get your location.");
                     Log.i("ljw", "error getting location: " + e.toString());
+                    replyLoadingSpinner.setVisibility(View.GONE);
                 });
 
     }

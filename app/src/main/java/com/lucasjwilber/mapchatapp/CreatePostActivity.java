@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -58,6 +59,7 @@ public class CreatePostActivity extends AppCompatActivity {
     ImageView selectedIconView;
     boolean iconSelected;
     int selectedPosition;
+    ProgressBar loadingSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +72,7 @@ public class CreatePostActivity extends AppCompatActivity {
         user = FirebaseAuth.getInstance().getCurrentUser();
         storageRef = storage.getReference();
         createPostImage = binding.createPostImage;
+        loadingSpinner = findViewById(R.id.createPostProgressBar);
 
         iconRv = findViewById(R.id.postIconRv);
         HorizontalLayout = new LinearLayoutManager(
@@ -85,6 +88,8 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     public void createPost(View v) {
+        loadingSpinner.setVisibility(View.VISIBLE);
+
         EditText postTitleForm = binding.postTitleEditText;
         String postTitle = postTitleForm.getText().toString();
         EditText postBodyForm = binding.postBodyEditText;
@@ -92,8 +97,10 @@ public class CreatePostActivity extends AppCompatActivity {
 
         if (postTitle.equals("") || postTitle.length() == 0) {
             Utils.showToast(CreatePostActivity.this, "A post title is required.");
+            return;
         } else if (postBody.equals("") || postBody.length() == 0) {
             Utils.showToast(CreatePostActivity.this, "Post text is required.");
+            return;
         }
 
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(CreatePostActivity.this);
@@ -196,17 +203,27 @@ public class CreatePostActivity extends AppCompatActivity {
                                                     "totalScore", user.getTotalScore() + 1)
                                             .addOnSuccessListener(result2 -> {
                                                 Log.i("ljw", "successfully updated user's post descriptors list");
+                                                loadingSpinner.setVisibility(View.VISIBLE);
                                             })
-                                            .addOnFailureListener(e -> Log.i("ljw", "Error updating user's post descriptors list " + e));
+                                            .addOnFailureListener(e -> {
+                                                Log.i("ljw", "Error updating user's post descriptors list " + e);
+                                                loadingSpinner.setVisibility(View.VISIBLE);
+                                            });
                                 }
 
                             })
-                            .addOnFailureListener(e -> Log.i("ljw", "Error getting user: " + e));
+                            .addOnFailureListener(e -> {
+                                Log.i("ljw", "Error getting user: " + e);
+                                loadingSpinner.setVisibility(View.VISIBLE);
+                            });
 
                     finish();
 
                 })
-                .addOnFailureListener(e -> Log.i("ljw", "Error adding post to db: " + e));
+                .addOnFailureListener(e -> {
+                    Log.i("ljw", "Error adding post to db: " + e);
+                    loadingSpinner.setVisibility(View.VISIBLE);
+                });
     }
 
     public void cameraButtonClicked(View v) {

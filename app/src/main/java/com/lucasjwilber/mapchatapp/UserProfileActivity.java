@@ -6,25 +6,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import org.w3c.dom.Text;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,6 +48,8 @@ public class UserProfileActivity extends AppCompatActivity {
     ConstraintLayout cl;
     String selectedPostId;
     boolean userIsOnTheirOwnProfile;
+    ProgressBar postLoadingSpinner;
+    ProgressBar deleteLoadingSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +73,8 @@ public class UserProfileActivity extends AppCompatActivity {
         usernameView = findViewById(R.id.profileUsername);
         userScoreView = findViewById(R.id.profileScore);
         cl = findViewById(R.id.profileDeletePostModal);
+        postLoadingSpinner = findViewById(R.id.profPostProgressBar);
+        deleteLoadingSpinner = findViewById(R.id.profDeleteProgressBar);
 
         db = FirebaseFirestore.getInstance();
 
@@ -197,6 +196,7 @@ public class UserProfileActivity extends AppCompatActivity {
         public void onPostDescriptorClicked(ConstraintLayout cl, Button b) {
             Log.i("ljw", "clicked on post " + cl.getTag());
             selectedPostId = cl.getTag().toString();
+            postLoadingSpinner.setVisibility(View.VISIBLE);
 
             if (selectedDV != null) {
                 selectedDV.setBackground(null);
@@ -218,6 +218,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         db);
                 postRv.setAdapter(postRvAdapter);
                 postRvAdapter.notifyDataSetChanged();
+                postLoadingSpinner.setVisibility(View.GONE);
             } else {
                 db.collection("posts")
                         .document(selectedPostId)
@@ -237,17 +238,16 @@ public class UserProfileActivity extends AppCompatActivity {
                             postRvAdapter = new PostRvAdapter(post, UserProfileActivity.this, thisProfileOwnerId, postRv, db);
                             postRv.setAdapter(postRvAdapter);
                             postDescriptorsRv.setMinimumHeight(100);
+                            postLoadingSpinner.setVisibility(View.GONE);
 
                         })
-                        .addOnFailureListener(e -> Log.i("ljw", "error getting post: " + e.toString()));
+                        .addOnFailureListener(e -> {
+                            Log.i("ljw", "error getting post: " + e.toString());
+                            postLoadingSpinner.setVisibility(View.GONE);
+                        });
             }
         }
 
-    }
-
-    public void onReportButtonClick(View v) {
-        Log.i("ljw", "clickety clack");
-        //display create-report modal
     }
 
     public void onDeleteButtonClick(View v) {
@@ -256,6 +256,9 @@ public class UserProfileActivity extends AppCompatActivity {
     }
     public void yesDelete(View v) {
         if (!userIsOnTheirOwnProfile) return;
+
+        v.setEnabled(false);
+        deleteLoadingSpinner.setVisibility(View.VISIBLE);
 
         db.collection("posts")
                 .document(selectedPostId)
@@ -292,13 +295,27 @@ public class UserProfileActivity extends AppCompatActivity {
                                         .addOnSuccessListener(result3 -> {
                                             Log.i("ljw", "successfully removed the deleted post's PD");
                                             Utils.showToast(UserProfileActivity.this, "Post deleted.");
+                                            deleteLoadingSpinner.setVisibility(View.GONE);
+                                            v.setEnabled(true);
                                         })
-                                        .addOnFailureListener(e -> Log.i("ljw", "error removing the deleted post's PD: " + e.toString()));
+                                        .addOnFailureListener(e -> {
+                                            Log.i("ljw", "error removing the deleted post's PD: " + e.toString());
+                                            deleteLoadingSpinner.setVisibility(View.GONE);
+                                            v.setEnabled(true);
+                                        });
 
                             })
-                            .addOnFailureListener(e -> Log.i("ljw", "error getting user to delete this PD"));
+                            .addOnFailureListener(e -> {
+                                Log.i("ljw", "error getting user to delete this PD");
+                                deleteLoadingSpinner.setVisibility(View.GONE);
+                                v.setEnabled(true);
+                            });
                 })
-                .addOnFailureListener(e -> Log.i("ljw", "error deleting post: " + e.toString()));
+                .addOnFailureListener(e -> {
+                    Log.i("ljw", "error deleting post: " + e.toString());
+                    deleteLoadingSpinner.setVisibility(View.GONE);
+                    v.setEnabled(true);
+                });
 
         cl.setVisibility(View.GONE);
     }

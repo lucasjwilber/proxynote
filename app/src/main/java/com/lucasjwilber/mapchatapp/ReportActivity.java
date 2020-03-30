@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -18,11 +19,13 @@ public class ReportActivity extends AppCompatActivity {
     String postId;
     FirebaseUser currentUser;
     FirebaseFirestore db;
+    ProgressBar loadingSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
+        loadingSpinner = findViewById(R.id.reportProgressBar);
 
         db = FirebaseFirestore.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -32,6 +35,7 @@ public class ReportActivity extends AppCompatActivity {
     }
 
     public void onReportSubmit(View v) {
+        loadingSpinner.setVisibility(View.VISIBLE);
         RadioGroup reportTypeRG = findViewById(R.id.reportTypeRG);
         String reason;
         Log.i("ljw", "checked rb is " + reportTypeRG.getCheckedRadioButtonId());
@@ -67,8 +71,12 @@ public class ReportActivity extends AppCompatActivity {
                 .addOnSuccessListener(success -> {
                     Log.i("ljw", "successfully added report to db");
                     Utils.showToast(ReportActivity.this, "Report submitted");
+                    loadingSpinner.setVisibility(View.GONE);
                     finish();
                 })
-                .addOnFailureListener(e -> Log.i("ljw", "error uploading report: " + e.toString()));
+                .addOnFailureListener(e -> {
+                    Log.i("ljw", "error uploading report: " + e.toString());
+                    loadingSpinner.setVisibility(View.GONE);
+                });
     }
 }

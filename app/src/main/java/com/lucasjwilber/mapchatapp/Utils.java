@@ -254,7 +254,7 @@ public class Utils {
                 message,
                 Toast.LENGTH_SHORT);
         View toastView = toast.getView();
-        toastView.setBackground(context.getResources().getDrawable(R.drawable.rounded_square_black));
+        toastView.setBackground(context.getResources().getDrawable(R.drawable.rounded_square_accentcolor));
         toast.show();
     }
 

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -42,6 +43,7 @@ public class LoginActivity extends AppCompatActivity {
     Button submitBtn;
     Button toggleBtn;
     TextView toggleLabel;
+    ProgressBar loadingSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +68,7 @@ public class LoginActivity extends AppCompatActivity {
         submitBtn = findViewById(R.id.loginActSubmitButton);
         toggleBtn = findViewById(R.id.loginActToggleButton);
         toggleLabel = findViewById(R.id.loginToggleLabel);
+        loadingSpinner = findViewById(R.id.loginProgressBar);
     }
 
     public void loginSignupToggle(View v) {
@@ -91,6 +94,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onLoginOrSignupSubmit(View v) {
+        loadingSpinner.setVisibility(View.VISIBLE);
         if (loginShown) {
             loginSubmit();
         } else {
@@ -111,9 +115,12 @@ public class LoginActivity extends AppCompatActivity {
                             user = mAuth.getCurrentUser();
                             Intent intent = new Intent(LoginActivity.this, MapActivity.class);
                             startActivity(intent);
+                            loadingSpinner.setVisibility(View.GONE);
+                            finish();
                         } else {
                             Log.i("ljw", "signInWithEmail:failure", task.getException());
                             Utils.showToast(LoginActivity.this, "Authentication failed.");
+                            loadingSpinner.setVisibility(View.VISIBLE);
                         }
                     }
                 });
@@ -149,7 +156,7 @@ public class LoginActivity extends AppCompatActivity {
                                 }
                             });
 
-                            //add new user to firestore also
+                            //add new user to firestore "users" collection
                             User newUser = new User(firstName, lastName, username, email, user.getUid());
                             db.collection("users")
                                     .document(user.getUid())
@@ -162,18 +169,22 @@ public class LoginActivity extends AppCompatActivity {
                                             Intent intent = new Intent(LoginActivity.this, MapActivity.class);
                                             intent.putExtra("newUser", true);
                                             startActivity(intent);
+                                            loadingSpinner.setVisibility(View.VISIBLE);
+                                            finish();
                                         }
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
                                             Log.i("ljw", "failed adding new user to firestore!\nnew user: "+newUser.toString());
+                                            loadingSpinner.setVisibility(View.VISIBLE);
                                         }
                                     });
 
                         } else {
                             Log.i("ljw", "createUserWithEmail:failure", task.getException());
                             Utils.showToast(LoginActivity.this, "Authentication failed.");
+                            loadingSpinner.setVisibility(View.VISIBLE);
                         }
                     }
                 });

@@ -56,7 +56,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/postTitleEditText"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="@+id/postTitleEditText"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.461" />
@@ -122,5 +121,19 @@
         android:text="Icon"
         app:layout_constraintEnd_toStartOf="@+id/postIconRv"
         app:layout_constraintTop_toTopOf="@+id/postIconRv" />
+
+    <ProgressBar
+        android:id="@+id/createPostProgressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/postBodyEditText"
+        app:layout_constraintStart_toStartOf="@+id/postBodyEditText"
+        app:layout_constraintTop_toBottomOf="@+id/postSubmitButton"
+        app:layout_constraintVertical_bias="0.26999998" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

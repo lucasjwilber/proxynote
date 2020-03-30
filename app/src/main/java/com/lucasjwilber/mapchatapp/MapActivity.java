@@ -196,6 +196,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 } else { //log out
                     FirebaseAuth.getInstance().signOut();
                     Log.i("ljw", "user logged out");
+                    Utils.showToast(MapActivity.this, "You are now logged out.");
                     user = null;
                 }
                 return true;
@@ -495,6 +496,20 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 db
         );
         postRv.setAdapter(postRvAdapter);
+        //set border color of this based on the post score
+        if (post.getScore() >= 20) {
+            postRv.setBackground(getDrawable(R.drawable.rounded_square_red));
+        } else if (post.getScore() >= 15) {
+            postRv.setBackground(getDrawable(R.drawable.rounded_square_orangered));
+        } else if (post.getScore() >= 10) {
+            postRv.setBackground(getDrawable(R.drawable.rounded_square_orange));
+        } else if (post.getScore() >= 5) {
+            postRv.setBackground(getDrawable(R.drawable.rounded_square_yelloworange));
+        } else if (post.getScore() <= -5) {
+            postRv.setBackground(getDrawable(R.drawable.rounded_square_brown));
+        } else {
+            postRv.setBackground(getDrawable(R.drawable.rounded_square_primarycolor));
+        }
         postRv.setVisibility(View.VISIBLE);
 
         // returning true instead would prevent the camera centering/info window opening
