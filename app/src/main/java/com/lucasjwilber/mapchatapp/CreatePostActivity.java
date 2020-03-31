@@ -88,8 +88,6 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     public void createPost(View v) {
-        loadingSpinner.setVisibility(View.VISIBLE);
-
         EditText postTitleForm = binding.postTitleEditText;
         String postTitle = postTitleForm.getText().toString();
         EditText postBodyForm = binding.postBodyEditText;
@@ -102,6 +100,8 @@ public class CreatePostActivity extends AppCompatActivity {
             Utils.showToast(CreatePostActivity.this, "Post text is required.");
             return;
         }
+
+        loadingSpinner.setVisibility(View.VISIBLE);
 
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(CreatePostActivity.this);
         fusedLocationClient.getLastLocation()

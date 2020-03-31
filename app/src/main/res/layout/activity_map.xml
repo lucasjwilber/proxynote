@@ -53,6 +53,48 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/loginSuggestionModal"
+            android:layout_width="300dp"
+            android:layout_height="200dp"
+            android:visibility="gone"
+            android:background="@drawable/rounded_square_accentcolor"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" >
+
+            <TextView
+                android:id="@+id/loginSuggestion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="You must be logged in to do that. "
+                android:textAlignment="textStart"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.30" />
+
+            <Button
+                android:id="@+id/loginSuggestionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:background="@drawable/rounded_square_filled_accentcolor"
+                android:onClick="onLoginSuggestionButtonClick"
+                android:text="Login/Sign Up"
+                android:textColor="@color/white"
+                app:layout_constraintEnd_toEndOf="@+id/loginSuggestion"
+                app:layout_constraintStart_toStartOf="@+id/loginSuggestion"
+                app:layout_constraintTop_toBottomOf="@+id/loginSuggestion" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </fragment>

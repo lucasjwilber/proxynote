@@ -132,6 +132,12 @@ public class LoginActivity extends AppCompatActivity {
         String username = usernameET.getText().toString();
         String email = emailET.getText().toString();
         String password = passwordET.getText().toString();
+        String confirmedPassword = confirmPwET.getText().toString();
+
+        if (!password.equals(confirmedPassword)) {
+            Utils.showToast(LoginActivity.this, "Passwords do not match.");
+            return;
+        }
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {

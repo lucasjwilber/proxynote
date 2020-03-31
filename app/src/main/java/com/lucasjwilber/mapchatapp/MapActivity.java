@@ -1,6 +1,7 @@
 package com.lucasjwilber.mapchatapp;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -99,7 +100,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     boolean mapHasBeenSetUp;
     SharedPreferences sharedPreferences;
     List<Marker> postMarkers;
-
+    ConstraintLayout loginSuggestionModal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -320,7 +321,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     public void onCreatePostButtonClick(View v) {
         if (user == null) {
-            //TODO: modal with "sign in to post"
+            String text = "You must be logged in to post.";
+            mapBinding.loginSuggestion.setText(text);
+            mapBinding.loginSuggestionModal.setVisibility(View.VISIBLE);
             return;
         }
 
@@ -388,9 +391,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void createMarkerWithPost(Post post) {
+        // this is used to prevent marker overlap
+        float zIndex = (float) Math.random();
+
         Marker borderMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(post.getLat(), post.getLng()))
                 .anchor(0, 1)
+                .zIndex(zIndex)
         );
 
         int score = post.getScore();
@@ -411,7 +418,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         Marker iconMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(post.getLat(), post.getLng()))
                 .anchor(-0.4f, 1.575f)
-                .zIndex(1.0f)
+                .zIndex(zIndex + 0.0001f)
         );
         iconMarker.setIcon(Utils.getPostIconBitmapDescriptor(post.getIcon(), this));
         iconMarker.setTag(post);
@@ -464,6 +471,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     public void onMapClick(LatLng arg0) {
         postRv.setVisibility(View.GONE);
+        mapBinding.loginSuggestionModal.setVisibility(View.GONE);
     }
 
     private Bitmap getBitmap(int drawableRes) {
@@ -518,6 +526,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     public void onReportButtonClick(View v) {
         Log.i("ljw", "clickety clack");
+    }
+
+    public void onLoginSuggestionButtonClick(View v) {
+        Intent goToLogin = new Intent(MapActivity.this, LoginActivity.class);
+        startActivity(goToLogin);
     }
 
 }
