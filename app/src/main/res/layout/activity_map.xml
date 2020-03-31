@@ -52,7 +52,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
+        
+        <ProgressBar
+            android:id="@+id/mapPostRvProgressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/postRecyclerView"
+            app:layout_constraintEnd_toEndOf="@+id/postRecyclerView"
+            app:layout_constraintStart_toStartOf="@+id/postRecyclerView"
+            app:layout_constraintTop_toTopOf="@+id/postRecyclerView" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/loginSuggestionModal"
@@ -70,6 +81,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="You must be logged in to do that. "
+                android:textSize="16sp"
                 android:textAlignment="textStart"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

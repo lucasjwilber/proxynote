@@ -120,7 +120,7 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             Log.i("ljw", "signInWithEmail:failure", task.getException());
                             Utils.showToast(LoginActivity.this, "Authentication failed.");
-                            loadingSpinner.setVisibility(View.VISIBLE);
+                            loadingSpinner.setVisibility(View.GONE);
                         }
                     }
                 });
@@ -175,7 +175,7 @@ public class LoginActivity extends AppCompatActivity {
                                             Intent intent = new Intent(LoginActivity.this, MapActivity.class);
                                             intent.putExtra("newUser", true);
                                             startActivity(intent);
-                                            loadingSpinner.setVisibility(View.VISIBLE);
+                                            loadingSpinner.setVisibility(View.GONE);
                                             finish();
                                         }
                                     })
@@ -183,14 +183,14 @@ public class LoginActivity extends AppCompatActivity {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
                                             Log.i("ljw", "failed adding new user to firestore!\nnew user: "+newUser.toString());
-                                            loadingSpinner.setVisibility(View.VISIBLE);
+                                            loadingSpinner.setVisibility(View.GONE);
                                         }
                                     });
 
                         } else {
                             Log.i("ljw", "createUserWithEmail:failure", task.getException());
                             Utils.showToast(LoginActivity.this, "Authentication failed.");
-                            loadingSpinner.setVisibility(View.VISIBLE);
+                            loadingSpinner.setVisibility(View.GONE);
                         }
                     }
                 });

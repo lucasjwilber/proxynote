@@ -16,6 +16,7 @@ public class User {
     private double lastLat;
     private double lastLng;
     private int reports;
+    private String aboutme;
 
     public User() {};
 
@@ -29,6 +30,15 @@ public class User {
         this.isPaid = false;
         this.totalScore = 0;
         this.reports = 0;
+        this.aboutme = "Hello!";
+    }
+
+    public String getAboutme() {
+        return aboutme;
+    }
+
+    public void setAboutme(String aboutme) {
+        this.aboutme = aboutme;
     }
 
     public void setUid(String uid) {

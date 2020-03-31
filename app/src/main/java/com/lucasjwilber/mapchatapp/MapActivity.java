@@ -25,8 +25,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -74,11 +74,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private FusedLocationProviderClient fusedLocationClient;
     FirebaseFirestore db;
     long postQueryLimit = 500;
-    FirebaseUser user;
+    FirebaseUser currentUser;
     public static final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
-    double postsRadius = 0.05;
-    String currentUsername = "someone";
-    String currentUserId = "some id";
     double userLat;
     double userLng;
     Marker userMarker;
@@ -92,8 +89,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     BitmapDescriptor postOutlineOrangeRed;
     BitmapDescriptor postOutlineRed;
     BitmapDescriptor postOutlineBrown;
-    Post currentSelectedPost;
-    Marker currentSelectedMarker;
+    String currentSelectedPostId;
     private RecyclerView postRv;
     private RecyclerView.Adapter postRvAdapter;
     private RecyclerView.LayoutManager postRvLayoutManager;
@@ -101,6 +97,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     SharedPreferences sharedPreferences;
     List<Marker> postMarkers;
     ConstraintLayout loginSuggestionModal;
+    ProgressBar postRvProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,7 +122,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postOutlineBrown = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_brown));
 
         db = FirebaseFirestore.getInstance();
-        user = FirebaseAuth.getInstance().getCurrentUser();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
         sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
 
 
@@ -153,6 +150,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         super.onResume();
         getUserLatLng(false);
         refreshData(null);
+        // if the postRv is shown after a user hits back from visting a user profile, update the postRv
+        // data to prevent vote manipulation
+        if (currentSelectedPostId != null && postRv.getVisibility() == View.VISIBLE) {
+            setPostRvAdapter(currentSelectedPostId);
+        }
     }
 
     public void refreshData(View v) {
@@ -169,7 +171,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         popup.inflate(R.menu.hamburger_menu);
 
         Menu menu = popup.getMenu();
-        if (user == null) {
+        if (currentUser == null) {
             menu.getItem(0).setVisible(false);
         } else {
             menu.getItem(3).setTitle("Log Out");
@@ -185,20 +187,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         switch (item.getItemId()) {
             case R.id.menuProfile:
                 Intent goToProfile = new Intent(this, UserProfileActivity.class);
-                goToProfile.putExtra("userId", user.getUid());
+                goToProfile.putExtra("userId", currentUser.getUid());
                 startActivity(goToProfile);
                 return true;
             case R.id.menuHelp:
                 return true;
             case R.id.menuLoginLogout:
-                if (user == null) { //go to login/signup page
+                if (currentUser == null) { //go to login/signup page
+                    postRv.setVisibility(View.GONE);
                     Intent i = new Intent(this, LoginActivity.class);
                     startActivity(i);
                 } else { //log out
                     FirebaseAuth.getInstance().signOut();
                     Log.i("ljw", "user logged out");
                     Utils.showToast(MapActivity.this, "You are now logged out.");
-                    user = null;
+                    currentUser = null;
                 }
                 return true;
             case R.id.mapTypeNormal:
@@ -320,7 +323,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void onCreatePostButtonClick(View v) {
-        if (user == null) {
+        if (currentUser == null) {
             String text = "You must be logged in to post.";
             mapBinding.loginSuggestion.setText(text);
             mapBinding.loginSuggestionModal.setVisibility(View.VISIBLE);
@@ -421,7 +424,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .zIndex(zIndex + 0.0001f)
         );
         iconMarker.setIcon(Utils.getPostIconBitmapDescriptor(post.getIcon(), this));
-        iconMarker.setTag(post);
+        iconMarker.setTag(post.getId());
 
         postMarkers.add(borderMarker);
         postMarkers.add(iconMarker);
@@ -469,7 +472,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
-    public void onMapClick(LatLng arg0) {
+    public void onMapClick(LatLng latlng) {
         postRv.setVisibility(View.GONE);
         mapBinding.loginSuggestionModal.setVisibility(View.GONE);
     }
@@ -488,48 +491,63 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public boolean onMarkerClick(Marker marker) {
         Log.i("ljw", "clicked on a marker");
 
-        Post post = (Post) marker.getTag();
-        if (post == null) {
+        if (marker.getTag() == null) {
             Log.i("ljw", "no post tagged to the clicked on marker, hmm");
             return true;
         }
 
-        currentSelectedMarker = marker;
-        currentSelectedPost = (Post) marker.getTag();
-        postRvAdapter = new PostRvAdapter(
-                post,
-                MapActivity.this,
-                (user != null ? user.getUid() : null),
-                postRv,
-                db
-        );
-        postRv.setAdapter(postRvAdapter);
-        //set border color of this based on the post score
-        if (post.getScore() >= 20) {
-            postRv.setBackground(getDrawable(R.drawable.rounded_square_red));
-        } else if (post.getScore() >= 15) {
-            postRv.setBackground(getDrawable(R.drawable.rounded_square_orangered));
-        } else if (post.getScore() >= 10) {
-            postRv.setBackground(getDrawable(R.drawable.rounded_square_orange));
-        } else if (post.getScore() >= 5) {
-            postRv.setBackground(getDrawable(R.drawable.rounded_square_yelloworange));
-        } else if (post.getScore() <= -5) {
-            postRv.setBackground(getDrawable(R.drawable.rounded_square_brown));
-        } else {
-            postRv.setBackground(getDrawable(R.drawable.rounded_square_primarycolor));
-        }
+        currentSelectedPostId = (String) marker.getTag();
+        setPostRvAdapter(currentSelectedPostId);
         postRv.setVisibility(View.VISIBLE);
 
         // returning true instead would prevent the camera centering/info window opening
         return false;
     }
 
-    public void onReportButtonClick(View v) {
-        Log.i("ljw", "clickety clack");
+    private void setPostRvAdapter(String postId) {
+        mapBinding.mapPostRvProgressBar.setVisibility(View.VISIBLE);
+
+        if (postId != null) {
+            db.collection("posts")
+                    .document(postId)
+                    .get()
+                    .addOnSuccessListener(result -> {
+                        Log.i("ljw", "got post " + result.getId());
+                        Post post = result.toObject(Post.class);
+
+                        postRvAdapter = new PostRvAdapter(
+                                post,
+                                MapActivity.this,
+                                currentUser != null ? currentUser.getUid() : null,
+                                currentUser != null ? currentUser.getDisplayName() : null,
+                                postRv,
+                                db
+                        );
+                        postRv.setAdapter(postRvAdapter);
+                        //set border color of this based on the post score
+                        if (post.getScore() >= 20) {
+                            postRv.setBackground(getDrawable(R.drawable.rounded_square_red));
+                        } else if (post.getScore() >= 15) {
+                            postRv.setBackground(getDrawable(R.drawable.rounded_square_orangered));
+                        } else if (post.getScore() >= 10) {
+                            postRv.setBackground(getDrawable(R.drawable.rounded_square_orange));
+                        } else if (post.getScore() >= 5) {
+                            postRv.setBackground(getDrawable(R.drawable.rounded_square_yelloworange));
+                        } else if (post.getScore() <= -5) {
+                            postRv.setBackground(getDrawable(R.drawable.rounded_square_brown));
+                        } else {
+                            postRv.setBackground(getDrawable(R.drawable.rounded_square_primarycolor));
+                        }
+                        mapBinding.mapPostRvProgressBar.setVisibility(View.GONE);
+                    })
+                    .addOnFailureListener(e -> Log.i("ljw", "error getting post: " + e.toString()));
+        }
     }
 
     public void onLoginSuggestionButtonClick(View v) {
         Intent goToLogin = new Intent(MapActivity.this, LoginActivity.class);
+        postRv.setVisibility(View.GONE);
+        mapBinding.loginSuggestionModal.setVisibility(View.GONE);
         startActivity(goToLogin);
     }
 

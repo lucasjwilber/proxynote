@@ -30,9 +30,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
     private Post post;
     private String currentUserId;
+    private String currentUserUsername;
     private Context context;
     private RecyclerView recyclerView;
-    private boolean userIsSignedIn;
+//    private boolean userIsSignedIn;
     private String distanceType;
     private Drawable upArrowColored;
     private Drawable downArrowColored;
@@ -48,16 +49,20 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private static final int POST_HEADER = 0;
     private static final int POST_COMMENT = 1;
 
-    PostRvAdapter(Post post, Context context, String currentUserId, RecyclerView recyclerView, FirebaseFirestore db) {
+    PostRvAdapter(
+            Post post,
+            Context context,
+            String currentUserId,
+            String currentUserUsername,
+            RecyclerView recyclerView,
+            FirebaseFirestore db ) {
         this.post = post;
         this.context = context;
         this.currentUserId = currentUserId;
+        this.currentUserUsername = currentUserUsername;
         this.recyclerView = recyclerView;
         this.db = db;
-        if (currentUserId != null) {
-            userIsSignedIn = true;
-            this.currentUserId = currentUserId;
-        }
+
         upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
         downArrowColored = context.getDrawable(R.drawable.arrow_down_colored);
         upArrow = context.getDrawable(R.drawable.arrow_up);
@@ -65,21 +70,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
         SharedPreferences prefs = context.getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");
-
-//        //set border color of this based on the post score
-//        if (post.getScore() >= 20) {
-//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_red));
-//        } else if (post.getScore() >= 15) {
-//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_orangered));
-//        } else if (post.getScore() >= 10) {
-//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_orange));
-//        } else if (post.getScore() >= 5) {
-//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_yelloworange));
-//        } else if (post.getScore() <= -5) {
-//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_brown));
-//        } else {
-//            recyclerView.setBackground(context.getDrawable(R.drawable.rounded_square_primarycolor));
-//        }
     }
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
@@ -164,13 +154,19 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
                 Log.i("ljw", "post votes: " + post.getVotes().size());
 
-                if (userIsSignedIn) {
-                    if (post.getVotes().containsKey(currentUserId)) {
-                        if (post.getVotes().get(currentUserId) > 0) {
-                            upvoteButton.setBackground(upArrowColored);
-                        } else if (post.getVotes().get(currentUserId) < 0) {
-                            downvoteButton.setBackground(downArrowColored);
-                        }
+//                if (userIsSignedIn && post.getVotes().containsKey(currentUserId)) {
+//                    if (post.getVotes().get(currentUserId) > 0) {
+//                        upvoteButton.setBackground(upArrowColored);
+//                    } else if (post.getVotes().get(currentUserId) < 0) {
+//                        downvoteButton.setBackground(downArrowColored);
+//                    }
+//                }
+                //todo: use above if NPE:
+                if (post.getVotes().containsKey(currentUserId)) {
+                    if (post.getVotes().get(currentUserId) > 0) {
+                        upvoteButton.setBackground(upArrowColored);
+                    } else if (post.getVotes().get(currentUserId) < 0) {
+                        downvoteButton.setBackground(downArrowColored);
                     }
                 }
                 return new PostViewHolder(l);
@@ -214,7 +210,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     public void onVoteButtonClick(Button b) {
-        if (!userIsSignedIn) {
+        if (currentUserId == null) {
             //TODO: modal with "sign in to vote"
             return;
         }
@@ -346,7 +342,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     private void onReportButtonClicked() {
-        if (!userIsSignedIn) {
+        if (currentUserId == null) {
             Utils.showToast(context, "You must be signed in to report a post.");
             return;
         }
@@ -357,7 +353,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
     public void addCommentToPost(String commentText) {
         Log.i("ljw", commentText);
-        if (!userIsSignedIn) {
+        if (currentUserId == null) {
             //TODO: modal with "sign in to comment"
             return;
         } else if (commentText.equals("") || commentText.length() == 0) {
@@ -378,20 +374,20 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                         userLng = location.getLongitude();
                         Log.i("ljw", "lat: " + userLat + "\nlong: " + userLng);
 
-                        //get user from "users"
-                        db.collection("users")
-                                .document(currentUserId)
-                                .get()
-                                .addOnSuccessListener(result -> {
-                                    Log.i("ljw", "got user from db");
-                                    User user = result.toObject(User.class);
-                                    assert user != null;
+//                        //get user from "users"
+//                        db.collection("users")
+//                                .document(postOwnerId)
+//                                .get()
+//                                .addOnSuccessListener(result -> {
+//                                    Log.i("ljw", "got user from db");
+//                                    User user = result.toObject(User.class);
+//                                    assert user != null;
 
                                     double distanceFromPost = Utils.getDistance(userLat, userLng, post.getLat(), post.getLng());
 
                                     Comment comment = new Comment(
                                             currentUserId,
-                                            user.getUsername(),
+                                            currentUserUsername != null ? currentUserUsername : "someone",
                                             commentText,
                                             userLat,
                                             userLng,
@@ -414,11 +410,11 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                                                 Log.i("ljw", "failed adding a comment because " + e.toString());
                                                 replyLoadingSpinner.setVisibility(View.GONE);
                                             });
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.i("ljw", "error getting user from db: " + e.toString());
-                                    replyLoadingSpinner.setVisibility(View.GONE);
-                                });
+//                                })
+//                                .addOnFailureListener(e -> {
+//                                    Log.i("ljw", "error getting user from db: " + e.toString());
+//                                    replyLoadingSpinner.setVisibility(View.GONE);
+//                                });
                     }
                 })
                 .addOnFailureListener(e -> {

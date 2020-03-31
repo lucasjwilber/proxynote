@@ -22,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -35,7 +34,6 @@ import com.google.firebase.storage.UploadTask;
 import com.lucasjwilber.mapchatapp.databinding.ActivityCreatePostBinding;
 
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -84,7 +82,6 @@ public class CreatePostActivity extends AppCompatActivity {
         iconRv.setAdapter(iconRvAdapter);
 
         Intent intent = getIntent();
-        userCurrentAddress = intent.getStringExtra("userCurrentAddress");
     }
 
     public void createPost(View v) {
@@ -105,7 +102,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(CreatePostActivity.this);
         fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(location -> {
+                .addOnSuccessListener(CreatePostActivity.this, location -> {
                     Log.i("ljw", "successfully got location");
                     // Got last known location. In some rare situations this can be null.
 

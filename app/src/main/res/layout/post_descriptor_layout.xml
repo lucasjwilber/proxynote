@@ -21,20 +21,19 @@
     <TextView
         android:id="@+id/postdescriptorScore"
         android:layout_width="wrap_content"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:paddingEnd="10dp"
         android:textAlignment="center"
-        android:textSize="18sp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@+id/postdescriptorIcon"
         app:layout_constraintStart_toEndOf="@+id/postdescriptorIcon"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintTop_toTopOf="@+id/postdescriptorIcon"
         tools:text="10" />
 
     <ImageView
         android:id="@+id/postdescriptorIcon"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
         android:paddingLeft="12dp"
         android:paddingTop="4dp"
         android:paddingRight="12dp"

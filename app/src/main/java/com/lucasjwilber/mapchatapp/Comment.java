@@ -2,7 +2,6 @@ package com.lucasjwilber.mapchatapp;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 public class Comment {
@@ -17,7 +16,7 @@ public class Comment {
     private long score;
     private HashMap<String, Integer> votes;
 
-    public Comment() {};
+    public Comment() {}
 
     //for creating & uploading new comments
     public Comment(String userId, String username, String text, double lat, double lng, double distanceFromPost) {

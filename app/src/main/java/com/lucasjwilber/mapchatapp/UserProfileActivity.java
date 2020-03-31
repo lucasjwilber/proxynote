@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -31,9 +32,9 @@ public class UserProfileActivity extends AppCompatActivity {
     User thisProfileOwner;
     String thisProfileOwnerId;
     FirebaseUser currentUser;
-    String currentUserId;
-    HashMap<String, Post> cachedPosts;
+//    HashMap<String, Post> cachedPosts;
     FirebaseFirestore db;
+
 
     private TextView userScoreView;
     private TextView usernameView;
@@ -50,22 +51,19 @@ public class UserProfileActivity extends AppCompatActivity {
     boolean userIsOnTheirOwnProfile;
     ProgressBar postLoadingSpinner;
     ProgressBar deleteLoadingSpinner;
+    TextView userProfAboutme;
+    EditText userProfAboutmeEdit;
+    Button userProfAboutmeEditBtn;
+    boolean aboutmeBeingEdited;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
 
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            currentUserId = currentUser.getUid();
-        }
 
-        cachedPosts = new HashMap<>();
+//        cachedPosts = new HashMap<>();
 
-        Intent intent = getIntent();
-        thisProfileOwnerId = intent.getStringExtra("userId");
-        Log.i("ljw", "userId is " + thisProfileOwnerId);
 
         postRv = findViewById(R.id.profileOnePostRv);
         postRvLayoutManager = new LinearLayoutManager(this);
@@ -75,45 +73,56 @@ public class UserProfileActivity extends AppCompatActivity {
         cl = findViewById(R.id.profileDeletePostModal);
         postLoadingSpinner = findViewById(R.id.profPostProgressBar);
         deleteLoadingSpinner = findViewById(R.id.profDeleteProgressBar);
+        userProfAboutme = findViewById(R.id.userProfAboutme);
+        userProfAboutmeEdit = findViewById(R.id.userProfAboutmeEdit);
+        userProfAboutmeEditBtn = findViewById(R.id.userProfEditAboutmeEditBtn);
 
         db = FirebaseFirestore.getInstance();
 
-        db.collection("users")
-                .document(thisProfileOwnerId)
-                .get()
-                .addOnSuccessListener(result -> {
-                    Log.i("ljw", "successfully got user:\n" + result.toString());
-                    User user = result.toObject(User.class);
+        Intent intent = getIntent();
+        thisProfileOwnerId = intent.getStringExtra("userId");
+        Log.i("ljw", "userId is " + thisProfileOwnerId);
 
-                    thisProfileOwner = user;
-                    if (thisProfileOwnerId.equals(currentUserId)) {
-                        userIsOnTheirOwnProfile = true;
-                    }
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null && thisProfileOwnerId.equals(currentUser.getUid())) {
+            userIsOnTheirOwnProfile = true;
+            userProfAboutmeEditBtn.setVisibility(View.VISIBLE);
+        }
 
-                    assert user != null;
-                    usernameView.setText(user.getUsername());
-                    String userScoreText = "(" +
-                            user.getTotalScore() +
-                            (user.getTotalScore() == 1 || user.getTotalScore() == -1 ? " point)" : " points)");
-                    userScoreView.setText(userScoreText);
-                    List<PostDescriptor> userPostDescriptors = user.getPostDescriptors();
 
-                    if (userPostDescriptors == null || userPostDescriptors.size() == 0) {
-                        Log.i("ljw", "user hasn't made any posts, or possibly doesn't have a postDescriptors list");
-                        TextView noPosts = findViewById(R.id.profileNoCommentsYet);
-                        String noPostsText = user.getUsername() + " hasn't made any posts yet.";
-                        noPosts.setText(noPostsText);
-                        noPosts.setVisibility(View.VISIBLE);
-                    } else {
-                        postDescriptorsRv = findViewById(R.id.profileAllPostsRv);
-                        postDescriptorsRvLayoutManager = new LinearLayoutManager(this);
-                        postDescriptorsRv.setLayoutManager(postDescriptorsRvLayoutManager);
-                        postDescriptorsRvAdapter = new PostSelectAdapter(userPostDescriptors);
-                        postDescriptorsRv.setAdapter(postDescriptorsRvAdapter);
-                    }
-                })
-                .addOnFailureListener(e -> Log.i("ljw", "error getting user: " + e.toString()));
+        if (thisProfileOwnerId != null) {
+            db.collection("users")
+                    .document(thisProfileOwnerId)
+                    .get()
+                    .addOnSuccessListener(result -> {
+                        Log.i("ljw", "successfully got user:\n" + result.toString());
+                        User user = result.toObject(User.class);
+                        assert user != null;
+                        thisProfileOwner = user;
+                        usernameView.setText(user.getUsername());
+                        String userScoreText = "(" +
+                                user.getTotalScore() +
+                                (user.getTotalScore() == 1 || user.getTotalScore() == -1 ? " point)" : " points)");
+                        userScoreView.setText(userScoreText);
+                        userProfAboutme.setText(user.getAboutme());
+                        List<PostDescriptor> userPostDescriptors = user.getPostDescriptors();
 
+                        if (userPostDescriptors == null || userPostDescriptors.size() == 0) {
+                            Log.i("ljw", "user hasn't made any posts, or possibly doesn't have a postDescriptors list");
+                            TextView noPosts = findViewById(R.id.profileNoCommentsYet);
+                            String noPostsText = user.getUsername() + " hasn't made any posts yet.";
+                            noPosts.setText(noPostsText);
+                            noPosts.setVisibility(View.VISIBLE);
+                        } else {
+                            postDescriptorsRv = findViewById(R.id.profileAllPostsRv);
+                            postDescriptorsRvLayoutManager = new LinearLayoutManager(this);
+                            postDescriptorsRv.setLayoutManager(postDescriptorsRvLayoutManager);
+                            postDescriptorsRvAdapter = new PostSelectAdapter(userPostDescriptors);
+                            postDescriptorsRv.setAdapter(postDescriptorsRvAdapter);
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.i("ljw", "error getting user: " + e.toString()));
+        }
     }
 
     //list of post descriptors RV:
@@ -207,35 +216,39 @@ public class UserProfileActivity extends AppCompatActivity {
             cl.setBackgroundColor(getResources().getColor(R.color.lightgray));
 
             if (userIsOnTheirOwnProfile) b.setVisibility(View.VISIBLE);
-
-            if (cachedPosts.containsKey(selectedPostId)) {
-                Log.i("ljw", "getting post from cache instead of firestore");
-                postRvAdapter = new PostRvAdapter(
-                        Objects.requireNonNull(cachedPosts.get(selectedPostId)),
-                        getApplicationContext(),
-                        thisProfileOwnerId,
-                        postRv,
-                        db);
-                postRv.setAdapter(postRvAdapter);
-                postRvAdapter.notifyDataSetChanged();
-                postLoadingSpinner.setVisibility(View.GONE);
-            } else {
+//
+////            if (cachedPosts.containsKey(selectedPostId)) {
+////                Log.i("ljw", "getting post from cache instead of firestore");
+////                postRvAdapter = new PostRvAdapter(
+////                        Objects.requireNonNull(cachedPosts.get(selectedPostId)),
+////                        getApplicationContext(),
+////                        currentUser != null ? currentUser.getUid() : null,
+////                        currentUser != null ? currentUser.getDisplayName() : null,
+////                        postRv,
+////                        db);
+////                postRv.setAdapter(postRvAdapter);
+////                postRvAdapter.notifyDataSetChanged();
+////                postLoadingSpinner.setVisibility(View.GONE);
+//            } else {
                 db.collection("posts")
                         .document(selectedPostId)
                         .get()
                         .addOnSuccessListener(response -> {
                             Log.i("ljw", "got post!");
                             Post post = response.toObject(Post.class);
-                            if (post == null) {
-                                Log.i("ljw", "post not found. may have been deleted from the post collection but not the user object");
-                                return;
-                            }
+                            assert post != null;
                             Log.i("ljw", "found post " + post.getId());
                             ArrayList list = (ArrayList) response.getData().get("comments");
                             post.setComments(Utils.turnMapsIntoListOfComments(list));
 
-                            cachedPosts.put(selectedPostId, post);
-                            postRvAdapter = new PostRvAdapter(post, UserProfileActivity.this, thisProfileOwnerId, postRv, db);
+//                            cachedPosts.put(selectedPostId, post);
+                            postRvAdapter = new PostRvAdapter(
+                                    post,
+                                    UserProfileActivity.this,
+                                    currentUser != null ? currentUser.getUid() : null,
+                                    currentUser != null ? currentUser.getDisplayName() : null,
+                                    postRv,
+                                    db);
                             postRv.setAdapter(postRvAdapter);
                             postDescriptorsRv.setMinimumHeight(100);
                             postLoadingSpinner.setVisibility(View.GONE);
@@ -245,7 +258,7 @@ public class UserProfileActivity extends AppCompatActivity {
                             Log.i("ljw", "error getting post: " + e.toString());
                             postLoadingSpinner.setVisibility(View.GONE);
                         });
-            }
+//            }
         }
 
     }
@@ -321,6 +334,35 @@ public class UserProfileActivity extends AppCompatActivity {
     }
     public void noDelete(View v) {
         cl.setVisibility(View.GONE);
+    }
+
+    public void onEditAboutmeButtonClicked(View v) {
+        if (!userIsOnTheirOwnProfile) return;
+        aboutmeBeingEdited = !aboutmeBeingEdited;
+        userProfAboutme.setVisibility(aboutmeBeingEdited ? View.GONE : View.VISIBLE);
+        userProfAboutmeEdit.setVisibility(aboutmeBeingEdited ? View.VISIBLE : View.GONE);
+        String buttonText = aboutmeBeingEdited ? "SAVE" : "EDIT";
+        userProfAboutmeEditBtn.setText(buttonText);
+
+        //on "edit" click:
+        if (aboutmeBeingEdited) {
+            userProfAboutmeEdit.setText(userProfAboutme.getText().toString());
+        }
+
+        // on "save" click, if the text was changed:
+        if (!aboutmeBeingEdited && !userProfAboutmeEdit.getText().toString().equals(userProfAboutme.getText().toString())) {
+            String newAboutmeText = userProfAboutmeEdit.getText().toString();
+            userProfAboutme.setText(newAboutmeText);
+            db.collection("users")
+                    .document(currentUser.getUid())
+                    .update("aboutme", newAboutmeText)
+                    .addOnSuccessListener(success -> {
+                        Log.i("ljw", "successfully updated aboutme");
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.i("ljw", "failed updating aboutme: " + e.toString());
+                    });
+        }
     }
 
 }
