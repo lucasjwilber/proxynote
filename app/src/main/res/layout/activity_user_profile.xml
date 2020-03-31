@@ -8,18 +8,6 @@
     android:layout_height="match_parent"
     tools:context=".UserProfileActivity">
 
-    <ProgressBar
-        android:id="@+id/profPostProgressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/profileOnePostRv"
-        app:layout_constraintEnd_toEndOf="@+id/profileOnePostRv"
-        app:layout_constraintStart_toStartOf="@+id/profileOnePostRv"
-        app:layout_constraintTop_toTopOf="@+id/profileOnePostRv" />
-
     <LinearLayout
         android:id="@+id/userProfileHeader"
         android:layout_width="wrap_content"
@@ -62,6 +50,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ProgressBar
+        android:id="@+id/postDescRvProgressBar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/profileAllPostsRv"
+        app:layout_constraintEnd_toEndOf="@+id/profileAllPostsRv"
+        app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
+        app:layout_constraintTop_toTopOf="@+id/profileAllPostsRv" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/profileOnePostRv"
         android:layout_width="0dp"
@@ -70,10 +69,20 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/profileAllPostsRv"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
-        app:layout_constraintTop_toBottomOf="@+id/profileAllPostsRv"
-        app:layout_constraintVertical_bias="0.941" />
+        app:layout_constraintTop_toBottomOf="@+id/profileAllPostsRv" />
+
+    <ProgressBar
+        android:id="@+id/postRvProgressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/profileOnePostRv"
+        app:layout_constraintEnd_toEndOf="@+id/profileOnePostRv"
+        app:layout_constraintStart_toStartOf="@+id/profileOnePostRv"
+        app:layout_constraintTop_toTopOf="@+id/profileOnePostRv" />
 
     <TextView
         android:id="@+id/allPostsLabel"
@@ -98,7 +107,7 @@
         app:layout_constraintTop_toTopOf="@+id/profileAllPostsRv" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/profileDeletePostModal"
+        android:id="@+id/deletePostModal"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="25dp"
@@ -152,7 +161,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ProgressBar
-        android:id="@+id/profDeleteProgressBar"
+        android:id="@+id/deletePostProgressBar"
         style="?android:attr/progressBarStyle"
         android:layout_width="30dp"
         android:layout_height="30dp"
@@ -164,7 +173,7 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
+        android:id="@+id/aboutMeLayout"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -174,7 +183,7 @@
         app:layout_constraintTop_toBottomOf="@+id/userProfileHeader">
 
         <TextView
-            android:id="@+id/userProfAboutme"
+            android:id="@+id/aboutMeTV"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
@@ -182,10 +191,10 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/userProfAboutmeEdit" />
+            app:layout_constraintTop_toTopOf="@+id/aboutMeET" />
 
         <EditText
-            android:id="@+id/userProfAboutmeEdit"
+            android:id="@+id/aboutMeET"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_square_black"
@@ -200,7 +209,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button
-        android:id="@+id/userProfEditAboutmeEditBtn"
+        android:id="@+id/aboutMeEditBtn"
         android:layout_width="35dp"
         android:layout_height="20dp"
         android:background="?android:attr/selectableItemBackground"
@@ -209,8 +218,8 @@
         android:textColor="@color/colorAccent"
         android:textSize="12sp"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
-        app:layout_constraintStart_toStartOf="@+id/constraintLayout" />
+        app:layout_constraintBottom_toTopOf="@+id/aboutMeLayout"
+        app:layout_constraintStart_toStartOf="@+id/aboutMeLayout" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
