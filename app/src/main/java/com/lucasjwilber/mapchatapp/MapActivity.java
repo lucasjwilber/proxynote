@@ -140,9 +140,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         refreshData(null);
         // if the postRv is shown after a user hits back from visting a user profile, update the postRv
         // data to prevent vote manipulation
-        if (currentSelectedPostId != null && postRv.getVisibility() == View.VISIBLE) {
-            setPostRvAdapter(currentSelectedPostId);
-        }
+//        if (currentSelectedPostId != null && postRv.getVisibility() == View.VISIBLE) {
+//            setPostRvAdapter(currentSelectedPostId);
+//        }
     }
 
     public void refreshData(View v) {
@@ -368,7 +368,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 // for whatever reason the Post created by document.toObject doesn't include the comments list
                                 // they are however present as an ArrayList of HashMaps
                                 ArrayList list = (ArrayList) document.getData().get("comments");
+                                Log.i("ljw", "list is " + list.toString());
                                 post.setComments(Utils.turnMapsIntoListOfComments(list));
+
+                                Log.i("ljw", "comments in map: " + post.getComments());
 
                                 createMarkerWithPost(post);
                             }
@@ -458,6 +461,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     .addOnSuccessListener(result -> {
                         Log.i("ljw", "got post " + result.getId());
                         Post post = result.toObject(Post.class);
+                        if (post != null) {
+                            ArrayList list = (ArrayList) result.getData().get("comments");
+                            post.setComments(Utils.turnMapsIntoListOfComments(list));
+                        }
 
                         postRvAdapter = new PostRvAdapter(
                                 post,

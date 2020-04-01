@@ -95,8 +95,11 @@ public class Utils {
                 return iDistance + " feet away";
             } else if (dDistance < 10){
                 //round the first decimal and remove the others
+                Log.i("ljw", "1: " + dDistance);
                 dDistance = Math.round(dDistance * 10);
+                Log.i("ljw", "2: " + dDistance);
                 dDistance = dDistance / 10;
+                Log.i("ljw", "3: " + dDistance);
                 return dDistance + " miles away";
             } else { // if (dDistance >= 10)
                 // round it and remove decimals
@@ -131,10 +134,6 @@ public class Utils {
         } else {
             return number + " " + unit + "s ago";
         }
-    }
-
-    static String getFormattedTime(long timestamp) {
-        return new java.util.Date(timestamp).toString();
     }
 
     private static Bitmap getBitmap(int drawableRes, Context context) {

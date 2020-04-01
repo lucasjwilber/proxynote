@@ -22,6 +22,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -147,6 +148,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 if (post.getImageUrl() != null && post.getImageUrl().length() > 0) {
                     Glide.with(parent).load(post.getImageUrl()).into(postImage);
                 }
+
+                Log.i("ljw", "comments: " + post.getComments());
+//                ArrayList list = (ArrayList) post.getComments();
+//                post.setComments(Utils.turnMapsIntoListOfComments(list));
 
                 postText.setText(post.getText());
                 int numComments = post.getComments().size();
@@ -406,7 +411,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
                                     List<Comment> comments = post.getComments();
                                     comments.add(comment);
-                                    Log.i("ljw", comments.toString());
+                                    Log.i("ljw", "adding comment " + comments.toString());
 
                                     //get post by id from firestore
                                     db.collection("posts")
