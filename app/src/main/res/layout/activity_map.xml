@@ -47,12 +47,12 @@
             android:layout_marginLeft="50dp"
             android:layout_marginRight="50dp"
             android:visibility="gone"
-            android:background="@drawable/rounded_square_primarycolor"
+            android:background="@drawable/rounded_square_yellow"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-        
+
         <ProgressBar
             android:id="@+id/mapPostRvProgressBar"
             style="?android:attr/progressBarStyleLarge"

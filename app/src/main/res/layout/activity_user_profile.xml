@@ -6,6 +6,7 @@
     android:id="@+id/userProfileLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lightgray"
     tools:context=".UserProfileActivity">
 
     <LinearLayout
@@ -65,8 +66,7 @@
         android:id="@+id/profileOnePostRv"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/profileAllPostsRv"
         app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"

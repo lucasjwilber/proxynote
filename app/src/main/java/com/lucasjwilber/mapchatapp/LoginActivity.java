@@ -7,10 +7,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -21,6 +17,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.lucasjwilber.mapchatapp.databinding.ActivityLoginBinding;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -28,73 +25,52 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseUser user;
     FirebaseFirestore db;
     private boolean loginShown = true;
-    TextView firstNameLabel;
-    EditText firstNameET;
-    TextView lastNameLabel;
-    EditText lastNameET;
-    TextView usernameLabel;
-    EditText usernameET;
-    EditText emailET;
-    EditText passwordET;
-    TextView confirmPwCLabel;
-    TextView confirmPwPLabel;
-    EditText confirmPwET;
-    Button forgotPwBtn;
-    Button submitBtn;
-    Button toggleBtn;
-    TextView toggleLabel;
-    ProgressBar loadingSpinner;
+    private ActivityLoginBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-
-        firstNameLabel = findViewById(R.id.loginActFirstNameLabel);
-        firstNameET = findViewById(R.id.loginActFirstNameEditText);
-        lastNameLabel = findViewById(R.id.loginActLastNameLabel);
-        lastNameET = findViewById(R.id.loginActLastNameEditText);
-        usernameLabel = findViewById(R.id.loginActUsernameLabel);
-        usernameET = findViewById(R.id.loginActUsernameEditText);
-        emailET = findViewById(R.id.loginActEmailEditText);
-        passwordET = findViewById(R.id.loginActPasswordEditText);
-        confirmPwCLabel = findViewById(R.id.loginActConfirmPasswordCLabel);
-        confirmPwPLabel = findViewById(R.id.loginActConfirmPasswordPLabel);
-        confirmPwET = findViewById(R.id.loginActConfirmPasswordEditText);
-//        forgotPwBtn = findViewById(R.id.loginActForgotPwBtn);
-        submitBtn = findViewById(R.id.loginActSubmitButton);
-        toggleBtn = findViewById(R.id.loginActToggleButton);
-        toggleLabel = findViewById(R.id.loginToggleLabel);
-        loadingSpinner = findViewById(R.id.loginProgressBar);
     }
 
-    public void loginSignupToggle(View v) {
-        String submitBtnText = loginShown ? "SIGN UP" : "LOGIN";
-        String toggleBtnText = loginShown ? "LOGIN" : "SIGN UP";
-        String toggleLabelText = loginShown ? "Already have an account?" : "Don't have an account?";
-        submitBtn.setText(submitBtnText);
-        toggleBtn.setText(toggleBtnText);
-        toggleLabel.setText(toggleLabelText);
-
-        int visibility = loginShown ? View.VISIBLE : View.GONE;
-        firstNameLabel.setVisibility(visibility);
-        firstNameET.setVisibility(visibility);
-        lastNameLabel.setVisibility(visibility);
-        lastNameET.setVisibility(visibility);
-        usernameLabel.setVisibility(visibility);
-        usernameET.setVisibility(visibility);
-        confirmPwCLabel.setVisibility(visibility);
-        confirmPwPLabel.setVisibility(visibility);
-        confirmPwET.setVisibility(visibility);
-
-        loginShown = !loginShown;
+    public void loginButtonClicked(View v) {
+        loginShown = true;
+        String submitBtnText = "LOGIN";
+        binding.loginButton.setTextColor(getResources().getColor(R.color.colorAccent));
+        binding.signupButton.setTextColor(getResources().getColor(R.color.gray));
+        binding.loginActSubmitButton.setText(submitBtnText);
+        binding.loginActFirstNameLabel.setVisibility(View.GONE);
+        binding.loginActFirstNameEditText.setVisibility(View.GONE);
+        binding.loginActLastNameLabel.setVisibility(View.GONE);
+        binding.loginActLastNameEditText.setVisibility(View.GONE);
+        binding.loginActUsernameLabel.setVisibility(View.GONE);
+        binding.loginActUsernameEditText.setVisibility(View.GONE);
+        binding.loginActConfirmPasswordCLabel.setVisibility(View.GONE);
+        binding.loginActConfirmPasswordPLabel.setVisibility(View.GONE);
+        binding.loginActConfirmPasswordEditText.setVisibility(View.GONE);
+    }
+    public void signupButtonClicked(View v) {
+        loginShown = false;
+        String submitBtnText = "SIGN UP";
+        binding.loginActSubmitButton.setText(submitBtnText);
+        binding.signupButton.setTextColor(getResources().getColor(R.color.colorAccent));
+        binding.loginButton.setTextColor(getResources().getColor(R.color.gray));
+        binding.loginActFirstNameLabel.setVisibility(View.VISIBLE);
+        binding.loginActFirstNameEditText.setVisibility(View.VISIBLE);
+        binding.loginActLastNameLabel.setVisibility(View.VISIBLE);
+        binding.loginActLastNameEditText.setVisibility(View.VISIBLE);
+        binding.loginActUsernameLabel.setVisibility(View.VISIBLE);
+        binding.loginActUsernameEditText.setVisibility(View.VISIBLE);
+        binding.loginActConfirmPasswordCLabel.setVisibility(View.VISIBLE);
+        binding.loginActConfirmPasswordPLabel.setVisibility(View.VISIBLE);
+        binding.loginActConfirmPasswordEditText.setVisibility(View.VISIBLE);
     }
 
-    public void onLoginOrSignupSubmit(View v) {
-        loadingSpinner.setVisibility(View.VISIBLE);
+    public void onSubmitButtonClicked(View v) {
         if (loginShown) {
             loginSubmit();
         } else {
@@ -103,8 +79,14 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void loginSubmit() {
-        String email = emailET.getText().toString();
-        String password = passwordET.getText().toString();
+        String email = binding.loginActEmailEditText.getText().toString();
+        String password = binding.loginActPasswordEditText.getText().toString();
+        if (email.equals("") || email.length() == 0 || password.equals("") || password.length() == 0) {
+            Utils.showToast(LoginActivity.this, "Please fill out your email and password.");
+            return;
+        }
+
+        binding.loginProgressBar.setVisibility(View.VISIBLE);
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -115,29 +97,31 @@ public class LoginActivity extends AppCompatActivity {
                             user = mAuth.getCurrentUser();
                             Intent intent = new Intent(LoginActivity.this, MapActivity.class);
                             startActivity(intent);
-                            loadingSpinner.setVisibility(View.GONE);
+                            binding.loginProgressBar.setVisibility(View.GONE);
                             finish();
                         } else {
                             Log.i("ljw", "signInWithEmail:failure", task.getException());
                             Utils.showToast(LoginActivity.this, "Authentication failed.");
-                            loadingSpinner.setVisibility(View.GONE);
+                            binding.loginProgressBar.setVisibility(View.GONE);
                         }
                     }
                 });
     }
 
     public void signupSubmit() {
-        String firstName = firstNameET.getText().toString();
-        String lastName = lastNameET.getText().toString();
-        String username = usernameET.getText().toString();
-        String email = emailET.getText().toString();
-        String password = passwordET.getText().toString();
-        String confirmedPassword = confirmPwET.getText().toString();
+        String firstName = binding.loginActFirstNameEditText.getText().toString();
+        String lastName = binding.loginActLastNameEditText.getText().toString();
+        String username = binding.loginActUsernameEditText.getText().toString();
+        String email = binding.loginActEmailEditText.getText().toString();
+        String password = binding.loginActPasswordEditText.getText().toString();
+        String confirmedPassword = binding.loginActConfirmPasswordEditText.getText().toString();
 
         if (!password.equals(confirmedPassword)) {
             Utils.showToast(LoginActivity.this, "Passwords do not match.");
             return;
         }
+
+        binding.loginProgressBar.setVisibility(View.VISIBLE);
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -175,7 +159,7 @@ public class LoginActivity extends AppCompatActivity {
                                             Intent intent = new Intent(LoginActivity.this, MapActivity.class);
                                             intent.putExtra("newUser", true);
                                             startActivity(intent);
-                                            loadingSpinner.setVisibility(View.GONE);
+                                            binding.loginProgressBar.setVisibility(View.GONE);
                                             finish();
                                         }
                                     })
@@ -183,14 +167,14 @@ public class LoginActivity extends AppCompatActivity {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
                                             Log.i("ljw", "failed adding new user to firestore!\nnew user: "+newUser.toString());
-                                            loadingSpinner.setVisibility(View.GONE);
+                                            binding.loginProgressBar.setVisibility(View.GONE);
                                         }
                                     });
 
                         } else {
                             Log.i("ljw", "createUserWithEmail:failure", task.getException());
                             Utils.showToast(LoginActivity.this, "Authentication failed.");
-                            loadingSpinner.setVisibility(View.GONE);
+                            binding.loginProgressBar.setVisibility(View.GONE);
                         }
                     }
                 });

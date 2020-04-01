@@ -1,7 +1,6 @@
 package com.lucasjwilber.mapchatapp;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -26,7 +25,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -96,8 +94,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     boolean mapHasBeenSetUp;
     SharedPreferences sharedPreferences;
     List<Marker> postMarkers;
-    ConstraintLayout loginSuggestionModal;
-    ProgressBar postRvProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,8 +105,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         // post recyclerview
         postRv = mapBinding.postRecyclerView;
-        postRvLayoutManager = new LinearLayoutManager(this);
-        postRv.setLayoutManager(postRvLayoutManager);
+//        postRvLayoutManager = new LinearLayoutManager(this);
+        postRv.setLayoutManager(new LinearLayoutManager(this));
         postMarkers = new LinkedList<>();
 
         userMarkerIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.user_location_pin));
@@ -158,7 +154,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void refreshData(View v) {
-        //remove old markers
+        //remove and replace markers
         if (mMap != null) {
             for (Marker m : postMarkers) m.remove();
             getPostsFromDbAndCreateMapMarkers();
@@ -520,7 +516,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 MapActivity.this,
                                 currentUser != null ? currentUser.getUid() : null,
                                 currentUser != null ? currentUser.getDisplayName() : null,
-                                postRv,
+//                                postRv,
                                 db
                         );
                         postRv.setAdapter(postRvAdapter);
@@ -536,7 +532,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         } else if (post.getScore() <= -5) {
                             postRv.setBackground(getDrawable(R.drawable.rounded_square_brown));
                         } else {
-                            postRv.setBackground(getDrawable(R.drawable.rounded_square_primarycolor));
+                            postRv.setBackground(getDrawable(R.drawable.rounded_square_yellow));
                         }
                         mapBinding.mapPostRvProgressBar.setVisibility(View.GONE);
                     })

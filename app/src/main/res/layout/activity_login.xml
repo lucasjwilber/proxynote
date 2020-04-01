@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lightgray"
     tools:context=".LoginActivity">
 
 
@@ -17,220 +18,262 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/logo" />
 
-    <TextView
-        android:id="@+id/loginActFirstNameLabel"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="First Name"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/loginActFirstNameEditText"
-        app:layout_constraintEnd_toStartOf="@+id/loginActFirstNameEditText"
-        app:layout_constraintTop_toTopOf="@+id/loginActFirstNameEditText" />
-
-    <EditText
-        android:id="@+id/loginActFirstNameEditText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/loginActLastNameEditText"
-        app:layout_constraintEnd_toEndOf="@+id/loginActLastNameEditText"
-        app:layout_constraintStart_toEndOf="@+id/loginActLastNameLabel" />
-
-    <TextView
-        android:id="@+id/loginActLastNameLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="Last Name"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/loginActLastNameEditText"
-        app:layout_constraintEnd_toStartOf="@+id/loginActLastNameEditText"
-        app:layout_constraintTop_toTopOf="@+id/loginActLastNameEditText" />
-
-    <EditText
-        android:id="@+id/loginActLastNameEditText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:ems="10"
-        android:visibility="gone"
-        android:inputType="textPersonName"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/loginActEmailEditText"
-        app:layout_constraintEnd_toEndOf="@+id/loginActEmailEditText"
-        app:layout_constraintStart_toEndOf="@+id/loginActEmailLabel" />
-
-    <TextView
-        android:id="@+id/loginActUsernameLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="Username"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/loginActUsernameEditText"
-        app:layout_constraintEnd_toStartOf="@+id/loginActUsernameEditText"
-        app:layout_constraintTop_toTopOf="@+id/loginActUsernameEditText" />
-
-    <EditText
-        android:id="@+id/loginActUsernameEditText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:visibility="gone"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/loginActFirstNameEditText"
-        app:layout_constraintEnd_toEndOf="@+id/loginActFirstNameEditText"
-        app:layout_constraintStart_toEndOf="@+id/loginActFirstNameLabel" />
-
-    <TextView
-        android:id="@+id/loginActEmailLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Email"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/loginActEmailEditText"
-        app:layout_constraintEnd_toStartOf="@+id/loginActEmailEditText"
-        app:layout_constraintTop_toTopOf="@+id/loginActEmailEditText" />
-
-    <EditText
-        android:id="@+id/loginActEmailEditText"
-        android:layout_width="241dp"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.58"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.45" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:layout_constraintVertical_bias="0.2">
 
-    <TextView
-        android:id="@+id/loginActPasswordLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Password"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/loginActPasswordEditText"
-        app:layout_constraintEnd_toStartOf="@+id/loginActPasswordEditText"
-        app:layout_constraintTop_toTopOf="@+id/loginActPasswordEditText" />
+        <TextView
+            android:id="@+id/loginActFirstNameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="First Name"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/loginActFirstNameEditText"
+            app:layout_constraintEnd_toStartOf="@+id/loginActFirstNameEditText"
+            app:layout_constraintTop_toTopOf="@+id/loginActFirstNameEditText"
+            tools:visibility="visible" />
 
-    <!--    <Button-->
-<!--        android:id="@+id/loginActForgotPwBtn"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_gravity="end"-->
-<!--        android:background="@android:color/transparent"-->
-<!--        android:text="Forgot password?"-->
-<!--        android:textSize="12sp"-->
-<!--        android:visibility="gone" />-->
+        <EditText
+            android:id="@+id/loginActFirstNameEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/loginActLastNameEditText"
+            app:layout_constraintEnd_toEndOf="@+id/loginActLastNameEditText"
+            app:layout_constraintStart_toEndOf="@+id/loginActLastNameLabel"
+            tools:visibility="visible" />
 
-    <TextView
-        android:id="@+id/loginActConfirmPasswordCLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="Confirm"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toTopOf="@+id/loginActConfirmPasswordPLabel"
-        app:layout_constraintStart_toStartOf="@+id/loginActConfirmPasswordPLabel" />
+        <TextView
+            android:id="@+id/loginActLastNameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Last Name"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/loginActLastNameEditText"
+            app:layout_constraintEnd_toStartOf="@+id/loginActLastNameEditText"
+            app:layout_constraintTop_toTopOf="@+id/loginActLastNameEditText"
+            tools:visibility="visible" />
 
-    <TextView
-        android:id="@+id/loginActConfirmPasswordPLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="Password"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/loginActConfirmPasswordEditText"
-        app:layout_constraintEnd_toStartOf="@+id/loginActConfirmPasswordEditText"
-        app:layout_constraintTop_toTopOf="@+id/loginActConfirmPasswordEditText"
-        app:layout_constraintVertical_bias="0.79" />
+        <EditText
+            android:id="@+id/loginActLastNameEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/loginActEmailEditText"
+            app:layout_constraintEnd_toEndOf="@+id/loginActEmailEditText"
+            app:layout_constraintStart_toEndOf="@+id/loginActEmailLabel"
+            tools:visibility="visible" />
 
-    <EditText
-        android:id="@+id/loginActPasswordEditText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:ems="10"
-        android:inputType="textPassword"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@+id/loginActEmailEditText"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/loginActEmailEditText"
-        app:layout_constraintTop_toBottomOf="@+id/loginActEmailEditText" />
+        <TextView
+            android:id="@+id/loginActUsernameLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Username"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/loginActUsernameEditText"
+            app:layout_constraintEnd_toStartOf="@+id/loginActUsernameEditText"
+            app:layout_constraintTop_toTopOf="@+id/loginActUsernameEditText"
+            tools:visibility="visible" />
 
-    <EditText
-        android:id="@+id/loginActConfirmPasswordEditText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_marginTop="8dp"
-        android:ems="10"
-        android:inputType="textPassword"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@+id/loginActPasswordEditText"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/loginActPasswordEditText"
-        app:layout_constraintTop_toBottomOf="@+id/loginActPasswordEditText" />
+        <EditText
+            android:id="@+id/loginActUsernameEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/loginActFirstNameEditText"
+            app:layout_constraintEnd_toEndOf="@+id/loginActFirstNameEditText"
+            app:layout_constraintStart_toEndOf="@+id/loginActFirstNameLabel"
+            tools:visibility="visible" />
 
-    <Button
-        android:id="@+id/loginActSubmitButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/rounded_square_filled_accentcolor"
-        android:onClick="onLoginOrSignupSubmit"
-        android:text="LOGIN"
-        android:textColor="@color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loginActConfirmPasswordEditText" />
+        <TextView
+            android:id="@+id/loginActEmailLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@+id/loginActEmailEditText"
+            app:layout_constraintEnd_toStartOf="@+id/loginActEmailEditText"
+            app:layout_constraintTop_toTopOf="@+id/loginActEmailEditText" />
 
-    <TextView
-        android:id="@+id/loginToggleLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Don't have an account?"
-        app:layout_constraintBottom_toTopOf="@+id/loginActToggleButton"
-        app:layout_constraintEnd_toEndOf="@+id/loginActToggleButton"
-        app:layout_constraintStart_toStartOf="@+id/loginActToggleButton" />
+        <EditText
+            android:id="@+id/loginActEmailEditText"
+            android:layout_width="241dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.75"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/loginActToggleButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:textColor="@color/colorAccent"
-        android:onClick="loginSignupToggle"
-        android:text="SIGN UP"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:text="SIGN UP" />
+        <TextView
+            android:id="@+id/loginActPasswordLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@+id/loginActPasswordEditText"
+            app:layout_constraintEnd_toStartOf="@+id/loginActPasswordEditText"
+            app:layout_constraintTop_toTopOf="@+id/loginActPasswordEditText" />
+
+        <!--    <Button-->
+        <!--        android:id="@+id/loginActForgotPwBtn"-->
+        <!--        android:layout_width="wrap_content"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:layout_gravity="end"-->
+        <!--        android:background="@android:color/transparent"-->
+        <!--        android:text="Forgot password?"-->
+        <!--        android:textSize="12sp"-->
+        <!--        android:visibility="gone" />-->
+
+        <TextView
+            android:id="@+id/loginActConfirmPasswordCLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirm"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/loginActConfirmPasswordPLabel"
+            app:layout_constraintStart_toStartOf="@+id/loginActConfirmPasswordPLabel"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/loginActConfirmPasswordPLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/loginActConfirmPasswordEditText"
+            app:layout_constraintEnd_toStartOf="@+id/loginActConfirmPasswordEditText"
+            app:layout_constraintTop_toTopOf="@+id/loginActConfirmPasswordEditText"
+            app:layout_constraintVertical_bias="0.79"
+            tools:visibility="visible" />
+
+        <EditText
+            android:id="@+id/loginActPasswordEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:inputType="textPassword"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="@+id/loginActEmailEditText"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/loginActEmailEditText"
+            app:layout_constraintTop_toBottomOf="@+id/loginActEmailEditText"
+            tools:visibility="visible" />
+
+        <EditText
+            android:id="@+id/loginActConfirmPasswordEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:inputType="textPassword"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/loginActPasswordEditText"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/loginActPasswordEditText"
+            app:layout_constraintTop_toBottomOf="@+id/loginActPasswordEditText"
+            tools:visibility="visible" />
+
+        <Button
+            android:id="@+id/loginActSubmitButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/rounded_square_filled_accentcolor"
+            android:onClick="onSubmitButtonClicked"
+            android:text="LOGIN"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loginActConfirmPasswordEditText" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ProgressBar
         android:id="@+id/loginProgressBar"
         style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_centerHorizontal="true"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/loginToggleLabel"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+        app:layout_constraintStart_toStartOf="@+id/linearLayout"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="132dp"
+        android:alpha="50"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.511"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loginActSubmitButton" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/loginButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:onClick="loginButtonClicked"
+            android:text="LOGIN"
+            android:textColor="@color/colorAccent"
+            android:textSize="18sp"
+            tools:text="LOGIN" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:text="|"
+            android:textAlignment="center"
+            android:textColor="@color/gray"
+            android:textSize="30dp" />
+
+        <Button
+            android:id="@+id/signupButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:onClick="signupButtonClicked"
+            android:text="SIGN UP"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="18sp"
+            tools:text="SIGN UP" />
+
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

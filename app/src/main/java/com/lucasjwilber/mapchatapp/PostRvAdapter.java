@@ -32,7 +32,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private String currentUserId;
     private String currentUserUsername;
     private Context context;
-    private RecyclerView recyclerView;
+//    private RecyclerView recyclerView;
 //    private boolean userIsSignedIn;
     private String distanceType;
     private Drawable upArrowColored;
@@ -40,8 +40,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private Button upvoteButton;
     private Button downvoteButton;
     private TextView postScore;
-    private Drawable upArrow;
-    private Drawable downArrow;
+//    private Drawable upArrow;
+//    private Drawable downArrow;
     private FirebaseFirestore db;
     private EditText addCommentBox;
     private ProgressBar replyLoadingSpinner;
@@ -54,19 +54,19 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             Context context,
             String currentUserId,
             String currentUserUsername,
-            RecyclerView recyclerView,
+//            RecyclerView recyclerView,
             FirebaseFirestore db ) {
         this.post = post;
         this.context = context;
         this.currentUserId = currentUserId;
         this.currentUserUsername = currentUserUsername;
-        this.recyclerView = recyclerView;
+//        this.recyclerView = recyclerView;
         this.db = db;
 
         upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
         downArrowColored = context.getDrawable(R.drawable.arrow_down_colored);
-        upArrow = context.getDrawable(R.drawable.arrow_up);
-        downArrow = context.getDrawable(R.drawable.arrow_down);
+//        upArrow = context.getDrawable(R.drawable.arrow_up);
+//        downArrow = context.getDrawable(R.drawable.arrow_down);
 
         SharedPreferences prefs = context.getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");
@@ -130,8 +130,14 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 TextView commentCount = l.findViewById(R.id.postCommentCount);
                 replyLoadingSpinner = l.findViewById(R.id.replySubmitProgressBar);
 
-                postUsername.setText(post.getUsername());
-                postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
+                if (!post.getUserId().equals(currentUserId)) {
+                    postUsername.setText(post.getUsername());
+                    postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
+                } else {
+                    String me = "me";
+                    postUsername.setText(me);
+                    postUsername.setTextColor(context.getResources().getColor(R.color.black));
+                }
                 postTimeAndPlace.setText(Utils.getHowLongAgo(post.getTimestamp()));
                 reportButton.setOnClickListener(v -> onReportButtonClicked());
                 postTitle.setText(post.getTitle());
@@ -190,9 +196,14 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             Comment comment = post.getComments().get(position - 1);
             TextView commentUsername = holder.constraintLayout.findViewById(R.id.commentUsername);
             TextView commentTimeAndPlace = holder.constraintLayout.findViewById(R.id.postRvCommentHeader);
-
-            commentUsername.setText(comment.getUsername());
-            commentUsername.setOnClickListener(v -> onUsernameClicked(comment.getUserId()));
+            if (!comment.getUserId().equals(currentUserId)) {
+                commentUsername.setText(comment.getUsername());
+                commentUsername.setOnClickListener(v -> onUsernameClicked(comment.getUserId()));
+            } else {
+                String me = "me";
+                commentUsername.setText(me);
+                commentUsername.setTextColor(context.getResources().getColor(R.color.black));
+            }
             String commentTimeAndPlaceText = Utils.getHowLongAgo(comment.getTimestamp()) +
                     ", " +
                     Utils.getHowFarAway(comment.getDistanceFromPost(), distanceType);
