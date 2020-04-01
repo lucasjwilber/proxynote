@@ -4,12 +4,23 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,15 +47,6 @@ public class Utils {
             }
             long score = (long) map.get("score");
             HashMap<String, Integer> votes = (HashMap<String, Integer>) map.get("votes");
-//            int reports;
-//            if (map.get("reports") == null) {
-//                reports = 0;
-//            } else if (map.get("reports").getClass() == Long.class) {
-//                Long r = (Long) map.get("reports");
-//                reports = r.intValue();
-//            } else {
-//                reports = (int) map.get("reports");
-//            }
 
             comments.add(new Comment(id, userId, username, text, timestamp, lat, lng, distance, score, votes));
         }

@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -20,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,13 +51,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.lucasjwilber.mapchatapp.databinding.ActivityMapBinding;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -79,7 +74,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     Marker userMarker;
     LatLngBounds cameraBounds;
     public String userCurrentAddress = "somewhere";
-    TextView userLocationTV;
     BitmapDescriptor userMarkerIcon;
     BitmapDescriptor postOutlineYellow;
     BitmapDescriptor postOutlineYellowOrange;
@@ -90,7 +84,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     String currentSelectedPostId;
     private RecyclerView postRv;
     private RecyclerView.Adapter postRvAdapter;
-    private RecyclerView.LayoutManager postRvLayoutManager;
     boolean mapHasBeenSetUp;
     SharedPreferences sharedPreferences;
     List<Marker> postMarkers;
@@ -105,7 +98,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         // post recyclerview
         postRv = mapBinding.postRecyclerView;
-//        postRvLayoutManager = new LinearLayoutManager(this);
         postRv.setLayoutManager(new LinearLayoutManager(this));
         postMarkers = new LinkedList<>();
 
@@ -321,8 +313,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onCreatePostButtonClick(View v) {
         if (currentUser == null) {
             String text = "You must be logged in to post.";
-            mapBinding.loginSuggestion.setText(text);
-            mapBinding.loginSuggestionModal.setVisibility(View.VISIBLE);
+            mapBinding.mapLoginSuggestion.setText(text);
+            mapBinding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
             return;
         }
 
@@ -379,8 +371,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 post.setComments(Utils.turnMapsIntoListOfComments(list));
 
                                 createMarkerWithPost(post);
-
-                                Log.i("ljw", "found post \"" + post.getTitle() + "/" + post.getText() + "\" with id " + post.getId() + "from document with id " + document.getId());
                             }
                         } else {
                             Log.i("ljw", "Error getting documents.", task.getException());
@@ -418,59 +408,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .position(new LatLng(post.getLat(), post.getLng()))
                 .anchor(-0.4f, 1.575f)
                 .zIndex(zIndex + 0.0001f)
+                .icon(Utils.getPostIconBitmapDescriptor(post.getIcon(), this))
         );
-        iconMarker.setIcon(Utils.getPostIconBitmapDescriptor(post.getIcon(), this));
         iconMarker.setTag(post.getId());
 
         postMarkers.add(borderMarker);
         postMarkers.add(iconMarker);
     }
 
-    public void getUsersFormattedAddress() {
-        Log.i("ljw", "calling geocode api...");
-
-        try {
-            URL url = new URL("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + userLat + "," + userLng + "&key=AIzaSyDEcxFt2-EK-4UN2IBzj0gTkegHKzyxHpk");
-
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            Log.i("ljw", "called api, reading response...");
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String line;
-            StringBuilder content = new StringBuilder();
-            while ((line = in.readLine()) != null) {
-                content.append(line);
-                if (line.contains("formatted_address")) {
-                    userCurrentAddress = line.split("\" : \"")[1];
-                    userCurrentAddress = userCurrentAddress.substring(0, userCurrentAddress.length() - 2);
-                    Log.i("ljw", "found formatted addresss: " + userCurrentAddress);
-                    break;
-                }
-            }
-            in.close();
-            con.disconnect();
-
-            String postingFromString = "Posting from " + userCurrentAddress;
-            Handler handler = new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(Message input) {
-                    userLocationTV.setText(postingFromString);
-                }
-            };
-            handler.obtainMessage().sendToTarget();
-
-        } catch (MalformedURLException e) {
-            Log.i("ljw", "malformedURLexception:\n" + e.toString());
-        } catch (ProtocolException e) {
-            Log.i("ljw", "protocol exception:\n" + e.toString());
-        } catch (IOException e) {
-            Log.i("ljw", "IO exception:\n" + e.toString());
-        }
-    }
-
     public void onMapClick(LatLng latlng) {
         postRv.setVisibility(View.GONE);
-        mapBinding.loginSuggestionModal.setVisibility(View.GONE);
+        mapBinding.mapLoginSuggestionModal.setVisibility(View.GONE);
     }
 
     private Bitmap getBitmap(int drawableRes) {
@@ -543,7 +491,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onLoginSuggestionButtonClick(View v) {
         Intent goToLogin = new Intent(MapActivity.this, LoginActivity.class);
         postRv.setVisibility(View.GONE);
-        mapBinding.loginSuggestionModal.setVisibility(View.GONE);
+        mapBinding.mapLoginSuggestionModal.setVisibility(View.GONE);
         startActivity(goToLogin);
     }
 

@@ -222,7 +222,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
     public void onVoteButtonClick(Button b) {
         if (currentUserId == null) {
-            //TODO: modal with "sign in to vote"
+            Utils.showToast(context, "You must be logged in to vote.");
             return;
         }
         // need to disable the button until the firestore transaction is complete, otherwise users
@@ -365,7 +365,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     public void addCommentToPost(String commentText) {
         Log.i("ljw", commentText);
         if (currentUserId == null) {
-            //TODO: modal with "sign in to comment"
+            Utils.showToast(context, "You must be logged in to comment.");
             return;
         } else if (commentText.equals("") || commentText.length() == 0) {
             Utils.showToast(context, "Please write a comment first.");

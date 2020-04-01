@@ -66,23 +66,23 @@
             app:layout_constraintTop_toTopOf="@+id/postRecyclerView" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/loginSuggestionModal"
-            android:layout_width="300dp"
-            android:layout_height="200dp"
-            android:visibility="gone"
+            android:id="@+id/mapLoginSuggestionModal"
+            android:layout_width="280dp"
+            android:layout_height="170dp"
             android:background="@drawable/rounded_square_accentcolor"
-            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" >
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                android:id="@+id/loginSuggestion"
+                android:id="@+id/mapLoginSuggestion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="You must be logged in to do that. "
-                android:textSize="16sp"
                 android:textAlignment="textStart"
+                android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -90,22 +90,21 @@
                 app:layout_constraintVertical_bias="0.30" />
 
             <Button
-                android:id="@+id/loginSuggestionButton"
+                android:id="@+id/mapLoginSuggestionButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:paddingStart="15dp"
-                android:paddingEnd="15dp"
+                android:layout_marginBottom="20dp"
                 android:background="@drawable/rounded_square_filled_accentcolor"
                 android:onClick="onLoginSuggestionButtonClick"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
                 android:text="Login/Sign Up"
                 android:textColor="@color/white"
-                app:layout_constraintEnd_toEndOf="@+id/loginSuggestion"
-                app:layout_constraintStart_toStartOf="@+id/loginSuggestion"
-                app:layout_constraintTop_toBottomOf="@+id/loginSuggestion" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

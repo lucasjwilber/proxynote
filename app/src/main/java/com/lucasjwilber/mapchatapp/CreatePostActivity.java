@@ -14,6 +14,9 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,7 +36,14 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.lucasjwilber.mapchatapp.databinding.ActivityCreatePostBinding;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
@@ -106,8 +116,6 @@ public class CreatePostActivity extends AppCompatActivity {
                     Log.i("ljw", "successfully got location");
                     // Got last known location. In some rare situations this can be null.
 
-                    //todo: get formatted address too
-
                     double userLat;
                     double userLng;
                     if (location != null) {
@@ -115,30 +123,73 @@ public class CreatePostActivity extends AppCompatActivity {
                         userLng = location.getLongitude();
                         Log.i("ljw", "lat: " + userLat + "\nlong: " + userLng);
 
-                        Post post = new Post(
-                                user.getUid(),
-                                user.getDisplayName(),
-                                postTitle,
-                                postBody,
-                                userCurrentAddress,
-                                userLat,
-                                userLng);
 
-                        post.setIcon(selectedIcon);
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //get formatted address
+                                String formattedAddress = "somewhere";
+                                Log.i("ljw", "calling geocode api...");
+                                try {
+                                    URL url = new URL("https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
+                                            userLat +
+                                            "," +
+                                            userLng +
+                                            "&key=" +
+                                            getResources().getString(R.string.google_geocode_key));
 
-                        if (currentImage == null) {
-                            uploadPost(post);
-                        } else {
-                            uploadImageAndPost(post);
-                        }
+                                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                                    con.setRequestMethod("GET");
+                                    Log.i("ljw", "called api, reading response...");
+                                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                                    String line;
+                                    StringBuilder content = new StringBuilder();
+                                    while ((line = in.readLine()) != null) {
+                                        content.append(line);
+                                        if (line.contains("formatted_address")) {
+                                            formattedAddress = line.split("\" : \"")[1];
+                                            formattedAddress = formattedAddress.substring(0, formattedAddress.length() - 2);
+                                            Log.i("ljw", "found formatted addresss: " + formattedAddress);
+                                            break;
+                                        }
+                                    }
+                                    Log.i("ljw", content.toString());
+                                    Log.i("ljw", "formatted address is " + formattedAddress);
+                                    in.close();
+                                    con.disconnect();
+
+                                } catch (MalformedURLException e) {
+                                    Log.i("ljw", "malformedURLexception:\n" + e.toString());
+                                } catch (ProtocolException e) {
+                                    Log.i("ljw", "protocol exception:\n" + e.toString());
+                                } catch (IOException e) {
+                                    Log.i("ljw", "IO exception:\n" + e.toString());
+                                }
+
+                                Post post = new Post(
+                                        user.getUid(),
+                                        user.getDisplayName(),
+                                        postTitle,
+                                        postBody,
+                                        formattedAddress,
+                                        userLat,
+                                        userLng);
+
+                                post.setIcon(selectedIcon);
+
+                                if (currentImage == null) {
+                                    uploadPost(post);
+                                } else {
+                                    uploadImageAndPost(post);
+                                }
+                            }
+                        }).start();
                     }
                 })
                 .addOnFailureListener(e -> {
                     Utils.showToast(CreatePostActivity.this, "Unable to get your location.");
                     Log.i("ljw", "failed getting location: " + e.toString());
                 });
-
-
     }
 
     private void uploadImageAndPost(Post post) {
@@ -295,9 +346,6 @@ public class CreatePostActivity extends AppCompatActivity {
         }
     }
 
-
-
-
     public void onIconClick(View v, int position) {
         Log.i("ljw", "selected icon code is " + v.getTag().toString());
         if (selectedIconView != null) selectedIconView.setBackground(null);
@@ -447,7 +495,7 @@ public class CreatePostActivity extends AppCompatActivity {
         public int getItemCount() {
             return icons.length;
         }
-
     }
+
 
 }

@@ -162,7 +162,9 @@ public class UserProfileActivity extends AppCompatActivity {
             }
 
             scoreView.setText(Integer.toString(score));
-            String timeAndLocationText = new Date(time) + ", " + location;
+            // location removed pending geocode implementation
+//            String timeAndLocationText = new Date(time) + ", " + location;
+            String timeAndLocationText = new Date(time).toString();
             timeAndLocationView.setText(timeAndLocationText);
             titleView.setText(title);
 
@@ -257,6 +259,7 @@ public class UserProfileActivity extends AppCompatActivity {
                                 }
 
                                 selectedDV.removeAllViews();
+                                selectedDV.setVisibility(View.GONE);
                                 binding.profileOnePostRv.setAdapter(null);
                                 binding.profileOnePostRv.setBackground(null);
 
@@ -266,8 +269,8 @@ public class UserProfileActivity extends AppCompatActivity {
                                                 "totalScore", user.getTotalScore() - postScore)
                                         .addOnSuccessListener(result3 -> {
                                             Log.i("ljw", "successfully removed the deleted post's PD");
-                                            Utils.showToast(UserProfileActivity.this, "Post deleted.");
                                             binding.deletePostProgressBar.setVisibility(View.GONE);
+                                            Utils.showToast(UserProfileActivity.this, "Post deleted.");
                                             v.setEnabled(true);
                                         })
                                         .addOnFailureListener(e -> {
