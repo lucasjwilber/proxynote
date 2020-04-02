@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +42,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private Button upvoteButton;
     private Button downvoteButton;
     private TextView postScore;
+    private ImageView postImage;
 //    private Drawable upArrow;
 //    private Drawable downArrow;
     private FirebaseFirestore db;
@@ -56,7 +58,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             String currentUserId,
             String currentUserUsername,
 //            RecyclerView recyclerView,
-            FirebaseFirestore db ) {
+            FirebaseFirestore db) {
         this.post = post;
         this.context = context;
         this.currentUserId = currentUserId;
@@ -123,7 +125,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 TextView postTimeAndPlace = l.findViewById(R.id.postRvTimeAndPlace);
                 TextView postTitle = l.findViewById(R.id.postRvHeaderTitle);
                 Button reportButton = l.findViewById(R.id.postRvHeaderReportBtn);
-                ImageView postImage = l.findViewById(R.id.postRvPostImage);
+                postImage = l.findViewById(R.id.postRvPostImage);
+                postImage.setOnClickListener(v -> goToFullSizeImage(post.getImageUrl()));
                 TextView postText = l.findViewById(R.id.postRvPostText);
                 addCommentBox = l.findViewById(R.id.postRvPostReplyBox);
                 Button addCommentButton = l.findViewById(R.id.postRvPostReplyButton);
@@ -438,7 +441,12 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                     Log.i("ljw", "error getting location: " + e.toString());
                     replyLoadingSpinner.setVisibility(View.GONE);
                 });
+    }
 
+    private void goToFullSizeImage(String imageUrl) {
+        Intent goToFullSizeImage = new Intent(context, FullSizeImageActivity.class);
+        goToFullSizeImage.putExtra("imageUrl", imageUrl);
+        context.startActivity(goToFullSizeImage);
     }
 
 

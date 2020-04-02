@@ -17,7 +17,8 @@
         android:roundIcon="@mipmap/mapchat_launcher_icon_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ReportActivity"></activity>
+        <activity android:name=".FullSizeImageActivity"></activity>
+        <activity android:name=".ReportActivity" />
         <activity android:name=".UserProfileActivity" />
         <activity android:name=".CreatePostActivity" />
         <activity
@@ -42,13 +43,12 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
 
         <activity
             android:name=".MapActivity"
             android:label="@string/title_activity_map" />
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -56,7 +56,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>
