@@ -253,7 +253,9 @@ public class CreatePostActivity extends AppCompatActivity {
                                             post.getTimestamp(),
                                             post.getScore(),
                                             post.getIcon(),
-                                            post.getLocation()
+                                            post.getLocation(),
+                                            post.getLat(),
+                                            post.getLng()
                                     ));
 
                                     db.collection("users")

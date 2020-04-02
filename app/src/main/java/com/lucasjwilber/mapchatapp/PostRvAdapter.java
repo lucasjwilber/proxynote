@@ -133,15 +133,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 addCommentButton.setOnClickListener(v -> addCommentToPost(addCommentBox.getText().toString()));
                 TextView commentCount = l.findViewById(R.id.postCommentCount);
                 replyLoadingSpinner = l.findViewById(R.id.replySubmitProgressBar);
-
-                if (!post.getUserId().equals(currentUserId)) {
-                    postUsername.setText(post.getUsername());
-                    postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
-                } else {
-                    String me = "me";
-                    postUsername.setText(me);
-                    postUsername.setTextColor(context.getResources().getColor(R.color.black));
-                }
+                postUsername.setText(post.getUsername());
+                postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
                 postTimeAndPlace.setText(Utils.getHowLongAgo(post.getTimestamp()));
                 reportButton.setOnClickListener(v -> onReportButtonClicked());
                 postTitle.setText(post.getTitle());
@@ -204,14 +197,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             Comment comment = post.getComments().get(position - 1);
             TextView commentUsername = holder.constraintLayout.findViewById(R.id.commentUsername);
             TextView commentTimeAndPlace = holder.constraintLayout.findViewById(R.id.postRvCommentHeader);
-            if (!comment.getUserId().equals(currentUserId)) {
-                commentUsername.setText(comment.getUsername());
-                commentUsername.setOnClickListener(v -> onUsernameClicked(comment.getUserId()));
-            } else {
-                String me = "me";
-                commentUsername.setText(me);
-                commentUsername.setTextColor(context.getResources().getColor(R.color.black));
-            }
+            commentUsername.setText(comment.getUsername());
+            commentUsername.setOnClickListener(v -> onUsernameClicked(comment.getUserId()));
             String commentTimeAndPlaceText = Utils.getHowLongAgo(comment.getTimestamp()) +
                     ", " +
                     Utils.getHowFarAway(comment.getDistanceFromPost(), distanceType);

@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -130,19 +131,21 @@ public class UserProfileActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(PostTitleViewholder holder, int position) {
 
-            PostDescriptor data = userPostDescriptors.get(position);
-            int score = data.getScore();
-            String title = data.getTitle();
-            int icon = data.getIcon();
-            long time = data.getTimestamp();
-            String location = data.getLocation();
-
+            PostDescriptor pd = userPostDescriptors.get(position);
+            int score = pd.getScore();
+            String title = pd.getTitle();
+            int icon = pd.getIcon();
+            long time = pd.getTimestamp();
+            String location = pd.getLocation();
+            holder.constraintLayout.setTag(new LatLng(pd.getLat(), pd.getLng()));
 
             ImageView iconView = holder.constraintLayout.findViewById(R.id.postdescriptorIcon);
             TextView scoreView = holder.constraintLayout.findViewById(R.id.postdescriptorScore);
             TextView timeAndLocationView = holder.constraintLayout.findViewById(R.id.postdescriptorTimeAndLocation);
             TextView titleView = holder.constraintLayout.findViewById(R.id.postdescriptorTitle);
             Button deleteButton = holder.constraintLayout.findViewById(R.id.deletePostButton);
+            Button viewLocationButton = holder.constraintLayout.findViewById(R.id.viewOnMapButton);
+            viewLocationButton.setOnClickListener(v -> onViewLocationClicked(pd.getLat(), pd.getLng()));
             ConstraintLayout cl = holder.constraintLayout;
             holder.constraintLayout.setOnClickListener(v -> onPostDescriptorClicked(cl, deleteButton));
 
@@ -168,7 +171,7 @@ public class UserProfileActivity extends AppCompatActivity {
             timeAndLocationView.setText(timeAndLocationText);
             titleView.setText(title);
 
-            holder.constraintLayout.setTag(data.getId());
+            holder.constraintLayout.setTag(pd.getId());
         }
 
         @Override
@@ -328,6 +331,14 @@ public class UserProfileActivity extends AppCompatActivity {
                         Log.i("ljw", "failed updating aboutme: " + e.toString());
                     });
         }
+    }
+
+    public void onViewLocationClicked(double lat, double lng) {
+        Intent goToMapOnLocation = new Intent(UserProfileActivity.this, MapActivity.class);
+        goToMapOnLocation.putExtra("lat", lat);
+        goToMapOnLocation.putExtra("lng", lng);
+        Log.i("ljw", "sending " + lat + "/" + lng);
+        startActivity(goToMapOnLocation);
     }
 
 }

@@ -276,13 +276,31 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void mapViewSetup() {
+        Intent intent = getIntent();
+        double lat = intent.getDoubleExtra("lat", 0d);
+        double lng = intent.getDoubleExtra("lng", 0d);
+        Log.i("ljw", "from intent: " + lat + "/" + lng);
+        Log.i("ljw", "user: " + userLat + "/" + userLng);
+
+        //if lat/lng is 0/0, either by the db field being null or an error with the intent,
+        //just center on the user instead of an incorrect location
+        if (lat == 0d && lng == 0d) {
+            lat = userLat;
+            lng = userLng;
+        }
+
+        double finalLat = lat;
+        double finalLng = lng;
+        Log.i("ljw", "going to " + finalLat + "/" + finalLng);
         AsyncTask.execute(() -> {
             //update map on main thread
             Handler handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(Message input) {
-                    //center the map on the user
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
+
+                    //if we got here from a click on the "show on map" button in a user profile,
+                    //center on that marker, else center on the user's location.
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(finalLat, finalLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                     //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
                     mMap.setMapType(sharedPreferences.getInt("mapType", GoogleMap.MAP_TYPE_HYBRID));
@@ -368,11 +386,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 // for whatever reason the Post created by document.toObject doesn't include the comments list
                                 // they are however present as an ArrayList of HashMaps
                                 ArrayList list = (ArrayList) document.getData().get("comments");
-                                Log.i("ljw", "list is " + list.toString());
                                 post.setComments(Utils.turnMapsIntoListOfComments(list));
-
-                                Log.i("ljw", "comments in map: " + post.getComments());
-
                                 createMarkerWithPost(post);
                             }
                         } else {

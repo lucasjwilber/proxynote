@@ -1,5 +1,8 @@
 package com.lucasjwilber.mapchatapp;
 
+//the purpose of this class is to provide a link between posts and users without nesting all posts in users
+//
+
 public class PostDescriptor {
     String id;
     private String title;
@@ -7,16 +10,36 @@ public class PostDescriptor {
     private int score;
     private int icon;
     private String location;
+    private double lat;
+    private double lng;
 
     public PostDescriptor() {};
 
-    public PostDescriptor(String id, String title, long timestamp, int score, int icon, String location) {
+    public PostDescriptor(String id, String title, long timestamp, int score, int icon, String location, double lat, double lng) {
         this.id = id;
         this.title = title;
         this.timestamp = timestamp;
         this.score = score;
         this.icon = icon;
         this.location = location;
+        this.lat = lat;
+        this.lng = lng;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
+    public double getLng() {
+        return lng;
+    }
+
+    public void setLng(double lng) {
+        this.lng = lng;
     }
 
     public String getId() {
