@@ -102,7 +102,6 @@ public class CreatePostActivity extends AppCompatActivity {
         iconRvAdapter = new IconSelectAdapter(this);
         iconRv.setAdapter(iconRvAdapter);
 
-        Intent intent = getIntent();
     }
 
     public void createPost(View v) {
@@ -399,7 +398,7 @@ public class CreatePostActivity extends AppCompatActivity {
         if (selectedIconView != null) selectedIconView.setBackground(null);
         selectedIconView = (ImageView) v;
         selectedIcon = (int) v.getTag();
-        v.setBackground(getDrawable(R.drawable.postoutline_accent));
+        v.setBackground(getDrawable(R.drawable.postoutline_yellow));
         selectedPosition = position;
         iconSelected = true;
     }
@@ -543,6 +542,10 @@ public class CreatePostActivity extends AppCompatActivity {
         public int getItemCount() {
             return icons.length;
         }
+    }
+
+    public void onBackButtonClicked(View v) {
+        finish();
     }
 
 

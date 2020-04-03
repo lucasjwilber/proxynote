@@ -10,6 +10,7 @@ tools:context=".FullSizeImageActivity">
         android:id="@+id/fullSizeImage"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -17,10 +18,29 @@ tools:context=".FullSizeImageActivity">
 
     <Button
         android:id="@+id/closeFullSizeImage"
-        android:layout_width="wrap_content"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:drawableStart="@drawable/back_accent"
+        android:onClick="onBackButtonClicked"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/fullSizeImageTitle"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Button"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="62dp"
+        android:textAlignment="center"
+        android:textColor="@color/lightgray"
+        android:textSize="30sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/closeFullSizeImage"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

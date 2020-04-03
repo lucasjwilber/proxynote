@@ -73,12 +73,14 @@
         android:id="@+id/viewOnMapButton"
         android:layout_width="30dp"
         android:layout_height="0dp"
+        android:paddingEnd="15dp"
         android:background="?android:attr/selectableItemBackground"
         android:drawableLeft="@drawable/view_location"
         android:onClick="onViewLocationClicked"
-        app:layout_constraintBottom_toBottomOf="@+id/deletePostButton"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/postdescriptorScore"
         app:layout_constraintEnd_toStartOf="@+id/deletePostButton"
-        app:layout_constraintTop_toTopOf="@+id/deletePostButton"
+        app:layout_constraintTop_toTopOf="@+id/postdescriptorScore"
         tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

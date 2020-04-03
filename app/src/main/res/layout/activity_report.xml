@@ -7,6 +7,18 @@
     android:background="@color/lightgray"
     tools:context=".ReportActivity">
 
+    <Button
+        android:id="@+id/closeReport"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:drawableStart="@drawable/back_accent"
+        android:onClick="onBackButtonClicked"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/reportLayout"
@@ -30,7 +42,7 @@
                 android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Reason (required):" />
+                android:text="Reason:" />
 
             <RadioButton
                 android:id="@+id/reportRBspam"
@@ -89,6 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
+            android:background="@drawable/rounded_square_black"
             android:ems="10"
             app:layout_constraintStart_toStartOf="@+id/reportAIlabel"
             app:layout_constraintTop_toBottomOf="@+id/reportAIlabel" />
@@ -99,12 +112,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/rounded_square_filled_accentcolor"
             android:onClick="onReportSubmit"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:padding="12dp"
             android:text="Report Post"
             android:textColor="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/reportAdditionalText"
             app:layout_constraintHorizontal_bias="0.509"
             app:layout_constraintStart_toStartOf="@+id/reportAdditionalText"
@@ -116,7 +130,7 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="4dp"
         android:text="Report Post"
         android:textSize="30sp"
         android:textStyle="bold"

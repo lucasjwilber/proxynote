@@ -79,4 +79,8 @@ public class ReportActivity extends AppCompatActivity {
                     loadingSpinner.setVisibility(View.GONE);
                 });
     }
+
+    public void onBackButtonClicked(View v) {
+        finish();
+    }
 }

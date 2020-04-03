@@ -6,9 +6,9 @@
         <item name="colorPrimary">@color/darkgray</item>
         <item name="colorAccent">@color/colorAccent</item>
         <!-- status bar-->
-        <item name="colorPrimaryDark">@color/gray</item>
+        <item name="colorPrimaryDark">@color/darkgray</item>
         <!-- nav bar-->
-        <item name="android:navigationBarColor">@color/gray</item>
+        <item name="android:navigationBarColor">@color/darkgray</item>
     </style>
 
 </resources>

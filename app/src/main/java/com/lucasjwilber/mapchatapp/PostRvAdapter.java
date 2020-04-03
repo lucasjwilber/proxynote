@@ -126,7 +126,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 TextView postTitle = l.findViewById(R.id.postRvHeaderTitle);
                 Button reportButton = l.findViewById(R.id.postRvHeaderReportBtn);
                 postImage = l.findViewById(R.id.postRvPostImage);
-                postImage.setOnClickListener(v -> goToFullSizeImage(post.getImageUrl()));
+                postImage.setOnClickListener(v -> goToFullSizeImage(post.getImageUrl(), post.getTitle()));
                 TextView postText = l.findViewById(R.id.postRvPostText);
                 addCommentBox = l.findViewById(R.id.postRvPostReplyBox);
                 Button addCommentButton = l.findViewById(R.id.postRvPostReplyButton);
@@ -179,7 +179,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 return new PostViewHolder(l);
             case POST_COMMENT:
             default:
-                Log.i("ljw", "view created for viewtype " + viewType);
                 l = (ConstraintLayout) LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.postrv_comment, parent, false);
                 return new PostViewHolder(l);
@@ -430,9 +429,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 });
     }
 
-    private void goToFullSizeImage(String imageUrl) {
+    private void goToFullSizeImage(String imageUrl, String title) {
         Intent goToFullSizeImage = new Intent(context, FullSizeImageActivity.class);
         goToFullSizeImage.putExtra("imageUrl", imageUrl);
+        goToFullSizeImage.putExtra("title", title);
         context.startActivity(goToFullSizeImage);
     }
 
