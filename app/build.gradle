@@ -57,13 +57,14 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.android.material:material:1.1.0'
     //firestore:
-    implementation 'com.google.firebase:firebase-firestore:21.4.1'
+    implementation 'com.google.firebase:firebase-firestore:21.4.2'
     //firebase auth:
     implementation 'com.google.firebase:firebase-auth:19.3.0'
     //firebase storage:
     implementation 'com.google.firebase:firebase-storage:19.1.1'
     //glide:
     implementation 'com.github.bumptech.glide:glide:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
     //file provider
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 }

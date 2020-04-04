@@ -87,6 +87,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     boolean mapHasBeenSetUp;
     SharedPreferences sharedPreferences;
     List<Marker> postMarkers;
+    Handler periodicLocationUpdateHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +113,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         db = FirebaseFirestore.getInstance();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
+        periodicLocationUpdateHandler = new Handler();
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -136,20 +138,29 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onResume() {
         super.onResume();
-        getUserLatLng(false);
-        refreshData(null);
-        // if the postRv is shown after a user hits back from visting a user profile, update the postRv
-        // data to prevent vote manipulation
-//        if (currentSelectedPostId != null && postRv.getVisibility() == View.VISIBLE) {
-//            setPostRvAdapter(currentSelectedPostId);
-//        }
+        startGetLocationLooper();
+        if (mMap != null) getPostsFromDbAndCreateMapMarkers();
     }
 
-    public void refreshData(View v) {
-        //remove and replace markers
+    @Override
+    public void onPause() {
+        super.onPause();
+        periodicLocationUpdateHandler.removeCallbacksAndMessages(null);   //aka stopGetLocationLooper
+    }
+
+    private void startGetLocationLooper() {
         if (mMap != null) {
-            for (Marker m : postMarkers) m.remove();
-            getPostsFromDbAndCreateMapMarkers();
+            periodicLocationUpdateHandler.removeCallbacksAndMessages(null);
+            periodicLocationUpdateHandler.postDelayed(new Runnable() {
+                public void run() {
+                    getUserLatLng(false);
+                    Log.i("ljw", "updated location from the runnable: " + userLat + "/" + userLng);
+                    //
+                    if (periodicLocationUpdateHandler != null) {
+                        periodicLocationUpdateHandler.postDelayed(this, 10000);
+                    }
+                }
+            }, 10000);
         }
     }
 
@@ -268,6 +279,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
                         if (!mapHasBeenSetUp) mapViewSetup();
                         if (centerOnUser) mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
+
+                        if (userMarker != null) userMarker.remove();
+                        userMarker = mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(userLat, userLng))
+                                .title("My Location")
+                                .icon(userMarkerIcon));
+
+                        startGetLocationLooper();
                     }
                 })
                 .addOnFailureListener(this, error -> {
@@ -310,8 +329,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     userMarker = mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(userLat, userLng))
                             .title("My Location")
-                            .icon(userMarkerIcon)
-                            .snippet(userCurrentAddress));
+                            .icon(userMarkerIcon));
 
                     //sleep for a moment because zooming and centering the camera at the same time
                     // causes an issue where the camera ends up zoomed on the wrong location.
@@ -324,6 +342,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 }
             };
             handler.obtainMessage().sendToTarget();
+
             mapHasBeenSetUp = true;
         });
     }
@@ -353,6 +372,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void getPostsFromDbAndCreateMapMarkers() {
         // get only posts within a certain radius of the user
         Double latZone = Math.round(userLat * 10) / 10.0;
+
+        // remove old markers
+        for (Marker m : postMarkers) m.remove();
 
         Log.i("ljw", "getting posts from " + cameraBounds.southwest.longitude + " to " + cameraBounds.northeast.longitude);
 
@@ -435,6 +457,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     public void onMapClick(LatLng latlng) {
         postRv.setVisibility(View.GONE);
+        postRv.setAdapter(null);
         mapBinding.mapLoginSuggestionModal.setVisibility(View.GONE);
     }
 

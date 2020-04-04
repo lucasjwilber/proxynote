@@ -19,11 +19,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -142,7 +142,15 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 postScore.setText(postScoreText);
 
                 if (post.getImageUrl() != null && post.getImageUrl().length() > 0) {
-                    Glide.with(parent).load(post.getImageUrl()).into(postImage);
+                    int cornerRadius = 5;
+                    int px = Math.round(cornerRadius * (context.getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT));
+                    Glide.with(parent)
+                            .load(post.getImageUrl())
+//                            .transform(new RoundedCorners(px))
+                            .thumbnail(.25f)
+//                            .circleCrop()
+//                            .centerCrop()
+                            .into(postImage);
                 }
 
                 Log.i("ljw", "comments: " + post.getComments());
@@ -435,6 +443,5 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         goToFullSizeImage.putExtra("title", title);
         context.startActivity(goToFullSizeImage);
     }
-
 
 }
