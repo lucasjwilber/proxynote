@@ -69,6 +69,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     long postQueryLimit = 500;
     FirebaseUser currentUser;
     public static final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
+    private static final int LOCATION_UPDATE_COOLDOWN = 15000;
+    private static final int POST_QUERY_COOLDOWN = 1750;
+    static boolean postQueryIsOnCooldown;
     double userLat;
     double userLng;
     Marker userMarker;
@@ -133,6 +136,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             getUserLatLng(true);
         }
 
+        Handler postQueryCooldownHandler = new Handler();
+        postQueryCooldownHandler.postDelayed(new Runnable() {
+            public void run() {
+                postQueryIsOnCooldown = false;
+                Log.i("ljw", "post query is off cooldown");
+                postQueryCooldownHandler.postDelayed(this, POST_QUERY_COOLDOWN);
+            }
+        }, POST_QUERY_COOLDOWN);
+
     }
 
     @Override
@@ -151,16 +163,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private void startGetLocationLooper() {
         if (mMap != null) {
             periodicLocationUpdateHandler.removeCallbacksAndMessages(null);
+
             periodicLocationUpdateHandler.postDelayed(new Runnable() {
                 public void run() {
                     getUserLatLng(false);
                     Log.i("ljw", "updated location from the runnable: " + userLat + "/" + userLng);
-                    //
+                    //this is nulled on activity pause, in which case we don't want to start another one
                     if (periodicLocationUpdateHandler != null) {
-                        periodicLocationUpdateHandler.postDelayed(this, 10000);
+                        periodicLocationUpdateHandler.postDelayed(this, LOCATION_UPDATE_COOLDOWN);
                     }
                 }
-            }, 20000);
+            }, LOCATION_UPDATE_COOLDOWN);
         }
     }
 
@@ -369,7 +382,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         Log.i("ljw", "camera bounds: " + cameraBounds.toString());
 
         // query db for posts near the user
-        getPostsFromDbAndCreateMapMarkers();
+//        getPostsFromDbAndCreateMapMarkers();
+
+        if (!postQueryIsOnCooldown) {
+            getPostsFromDbAndCreateMapMarkers();
+            postQueryIsOnCooldown = true;
+            Log.i("ljw", "post query is on cooldown");
+        }
     }
 
     public void getPostsFromDbAndCreateMapMarkers() {
