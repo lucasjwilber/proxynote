@@ -110,6 +110,7 @@
         android:background="@drawable/rounded_square_black"
         android:hint="Add a comment"
         android:textSize="16sp"
+        android:maxLength="200"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/postRvPostText" />

@@ -60,6 +60,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore:21.4.2'
     //firebase auth:
     implementation 'com.google.firebase:firebase-auth:19.3.0'
+    implementation 'com.google.android.gms:play-services-auth:18.0.0'
     //firebase storage:
     implementation 'com.google.firebase:firebase-storage:19.1.1'
     //glide:

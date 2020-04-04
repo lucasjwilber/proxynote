@@ -160,7 +160,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         periodicLocationUpdateHandler.postDelayed(this, 10000);
                     }
                 }
-            }, 10000);
+            }, 20000);
         }
     }
 
@@ -185,11 +185,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         switch (item.getItemId()) {
             case R.id.menuProfile:
+                hideAllModals();
                 Intent goToProfile = new Intent(this, UserProfileActivity.class);
                 goToProfile.putExtra("userId", currentUser.getUid());
                 startActivity(goToProfile);
                 return true;
             case R.id.menuHelp:
+                Intent goToHelp = new Intent(MapActivity.this, HelpActivity.class);
+                startActivity(goToHelp);
                 return true;
             case R.id.menuLoginLogout:
                 if (currentUser == null) { //go to login/signup page
@@ -456,6 +459,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void onMapClick(LatLng latlng) {
+        hideAllModals();
+    }
+
+    private void hideAllModals() {
+
         postRv.setVisibility(View.GONE);
         postRv.setAdapter(null);
         mapBinding.mapLoginSuggestionModal.setVisibility(View.GONE);
