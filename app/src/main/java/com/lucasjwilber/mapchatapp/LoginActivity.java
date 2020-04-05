@@ -228,7 +228,8 @@ public class LoginActivity extends AppCompatActivity {
             user.sendEmailVerification()
             .addOnSuccessListener(r -> {
                 Utils.showToast(LoginActivity.this, "Verification email sent.");
-            });
+            })
+            .addOnFailureListener(e -> Log.i("ljw", "error sending ver email: " + e.toString()));
         }
     }
 

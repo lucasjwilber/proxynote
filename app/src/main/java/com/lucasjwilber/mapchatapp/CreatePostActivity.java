@@ -241,7 +241,6 @@ public class CreatePostActivity extends AppCompatActivity {
                             .get()
                             .addOnSuccessListener(userData -> {
                                 User user = userData.toObject(User.class);
-                                assert user != null;
                                 if (user.getPostDescriptors() == null) {
                                     Log.i("ljw", "user doesn't have a postDescriptors field!");
                                 } else {

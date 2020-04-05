@@ -364,6 +364,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void onCreatePostButtonClick(View v) {
+        hideAllModals();
+
         if (currentUser == null) {
             String text = "You must be logged in to post.";
             mapBinding.mapLoginSuggestion.setText(text);
@@ -373,11 +375,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             mapBinding.verifyEmailReminder.setVisibility(View.VISIBLE);
             startVerificationListener();
             return;
+        } else {
+            Intent goToCreatePostAct = new Intent(this, CreatePostActivity.class);
+            startActivity(goToCreatePostAct);
         }
-
-        postRv.setVisibility(View.GONE);
-        Intent goToCreatePostAct = new Intent(this, CreatePostActivity.class);
-        startActivity(goToCreatePostAct);
     }
 
     @Override
