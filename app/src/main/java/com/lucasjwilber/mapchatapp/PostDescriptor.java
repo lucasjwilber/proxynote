@@ -1,7 +1,6 @@
 package com.lucasjwilber.mapchatapp;
 
 //the purpose of this class is to provide a link between posts and users without nesting all posts in users
-//
 
 public class PostDescriptor {
     String id;

@@ -22,6 +22,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -33,9 +35,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private Post post;
     private String currentUserId;
     private String currentUserUsername;
+    private String parentActivity;
     private Context context;
-//    private RecyclerView recyclerView;
-//    private boolean userIsSignedIn;
     private String distanceType;
     private Drawable upArrowColored;
     private Drawable downArrowColored;
@@ -43,9 +44,9 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private Button downvoteButton;
     private TextView postScore;
     private ImageView postImage;
-//    private Drawable upArrow;
-//    private Drawable downArrow;
     private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private FirebaseUser user;
     private EditText addCommentBox;
     private ProgressBar replyLoadingSpinner;
 
@@ -57,19 +58,20 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             Context context,
             String currentUserId,
             String currentUserUsername,
-//            RecyclerView recyclerView,
+            String parentActivity,
             FirebaseFirestore db) {
         this.post = post;
         this.context = context;
         this.currentUserId = currentUserId;
         this.currentUserUsername = currentUserUsername;
-//        this.recyclerView = recyclerView;
+        this.parentActivity = parentActivity;
         this.db = db;
+
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
 
         upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
         downArrowColored = context.getDrawable(R.drawable.arrow_down_colored);
-//        upArrow = context.getDrawable(R.drawable.arrow_up);
-//        downArrow = context.getDrawable(R.drawable.arrow_down);
 
         SharedPreferences prefs = context.getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");
@@ -134,7 +136,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 TextView commentCount = l.findViewById(R.id.postCommentCount);
                 replyLoadingSpinner = l.findViewById(R.id.replySubmitProgressBar);
                 postUsername.setText(post.getUsername());
-                postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
+                //don't let users start a new activity for the profile they're already on
+//                if (!parentActivity.equals("userProfile") && currentUserId != post.getUserId()) {
+                    postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
+//                }
                 postTimeAndPlace.setText(Utils.getHowLongAgo(post.getTimestamp()));
                 reportButton.setOnClickListener(v -> onReportButtonClicked());
                 postTitle.setText(post.getTitle());
@@ -169,14 +174,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
                 Log.i("ljw", "post votes: " + post.getVotes().size());
 
-//                if (userIsSignedIn && post.getVotes().containsKey(currentUserId)) {
-//                    if (post.getVotes().get(currentUserId) > 0) {
-//                        upvoteButton.setBackground(upArrowColored);
-//                    } else if (post.getVotes().get(currentUserId) < 0) {
-//                        downvoteButton.setBackground(downArrowColored);
-//                    }
-//                }
-                //todo: use above if NPE:
                 if (post.getVotes().containsKey(currentUserId)) {
                     if (post.getVotes().get(currentUserId) > 0) {
                         upvoteButton.setBackground(upArrowColored);
@@ -196,8 +193,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(PostViewHolder holder, int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
 
         // only if it's a comment are we recycling the same view type:
         if (position >= 1) {
@@ -223,8 +218,11 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     public void onVoteButtonClick(Button b) {
-        if (currentUserId == null) {
+        if (user == null) {
             Utils.showToast(context, "You must be logged in to vote.");
+            return;
+        } else if (!user.isEmailVerified()) {
+            Utils.showToast(context, "Please verify your email first.");
             return;
         }
         // need to disable the button until the firestore transaction is complete, otherwise users
@@ -355,8 +353,11 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     private void onReportButtonClicked() {
-        if (currentUserId == null) {
+        if (user == null) {
             Utils.showToast(context, "You must be signed in to report a post.");
+            return;
+        } else if (!user.isEmailVerified()) {
+            Utils.showToast(context, "Please verify your email first.");
             return;
         }
         Intent goToReportActivity = new Intent(context, ReportActivity.class);
@@ -366,8 +367,11 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
     public void addCommentToPost(String commentText) {
         Log.i("ljw", commentText);
-        if (currentUserId == null) {
+        if (user == null) {
             Utils.showToast(context, "You must be logged in to comment.");
+            return;
+        } else if (!user.isEmailVerified()) {
+            Utils.showToast(context, "Please verify your email first.");
             return;
         } else if (commentText.equals("") || commentText.length() == 0) {
             Utils.showToast(context, "Please write a comment first.");

@@ -3,15 +3,20 @@ package com.lucasjwilber.mapchatapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -22,10 +27,13 @@ import com.lucasjwilber.mapchatapp.databinding.ActivityLoginBinding;
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-    FirebaseUser user;
-    FirebaseFirestore db;
+    private FirebaseUser user;
+    private FirebaseFirestore db;
     private boolean loginShown = true;
     private ActivityLoginBinding binding;
+    private SharedPreferences sharedPreferences;
+    private Handler emailVerificationCheckRunnable;
+    boolean waitingForEmailVerification;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +43,39 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(view);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        //autofill email ET if it was saved
+        sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
+        String savedEmail = sharedPreferences.getString("email", "");
+        binding.loginActEmailEditText.setText(savedEmail);
+
+        if (mAuth.getCurrentUser() != null) {
+            user = mAuth.getCurrentUser();
+            if (user != null && !user.isEmailVerified()) {
+                binding.emailVerificationModal.setVisibility(View.VISIBLE);
+                binding.loginBaseLayout.setVisibility(View.GONE);
+            }
+        }
+
+        emailVerificationCheckRunnable = new Handler();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (waitingForEmailVerification) {
+            waitForEmailVerification();
+        }
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        emailVerificationCheckRunnable.removeCallbacksAndMessages(null);
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        emailVerificationCheckRunnable.removeCallbacksAndMessages(null);
     }
 
     public void loginButtonClicked(View v) {
@@ -43,10 +84,6 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginButton.setTextColor(getResources().getColor(R.color.colorAccent));
         binding.signupButton.setTextColor(getResources().getColor(R.color.gray));
         binding.loginActSubmitButton.setText(submitBtnText);
-        binding.loginActFirstNameLabel.setVisibility(View.GONE);
-        binding.loginActFirstNameEditText.setVisibility(View.GONE);
-        binding.loginActLastNameLabel.setVisibility(View.GONE);
-        binding.loginActLastNameEditText.setVisibility(View.GONE);
         binding.loginActUsernameLabel.setVisibility(View.GONE);
         binding.loginActUsernameEditText.setVisibility(View.GONE);
         binding.loginActConfirmPasswordCLabel.setVisibility(View.GONE);
@@ -59,10 +96,6 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginActSubmitButton.setText(submitBtnText);
         binding.signupButton.setTextColor(getResources().getColor(R.color.colorAccent));
         binding.loginButton.setTextColor(getResources().getColor(R.color.gray));
-        binding.loginActFirstNameLabel.setVisibility(View.VISIBLE);
-        binding.loginActFirstNameEditText.setVisibility(View.VISIBLE);
-        binding.loginActLastNameLabel.setVisibility(View.VISIBLE);
-        binding.loginActLastNameEditText.setVisibility(View.VISIBLE);
         binding.loginActUsernameLabel.setVisibility(View.VISIBLE);
         binding.loginActUsernameEditText.setVisibility(View.VISIBLE);
         binding.loginActConfirmPasswordCLabel.setVisibility(View.VISIBLE);
@@ -82,7 +115,7 @@ public class LoginActivity extends AppCompatActivity {
         String email = binding.loginActEmailEditText.getText().toString();
         String password = binding.loginActPasswordEditText.getText().toString();
         if (email.equals("") || email.length() == 0 || password.equals("") || password.length() == 0) {
-            Utils.showToast(LoginActivity.this, "Please fill out your email and password.");
+            Utils.showToast(LoginActivity.this, "Please enter your email and password.");
             return;
         }
 
@@ -95,10 +128,13 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.i("ljw", "signInWithEmail:success");
                             user = mAuth.getCurrentUser();
-                            Intent intent = new Intent(LoginActivity.this, MapActivity.class);
-                            startActivity(intent);
                             binding.loginProgressBar.setVisibility(View.GONE);
-                            finish();
+                            if (user.isEmailVerified()) {
+                                finish();
+                            } else {
+                                binding.emailVerificationModal.setVisibility(View.VISIBLE);
+                                binding.loginBaseLayout.setVisibility(View.GONE);
+                            }
                         } else {
                             Log.i("ljw", "signInWithEmail:failure", task.getException());
                             Utils.showToast(LoginActivity.this, "Authentication failed.");
@@ -109,8 +145,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void signupSubmit() {
-        String firstName = binding.loginActFirstNameEditText.getText().toString();
-        String lastName = binding.loginActLastNameEditText.getText().toString();
         String username = binding.loginActUsernameEditText.getText().toString();
         String email = binding.loginActEmailEditText.getText().toString();
         String password = binding.loginActPasswordEditText.getText().toString();
@@ -131,6 +165,10 @@ public class LoginActivity extends AppCompatActivity {
                             Log.i("ljw", "createUserWithEmail:success");
                             user  = mAuth.getCurrentUser();
 
+                            //save email for autofill next time
+                            SharedPreferences.Editor editor = sharedPreferences.edit().putString("email", email);
+                            editor.apply();
+
                             // set the user's displayname/username. this can't be done when adding the user unfortunately.
                             UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
                             user.updateProfile(userProfileChangeRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -147,7 +185,7 @@ public class LoginActivity extends AppCompatActivity {
                             });
 
                             //add new user to firestore "users" collection
-                            User newUser = new User(firstName, lastName, username, email, user.getUid());
+                            User newUser = new User(username, email, user.getUid());
                             db.collection("users")
                                     .document(user.getUid())
                                     .set(newUser)
@@ -155,12 +193,13 @@ public class LoginActivity extends AppCompatActivity {
                                         @Override
                                         public void onSuccess(Void aVoid) {
                                             Log.i("ljw", "added new user to firestore");
-//                                            // go to map:
-                                            Intent intent = new Intent(LoginActivity.this, MapActivity.class);
-                                            intent.putExtra("newUser", true);
-                                            startActivity(intent);
                                             binding.loginProgressBar.setVisibility(View.GONE);
-                                            finish();
+
+                                            user.sendEmailVerification()
+                                                    .addOnSuccessListener(r -> {
+                                                        Log.i("ljw", "is user verified yet: " + user.isEmailVerified());
+                                                        waitForEmailVerification();
+                                                    });
                                         }
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
@@ -178,5 +217,41 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    public void onGoToMapClick(View v) {
+        finish();
+    }
+
+    public void onResendEmailVerificationClick(View v) {
+        if (user != null) {
+            user.sendEmailVerification()
+            .addOnSuccessListener(r -> {
+                Utils.showToast(LoginActivity.this, "Verification email sent.");
+            });
+        }
+    }
+
+    private void waitForEmailVerification() {
+        binding.emailVerificationModal.setVisibility(View.VISIBLE);
+        binding.loginBaseLayout.setVisibility(View.GONE);
+        waitingForEmailVerification = true;
+
+        emailVerificationCheckRunnable.postDelayed(new Runnable() {
+            public void run() {
+                if (mAuth.getCurrentUser() != null) {
+                    mAuth.getCurrentUser().reload();
+                }
+                if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isEmailVerified()) {
+                    emailVerificationCheckRunnable.removeCallbacksAndMessages(null);
+                    Log.i("ljw", "user verified!");
+                    waitingForEmailVerification = false;
+                    finish();
+                } else {
+                    Log.i("ljw", "user still not verified");
+                    emailVerificationCheckRunnable.postDelayed(this, 2000);
+                }
+            }
+        }, 2000);
     }
 }

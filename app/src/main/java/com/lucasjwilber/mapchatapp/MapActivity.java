@@ -136,15 +136,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             getUserLatLng(true);
         }
 
-        Handler postQueryCooldownHandler = new Handler();
-        postQueryCooldownHandler.postDelayed(new Runnable() {
-            public void run() {
-                postQueryIsOnCooldown = false;
-                Log.i("ljw", "post query is off cooldown");
-                postQueryCooldownHandler.postDelayed(this, POST_QUERY_COOLDOWN);
-            }
-        }, POST_QUERY_COOLDOWN);
-
     }
 
     @Override
@@ -388,6 +379,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             getPostsFromDbAndCreateMapMarkers();
             postQueryIsOnCooldown = true;
             Log.i("ljw", "post query is on cooldown");
+
+            Handler postQueryCooldownHandler = new Handler();
+            postQueryCooldownHandler.postDelayed(new Runnable() {
+                public void run() {
+                    postQueryIsOnCooldown = false;
+                    Log.i("ljw", "post query is off cooldown");
+                }
+            }, POST_QUERY_COOLDOWN);
         }
     }
 

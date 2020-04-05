@@ -5,8 +5,6 @@ import java.util.List;
 
 public class User {
     private String uid;
-    private String firstName;
-    private String lastName;
     private String username;
     private String email;
     private List<PostDescriptor> postDescriptors;
@@ -20,9 +18,7 @@ public class User {
 
     public User() {};
 
-    public User(String firstName, String lastName, String username, String email, String uid) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+    public User(String username, String email, String uid) {
         this.username = username;
         this.email = email;
         this.uid = uid;
@@ -111,22 +107,6 @@ public class User {
 
     public void setPostDescriptors(List<PostDescriptor> postDescriptors) {
         this.postDescriptors = postDescriptors;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
     }
 
     public String getEmail() {
