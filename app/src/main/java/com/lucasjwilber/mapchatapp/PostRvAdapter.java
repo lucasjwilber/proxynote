@@ -35,7 +35,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private Post post;
     private String currentUserId;
     private String currentUserUsername;
-    private String parentActivity;
+    private String profileOwnerId;
     private Context context;
     private String distanceType;
     private Drawable upArrowColored;
@@ -58,13 +58,13 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             Context context,
             String currentUserId,
             String currentUserUsername,
-            String parentActivity,
+            String profileOwnerId,
             FirebaseFirestore db) {
         this.post = post;
         this.context = context;
         this.currentUserId = currentUserId;
         this.currentUserUsername = currentUserUsername;
-        this.parentActivity = parentActivity;
+        this.profileOwnerId = profileOwnerId;
         this.db = db;
 
         mAuth = FirebaseAuth.getInstance();
@@ -136,10 +136,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 TextView commentCount = l.findViewById(R.id.postCommentCount);
                 replyLoadingSpinner = l.findViewById(R.id.replySubmitProgressBar);
                 postUsername.setText(post.getUsername());
-                //don't let users start a new activity for the profile they're already on
-//                if (!parentActivity.equals("userProfile") && currentUserId != post.getUserId()) {
+                //don't let users start a new userprofile activity for the profile they're already viewing
+                if (!post.getUserId().equals(profileOwnerId)) {
                     postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
-//                }
+                }
                 postTimeAndPlace.setText(Utils.getHowLongAgo(post.getTimestamp()));
                 reportButton.setOnClickListener(v -> onReportButtonClicked());
                 postTitle.setText(post.getTitle());

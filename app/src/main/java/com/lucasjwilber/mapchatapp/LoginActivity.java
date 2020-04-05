@@ -244,7 +244,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isEmailVerified()) {
                     emailVerificationCheckRunnable.removeCallbacksAndMessages(null);
-                    Log.i("ljw", "user verified!");
+                    Utils.showToast(LoginActivity.this, "Email verified!");
                     waitingForEmailVerification = false;
                     finish();
                 } else {

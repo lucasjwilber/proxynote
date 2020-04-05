@@ -106,6 +106,46 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/verifyEmailReminder"
+        android:layout_width="280dp"
+        android:layout_height="170dp"
+        android:background="@drawable/rounded_square_accentcolor"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:text="You need to verify your email before you can post."
+            android:textAlignment="center"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.30" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:id="@+id/mapResendEmailButton"
+            android:background="?android:attr/selectableItemBackground"
+            android:onClick="onResendEmailVerificationClick"
+            android:text="Re-send verification email"
+            android:textColor="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </fragment>

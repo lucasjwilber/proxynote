@@ -91,6 +91,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     SharedPreferences sharedPreferences;
     List<Marker> postMarkers;
     Handler periodicLocationUpdateHandler;
+    private boolean userIsEmailVerified;
+    private Handler emailVerificationCheckRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +116,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postOutlineBrown = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_brown));
 
         db = FirebaseFirestore.getInstance();
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
         sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
         periodicLocationUpdateHandler = new Handler();
 
@@ -136,11 +137,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             getUserLatLng(true);
         }
 
+        emailVerificationCheckRunnable = new Handler();
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null && currentUser.isEmailVerified()) {
+            userIsEmailVerified = true;
+        }
+
         startGetLocationLooper();
         if (mMap != null) getPostsFromDbAndCreateMapMarkers();
     }
@@ -360,6 +369,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             mapBinding.mapLoginSuggestion.setText(text);
             mapBinding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
             return;
+        } else if (!userIsEmailVerified) {
+            mapBinding.verifyEmailReminder.setVisibility(View.VISIBLE);
+            startVerificationListener();
+            return;
         }
 
         postRv.setVisibility(View.GONE);
@@ -478,13 +491,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     public void onMapClick(LatLng latlng) {
         hideAllModals();
+        emailVerificationCheckRunnable.removeCallbacksAndMessages(null);
     }
 
     private void hideAllModals() {
-
         postRv.setVisibility(View.GONE);
         postRv.setAdapter(null);
         mapBinding.mapLoginSuggestionModal.setVisibility(View.GONE);
+        mapBinding.verifyEmailReminder.setVisibility(View.GONE);
     }
 
     private Bitmap getBitmap(int drawableRes) {
@@ -534,7 +548,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 MapActivity.this,
                                 currentUser != null ? currentUser.getUid() : null,
                                 currentUser != null ? currentUser.getDisplayName() : null,
-//                                postRv,
+                                null,
                                 db
                         );
                         postRv.setAdapter(postRvAdapter);
@@ -563,6 +577,34 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postRv.setVisibility(View.GONE);
         mapBinding.mapLoginSuggestionModal.setVisibility(View.GONE);
         startActivity(goToLogin);
+    }
+
+    public void onResendEmailVerificationClick(View v) {
+        if (currentUser != null) {
+            currentUser.sendEmailVerification()
+                    .addOnSuccessListener(r -> {
+                        Utils.showToast(MapActivity.this, "Verification email sent.");
+                    });
+        }
+    }
+
+    private void startVerificationListener() {
+        emailVerificationCheckRunnable.postDelayed(new Runnable() {
+            public void run() {
+                if (currentUser != null) {
+                    currentUser.reload();
+                }
+                if (currentUser != null && currentUser.isEmailVerified()) {
+                    emailVerificationCheckRunnable.removeCallbacksAndMessages(null);
+                    userIsEmailVerified = true;
+                    Utils.showToast(MapActivity.this, "Email verified!");
+                    mapBinding.verifyEmailReminder.setVisibility(View.GONE);
+                } else {
+                    Log.i("ljw", "user still not verified");
+                    emailVerificationCheckRunnable.postDelayed(this, 2000);
+                }
+            }
+        }, 2000);
     }
 
 }

@@ -237,7 +237,7 @@ public class UserProfileActivity extends AppCompatActivity {
                                 UserProfileActivity.this,
                                 currentUser != null ? currentUser.getUid() : null,
                                 currentUser != null ? currentUser.getDisplayName() : null,
-//                                    binding.profileOnePostRv,
+                                thisProfileOwnerId,
                                 db);
                         binding.profileOnePostRv.setAdapter(postRvAdapter);
                         binding.profileOnePostRv.setBackground(getResources().getDrawable(R.drawable.rounded_square_black));
