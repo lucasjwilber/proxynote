@@ -62,6 +62,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnCameraIdleListener {
 
+    private final String TAG = "ljw";
     private ActivityMapBinding mapBinding;
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
@@ -152,6 +153,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         startGetLocationLooper();
         if (mMap != null) getPostsFromDbAndCreateMapMarkers();
+
+        //hide/refresh/show postRv, to prevent vote manipulation via out-of-date scores
+        if (postRv.getVisibility() == View.VISIBLE) {
+            postRv.setVisibility(View.GONE);
+            postRvAdapter = null;
+            setPostRvAdapter(currentSelectedPostId);
+            postRv.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -167,7 +176,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             periodicLocationUpdateHandler.postDelayed(new Runnable() {
                 public void run() {
                     getUserLatLng(false);
-                    Log.i("ljw", "updated location from the runnable: " + userLat + "/" + userLng);
+                    Log.i(TAG, "updated location from the runnable: " + userLat + "/" + userLng);
                     //this is nulled on activity pause, in which case we don't want to start another one
                     if (periodicLocationUpdateHandler != null) {
                         periodicLocationUpdateHandler.postDelayed(this, LOCATION_UPDATE_COOLDOWN);
@@ -214,7 +223,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     startActivity(i);
                 } else { //log out
                     FirebaseAuth.getInstance().signOut();
-                    Log.i("ljw", "user logged out");
+                    Log.i(TAG, "user logged out");
                     Utils.showToast(MapActivity.this, "You are now logged out.");
                     currentUser = null;
                 }
@@ -274,11 +283,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
-                    Log.i("ljw", "location permission granted, getting location...");
+                    Log.i(TAG, "location permission granted, getting location...");
                     getUserLatLng(true);
                 }
             } else {
-                Log.i("ljw", "location permission denied");
+                Log.i(TAG, "location permission denied");
             }
         }
     }
@@ -286,12 +295,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void getUserLatLng(boolean centerOnUser) {
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, location -> {
-                    Log.i("ljw", "successfully got location");
+                    Log.i(TAG, "successfully got location");
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         userLat = location.getLatitude();
                         userLng = location.getLongitude();
-                        Log.i("ljw", "lat: " + userLat + "\nlong: " + userLng);
+                        Log.i(TAG, "lat: " + userLat + "\nlong: " + userLng);
 
                         if (!mapHasBeenSetUp) mapViewSetup();
                         if (centerOnUser) mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
@@ -306,7 +315,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     }
                 })
                 .addOnFailureListener(this, error -> {
-                    Log.i("ljw", "error getting location:\n" + error.toString());
+                    Log.i(TAG, "error getting location:\n" + error.toString());
                 });
     }
 
@@ -314,8 +323,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         Intent intent = getIntent();
         double lat = intent.getDoubleExtra("lat", 0d);
         double lng = intent.getDoubleExtra("lng", 0d);
-        Log.i("ljw", "from intent: " + lat + "/" + lng);
-        Log.i("ljw", "user: " + userLat + "/" + userLng);
+        Log.i(TAG, "from intent: " + lat + "/" + lng);
+        Log.i(TAG, "user: " + userLat + "/" + userLng);
 
         //if lat/lng is 0/0, either by the db field being null or an error with the intent,
         //just center on the user instead of an incorrect location
@@ -326,7 +335,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         double finalLat = lat;
         double finalLng = lng;
-        Log.i("ljw", "going to " + finalLat + "/" + finalLng);
+        Log.i(TAG, "going to " + finalLat + "/" + finalLng);
         AsyncTask.execute(() -> {
             //update map on main thread
             Handler handler = new Handler(Looper.getMainLooper()) {
@@ -384,7 +393,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onCameraIdle() {
         cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-        Log.i("ljw", "camera bounds: " + cameraBounds.toString());
+        Log.i(TAG, "camera bounds: " + cameraBounds.toString());
 
         // query db for posts near the user
 //        getPostsFromDbAndCreateMapMarkers();
@@ -392,13 +401,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         if (!postQueryIsOnCooldown) {
             getPostsFromDbAndCreateMapMarkers();
             postQueryIsOnCooldown = true;
-            Log.i("ljw", "post query is on cooldown");
+            Log.i(TAG, "post query is on cooldown");
 
             Handler postQueryCooldownHandler = new Handler();
             postQueryCooldownHandler.postDelayed(new Runnable() {
                 public void run() {
                     postQueryIsOnCooldown = false;
-                    Log.i("ljw", "post query is off cooldown");
+                    Log.i(TAG, "post query is off cooldown");
                 }
             }, POST_QUERY_COOLDOWN);
         }
@@ -411,7 +420,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         // remove old markers
         for (Marker m : postMarkers) m.remove();
 
-        Log.i("ljw", "getting posts from " + cameraBounds.southwest.longitude + " to " + cameraBounds.northeast.longitude);
+        Log.i(TAG, "getting posts from " + cameraBounds.southwest.longitude + " to " + cameraBounds.northeast.longitude);
 
         db.collection("posts")
                 .whereLessThan("lng", cameraBounds.northeast.longitude)
@@ -447,15 +456,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 createMarkerWithPost(post);
                             }
                         } else {
-                            Log.i("ljw", "Error getting documents.", task.getException());
+                            Log.i(TAG, "Error getting documents.", task.getException());
                         }
                     }
                 });
     }
 
     public void createMarkerWithPost(Post post) {
-        // this is used to prevent marker overlap
-        float zIndex = (float) Math.random();
+        float zIndex = (float) post.getTimestamp();
 
         Marker borderMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(post.getLat(), post.getLng()))
@@ -481,7 +489,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         Marker iconMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(post.getLat(), post.getLng()))
                 .anchor(-0.4f, 1.575f)
-                .zIndex(zIndex + 0.0001f)
+                .zIndex(zIndex + 1f)
                 .icon(Utils.getPostIconBitmapDescriptor(post.getIcon(), this))
         );
         iconMarker.setTag(post.getId());
@@ -514,10 +522,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        Log.i("ljw", "clicked on a marker");
+        Log.i(TAG, "clicked on a marker");
 
         if (marker.getTag() == null) {
-            Log.i("ljw", "no post tagged to the clicked on marker, hmm");
+            Log.i(TAG, "no post tagged to the clicked on marker, hmm");
             return true;
         }
 
@@ -537,7 +545,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     .document(postId)
                     .get()
                     .addOnSuccessListener(result -> {
-                        Log.i("ljw", "got post " + result.getId());
+                        Log.i(TAG, "got post " + result.getId());
                         Post post = result.toObject(Post.class);
                         if (post != null) {
                             ArrayList list = (ArrayList) result.getData().get("comments");
@@ -569,14 +577,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         }
                         mapBinding.mapPostRvProgressBar.setVisibility(View.GONE);
                     })
-                    .addOnFailureListener(e -> Log.i("ljw", "error getting post: " + e.toString()));
+                    .addOnFailureListener(e -> Log.i(TAG, "error getting post: " + e.toString()));
         }
     }
 
     public void onLoginSuggestionButtonClick(View v) {
         Intent goToLogin = new Intent(MapActivity.this, LoginActivity.class);
-        postRv.setVisibility(View.GONE);
-        mapBinding.mapLoginSuggestionModal.setVisibility(View.GONE);
+        hideAllModals();
         startActivity(goToLogin);
     }
 
@@ -601,7 +608,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     Utils.showToast(MapActivity.this, "Email verified!");
                     mapBinding.verifyEmailReminder.setVisibility(View.GONE);
                 } else {
-                    Log.i("ljw", "user still not verified");
+                    Log.i(TAG, "user still not verified");
                     emailVerificationCheckRunnable.postDelayed(this, 2000);
                 }
             }

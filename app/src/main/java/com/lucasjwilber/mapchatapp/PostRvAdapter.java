@@ -19,7 +19,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,6 +31,7 @@ import java.util.List;
 
 public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHolder> {
 
+    private final String TAG = "ljw";
     private Post post;
     private String currentUserId;
     private String currentUserUsername;
@@ -43,9 +43,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private Button upvoteButton;
     private Button downvoteButton;
     private TextView postScore;
-    private ImageView postImage;
     private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
     private FirebaseUser user;
     private EditText addCommentBox;
     private ProgressBar replyLoadingSpinner;
@@ -67,7 +65,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         this.profileOwnerId = profileOwnerId;
         this.db = db;
 
-        mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
 
         upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
@@ -94,26 +92,9 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             return POST_COMMENT;
     }
 
-    // Create new views (invoked by the layout manager)
     @Override
     public PostRvAdapter.PostViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
         ConstraintLayout l;
-
-//        if (parent.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            Log.i("ljw", "parent is " + parent.getId());
-//            Log.i("ljw", "map is " + R.id.mapLayout);
-//            if (parent == parent.getLayoutlayout.activity_map) {
-//                RecyclerView rv = parent.findViewById(R.id.postRecyclerView);
-//                ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) rv.getLayoutParams();
-//                marginLayoutParams.setMargins(250, 50, 250, 50);
-//            } else if (parent.getId() == R.id.userProfileLayout) {
-//                RecyclerView rv = parent.findViewById(R.id.profileOnePostRv);
-//                ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) rv.getLayoutParams();
-//                marginLayoutParams.setMargins(250, 50, 250, 50);
-//            }
-//        }
-
         switch (viewType) {
             case POST_HEADER:
                 l = (ConstraintLayout) LayoutInflater.from(parent.getContext())
@@ -127,7 +108,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 TextView postTimeAndPlace = l.findViewById(R.id.postRvTimeAndPlace);
                 TextView postTitle = l.findViewById(R.id.postRvHeaderTitle);
                 Button reportButton = l.findViewById(R.id.postRvHeaderReportBtn);
-                postImage = l.findViewById(R.id.postRvPostImage);
+                ImageView postImage = l.findViewById(R.id.postRvPostImage);
                 postImage.setOnClickListener(v -> goToFullSizeImage(post.getImageUrl(), post.getTitle()));
                 TextView postText = l.findViewById(R.id.postRvPostText);
                 addCommentBox = l.findViewById(R.id.postRvPostReplyBox);
@@ -151,14 +132,12 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                     int px = Math.round(cornerRadius * (context.getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT));
                     Glide.with(parent)
                             .load(post.getImageUrl())
-//                            .transform(new RoundedCorners(px))
+//                           TODO: .transform(new RoundedCorners(px))
                             .thumbnail(.25f)
-//                            .circleCrop()
-//                            .centerCrop()
                             .into(postImage);
                 }
 
-                Log.i("ljw", "comments: " + post.getComments());
+                Log.i(TAG, "comments: " + post.getComments());
 //                ArrayList list = (ArrayList) post.getComments();
 //                post.setComments(Utils.turnMapsIntoListOfComments(list));
 
@@ -172,7 +151,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 }
                 commentCount.setText(commentCountText);
 
-                Log.i("ljw", "post votes: " + post.getVotes().size());
+                Log.i(TAG, "post votes: " + post.getVotes().size());
 
                 if (post.getVotes().containsKey(currentUserId)) {
                     if (post.getVotes().get(currentUserId) > 0) {
@@ -240,7 +219,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         int usersNewVote = 0;
         int scoreChange = 0;
 
-//        if (b.getId() == R.id.postRvHeaderVoteDownBtn) {
         if (b == downvoteButton) {
             if (usersPreviousVote == -1) {
                 usersNewVote = 0;
@@ -257,7 +235,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 upvoteButton.setBackground(context.getDrawable(R.drawable.arrow_up));
             }
         }
-//        if (v.getId() == R.id.postRvHeaderVoteUpBtn) {
         if (b == upvoteButton) {
             if (usersPreviousVote == -1) {
                 usersNewVote = 1;
@@ -296,14 +273,14 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                             .update("score", post.getScore() + finalScoreChange,
                                     "votes", voteMap)
                             .addOnCompleteListener(task1 -> {
-                                Log.i("ljw", "successfully updated score");
+                                Log.i(TAG, "successfully updated score");
 
                                 //update the post creator's total score field:
                                 db.collection("users")
                                         .document(post.getUserId())
                                         .get()
                                         .addOnCompleteListener(task2 -> {
-                                            Log.i("ljw", "got post creator for score update");
+                                            Log.i(TAG, "got post creator for score update");
                                             User user = task2.getResult().toObject(User.class);
                                             int userScore = user.getTotalScore();
 
@@ -320,28 +297,28 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                                                     .update("totalScore", userScore + finalScoreChange,
                                                             "postDescriptors", postDescriptors)
                                                     .addOnCompleteListener(task3 -> {
-                                                        Log.i("ljw", "updated post user's score and the postDescriptor successfully");
+                                                        Log.i(TAG, "updated post user's score and the postDescriptor successfully");
                                                     })
                                                     .addOnFailureListener(e -> {
-                                                        Log.i("ljw", "couldn't update user's score: " + e.toString());
+                                                        Log.i(TAG, "couldn't update user's score: " + e.toString());
                                                     });
 
 
                                         })
                                         .addOnFailureListener(e -> {
-                                            Log.i("ljw", "failed getting user: " + e.toString());
+                                            Log.i(TAG, "failed getting user: " + e.toString());
                                         });
 
 
                                 b.setEnabled(true);
                             })
                             .addOnFailureListener(e -> {
-                                Log.i("ljw", "failed updating score: " + e.toString());
+                                Log.i(TAG, "failed updating score: " + e.toString());
                                 b.setEnabled(true);
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.i("ljw", "error getting post to update its score: " + e.toString());
+                    Log.i(TAG, "error getting post to update its score: " + e.toString());
                     b.setEnabled(true);
                 });
     }
@@ -366,7 +343,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     public void addCommentToPost(String commentText) {
-        Log.i("ljw", commentText);
+        Log.i(TAG, commentText);
         if (user == null) {
             Utils.showToast(context, "You must be logged in to comment.");
             return;
@@ -382,61 +359,45 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(location -> {
-                    Log.i("ljw", "successfully got location");
+                    Log.i(TAG, "successfully got location");
                     // Got last known location. In some rare situations this can be null.
                     double userLat;
                     double userLng;
                     if (location != null) {
                         userLat = location.getLatitude();
                         userLng = location.getLongitude();
-                        Log.i("ljw", "lat: " + userLat + "\nlong: " + userLng);
+                        Log.i(TAG, "lat: " + userLat + "\nlong: " + userLng);
 
-//                        //get user from "users"
-//                        db.collection("users")
-//                                .document(postOwnerId)
-//                                .get()
-//                                .addOnSuccessListener(result -> {
-//                                    Log.i("ljw", "got user from db");
-//                                    User user = result.toObject(User.class);
-//                                    assert user != null;
+                        double distanceFromPost = Utils.getDistance(userLat, userLng, post.getLat(), post.getLng());
 
-                                    double distanceFromPost = Utils.getDistance(userLat, userLng, post.getLat(), post.getLng());
+                        Comment comment = new Comment(
+                                currentUserId,
+                                currentUserUsername != null ? currentUserUsername : "someone",
+                                commentText,
+                                userLat,
+                                userLng,
+                                distanceFromPost);
 
-                                    Comment comment = new Comment(
-                                            currentUserId,
-                                            currentUserUsername != null ? currentUserUsername : "someone",
-                                            commentText,
-                                            userLat,
-                                            userLng,
-                                            distanceFromPost);
+                        List<Comment> comments = post.getComments();
+                        comments.add(comment);
 
-                                    List<Comment> comments = post.getComments();
-                                    comments.add(comment);
-                                    Log.i("ljw", "adding comment " + comments.toString());
-
-                                    //get post by id from firestore
-                                    db.collection("posts")
-                                            .document(post.getId())
-                                            .update("comments", comments)
-                                            .addOnCompleteListener(task -> {
-                                                Log.i("ljw", "successfully added a comment");
-                                                addCommentBox.setText("");
-                                                replyLoadingSpinner.setVisibility(View.GONE);
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Log.i("ljw", "failed adding a comment because " + e.toString());
-                                                replyLoadingSpinner.setVisibility(View.GONE);
-                                            });
-//                                })
-//                                .addOnFailureListener(e -> {
-//                                    Log.i("ljw", "error getting user from db: " + e.toString());
-//                                    replyLoadingSpinner.setVisibility(View.GONE);
-//                                });
+                        //get post by id from firestore
+                        db.collection("posts")
+                                .document(post.getId())
+                                .update("comments", comments)
+                                .addOnCompleteListener(task -> {
+                                    addCommentBox.setText("");
+                                    replyLoadingSpinner.setVisibility(View.GONE);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "failed adding a comment because " + e.toString());
+                                    replyLoadingSpinner.setVisibility(View.GONE);
+                                });
                     }
                 })
                 .addOnFailureListener(e -> {
                     Utils.showToast(context, "Unable to get your location.");
-                    Log.i("ljw", "error getting location: " + e.toString());
+                    Log.e(TAG, "error getting location: " + e.toString());
                     replyLoadingSpinner.setVisibility(View.GONE);
                 });
     }

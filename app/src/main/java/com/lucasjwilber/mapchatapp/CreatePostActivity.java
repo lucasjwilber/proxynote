@@ -56,26 +56,23 @@ import java.util.UUID;
 
 public class CreatePostActivity extends AppCompatActivity {
 
+    private final String TAG = "ljw";
     private static final int CAMERA__AND_STORAGE_PERMISSIONS = 69;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    String currentPhotoPath;
+    private  static final int REQUEST_IMAGE_CAPTURE = 1;
+    private String currentPhotoPath;
     private ActivityCreatePostBinding binding;
-    FirebaseFirestore db;
-    FirebaseUser user;
-    FirebaseStorage storage = FirebaseStorage.getInstance();
-    StorageReference storageRef;
-    public String userCurrentAddress;
-    ImageView createPostImage;
-    Bitmap currentImage;
-    private RecyclerView iconRv;
-    private RecyclerView.Adapter iconRvAdapter;
-    private RecyclerView.LayoutManager iconRvLayoutManager;
-    LinearLayoutManager HorizontalLayout;
+    private FirebaseFirestore db;
+    private FirebaseUser user;
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
+    private StorageReference storageRef;
+    private String userCurrentAddress;
+    private ImageView createPostImage;
+    private Bitmap currentImage;
     private int selectedIcon = 0;
-    ImageView selectedIconView;
-    boolean iconSelected;
-    int selectedPosition;
-    ProgressBar loadingSpinner;
+    private ImageView selectedIconView;
+    private boolean iconSelected;
+    private int selectedPosition;
+    private ProgressBar loadingSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,22 +81,19 @@ public class CreatePostActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
 
-        //x
-        Log.i("ljw", getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath());
-
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
         storageRef = storage.getReference();
         createPostImage = binding.createPostImage;
         loadingSpinner = findViewById(R.id.createPostProgressBar);
 
-        iconRv = findViewById(R.id.postIconRv);
-        HorizontalLayout = new LinearLayoutManager(
+        RecyclerView iconRv = findViewById(R.id.postIconRv);
+        LinearLayoutManager horizontalLayout = new LinearLayoutManager(
                 CreatePostActivity.this,
                 LinearLayoutManager.HORIZONTAL,
                 false);
-        iconRv.setLayoutManager(HorizontalLayout);
-        iconRvAdapter = new IconSelectAdapter(this);
+        iconRv.setLayoutManager(horizontalLayout);
+        RecyclerView.Adapter iconRvAdapter = new IconSelectAdapter(this);
         iconRv.setAdapter(iconRvAdapter);
 
     }
@@ -123,7 +117,7 @@ public class CreatePostActivity extends AppCompatActivity {
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(CreatePostActivity.this);
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(CreatePostActivity.this, location -> {
-                    Log.i("ljw", "successfully got location");
+                    Log.i(TAG, "successfully got location");
                     // Got last known location. In some rare situations this can be null.
 
                     double userLat;
@@ -131,7 +125,7 @@ public class CreatePostActivity extends AppCompatActivity {
                     if (location != null) {
                         userLat = location.getLatitude();
                         userLng = location.getLongitude();
-                        Log.i("ljw", "lat: " + userLat + "\nlong: " + userLng);
+                        Log.i(TAG, "lat: " + userLat + "\nlong: " + userLng);
 
 
                         new Thread(new Runnable() {
@@ -139,7 +133,7 @@ public class CreatePostActivity extends AppCompatActivity {
                             public void run() {
                                 //get formatted address
                                 String formattedAddress = "somewhere";
-                                Log.i("ljw", "calling geocode api...");
+                                Log.i(TAG, "calling geocode api...");
                                 try {
                                     URL url = new URL("https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
                                             userLat +
@@ -150,7 +144,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
                                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                                     con.setRequestMethod("GET");
-                                    Log.i("ljw", "called api, reading response...");
+                                    Log.i(TAG, "called api, reading response...");
                                     BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                                     String line;
                                     StringBuilder content = new StringBuilder();
@@ -159,21 +153,21 @@ public class CreatePostActivity extends AppCompatActivity {
                                         if (line.contains("formatted_address")) {
                                             formattedAddress = line.split("\" : \"")[1];
                                             formattedAddress = formattedAddress.substring(0, formattedAddress.length() - 2);
-                                            Log.i("ljw", "found formatted addresss: " + formattedAddress);
+                                            Log.i(TAG, "found formatted addresss: " + formattedAddress);
                                             break;
                                         }
                                     }
-                                    Log.i("ljw", content.toString());
-                                    Log.i("ljw", "formatted address is " + formattedAddress);
+                                    Log.i(TAG, content.toString());
+                                    Log.i(TAG, "formatted address is " + formattedAddress);
                                     in.close();
                                     con.disconnect();
 
                                 } catch (MalformedURLException e) {
-                                    Log.i("ljw", "malformedURLexception:\n" + e.toString());
+                                    Log.i(TAG, "malformedURLexception:\n" + e.toString());
                                 } catch (ProtocolException e) {
-                                    Log.i("ljw", "protocol exception:\n" + e.toString());
+                                    Log.i(TAG, "protocol exception:\n" + e.toString());
                                 } catch (IOException e) {
-                                    Log.i("ljw", "IO exception:\n" + e.toString());
+                                    Log.i(TAG, "IO exception:\n" + e.toString());
                                 }
 
                                 Post post = new Post(
@@ -198,7 +192,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Utils.showToast(CreatePostActivity.this, "Unable to get your location.");
-                    Log.i("ljw", "failed getting location: " + e.toString());
+                    Log.i(TAG, "failed getting location: " + e.toString());
                 });
     }
 
@@ -210,21 +204,21 @@ public class CreatePostActivity extends AppCompatActivity {
         currentImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] imageData = baos.toByteArray();
         StorageReference imageRef = storageRef.child(imageUUID);
-        Log.i("ljw", "storage ref is " + imageRef + "\nurl is + " + imageRef.getDownloadUrl());
+        Log.i(TAG, "storage ref is " + imageRef + "\nurl is + " + imageRef.getDownloadUrl());
 
         UploadTask uploadTask = imageRef.putBytes(imageData);
         uploadTask.addOnSuccessListener(result -> {
-            Log.i("ljw", "uploaded image! \n" + result.toString());
+            Log.i(TAG, "uploaded image! \n" + result.toString());
             imageRef.getDownloadUrl().addOnSuccessListener(url -> {
-                Log.i("ljw", "got image url: " + url.toString());
+                Log.i(TAG, "got image url: " + url.toString());
                 post.setImageUrl(url.toString());
                 uploadPost(post);
             })
             .addOnFailureListener(e -> {
-                Log.i("ljw", "error: " + e.toString());
+                Log.i(TAG, "error: " + e.toString());
             });
         }).addOnFailureListener(failure -> {
-            Log.i("ljw", "failure! :" + failure.toString());
+            Log.i(TAG, "failure! :" + failure.toString());
         });
     }
 
@@ -233,7 +227,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 .document(post.getId())
                 .set(post)
                 .addOnSuccessListener(result -> {
-                    Log.i("ljw", "successfully added new post to DB");
+                    Log.i(TAG, "successfully added new post to DB");
 
                     //add post to user's list and +1 their total score
                     db.collection("users")
@@ -242,7 +236,7 @@ public class CreatePostActivity extends AppCompatActivity {
                             .addOnSuccessListener(userData -> {
                                 User user = userData.toObject(User.class);
                                 if (user.getPostDescriptors() == null) {
-                                    Log.i("ljw", "user doesn't have a postDescriptors field!");
+                                    Log.i(TAG, "user doesn't have a postDescriptors field!");
                                 } else {
                                     List<PostDescriptor> postDescriptors = user.getPostDescriptors();
                                     postDescriptors.add(new PostDescriptor(
@@ -261,18 +255,18 @@ public class CreatePostActivity extends AppCompatActivity {
                                             .update("postDescriptors", postDescriptors,
                                                     "totalScore", user.getTotalScore() + 1)
                                             .addOnSuccessListener(result2 -> {
-                                                Log.i("ljw", "successfully updated user's post descriptors list");
+                                                Log.i(TAG, "successfully updated user's post descriptors list");
                                                 loadingSpinner.setVisibility(View.VISIBLE);
                                             })
                                             .addOnFailureListener(e -> {
-                                                Log.i("ljw", "Error updating user's post descriptors list " + e);
+                                                Log.i(TAG, "Error updating user's post descriptors list " + e);
                                                 loadingSpinner.setVisibility(View.VISIBLE);
                                             });
                                 }
 
                             })
                             .addOnFailureListener(e -> {
-                                Log.i("ljw", "Error getting user: " + e);
+                                Log.i(TAG, "Error getting user: " + e);
                                 loadingSpinner.setVisibility(View.VISIBLE);
                             });
 
@@ -280,21 +274,21 @@ public class CreatePostActivity extends AppCompatActivity {
 
                 })
                 .addOnFailureListener(e -> {
-                    Log.i("ljw", "Error adding post to db: " + e);
+                    Log.i(TAG, "Error adding post to db: " + e);
                     loadingSpinner.setVisibility(View.VISIBLE);
                 });
     }
 
     public void cameraButtonClicked(View v) {
-        Log.i("ljw", "camera button clicked");
+        Log.i(TAG, "camera button clicked");
 
         PackageManager pm = getPackageManager();
         if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-            Log.i("ljw", "package manager says this device has a camera. going to try to use it...");
+            Log.i(TAG, "package manager says this device has a camera. going to try to use it...");
             checkVersionLaunchCamera();
         } else {
             Utils.showToast(CreatePostActivity.this, "This device doesn't have a compatible camera.");
-            Log.i("ljw", "this device doesn't have a camera to use.");
+            Log.i(TAG, "this device doesn't have a camera to use.");
         }
     }
 
@@ -330,13 +324,13 @@ public class CreatePostActivity extends AppCompatActivity {
                 if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.CAMERA)
                         == PackageManager.PERMISSION_GRANTED) {
-                    Log.i("ljw", "camera permission granted");
+                    Log.i(TAG, "camera permission granted");
 
                     //launch camera
                     dispatchTakePictureIntent();
                 }
             } else {
-                Log.i("ljw", "camera permission denied");
+                Log.i(TAG, "camera permission denied");
             }
         }
     }
@@ -350,7 +344,7 @@ public class CreatePostActivity extends AppCompatActivity {
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
-                Log.i("ljw", "error making file: " + ex.toString());
+                Log.i(TAG, "error making file: " + ex.toString());
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -393,7 +387,7 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     public void onIconClick(View v, int position) {
-        Log.i("ljw", "selected icon code is " + v.getTag().toString());
+        Log.i(TAG, "selected icon code is " + v.getTag().toString());
         if (selectedIconView != null) selectedIconView.setBackground(null);
         selectedIconView = (ImageView) v;
         selectedIcon = (int) v.getTag();
