@@ -42,13 +42,13 @@
                 android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Reason:" />
+                android:text="@string/reason" />
 
             <RadioButton
                 android:id="@+id/reportRBspam"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Spam"
+                android:text="@string/spam"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:layout_editor_absoluteX="29dp" />
 
@@ -56,7 +56,7 @@
                 android:id="@+id/reportRBpersonalInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Personal Information"
+                android:text="@string/personal_information"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:layout_editor_absoluteX="33dp" />
@@ -65,7 +65,7 @@
                 android:id="@+id/reportRBthreat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Threatening"
+                android:text="@string/threatening"
                 tools:layout_editor_absoluteX="35dp"
                 tools:layout_editor_absoluteY="90dp" />
 
@@ -73,7 +73,7 @@
                 android:id="@+id/reportRBvulgar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Vulgar or Offensive Content"
+                android:text="@string/vulgar_or_offensive"
                 tools:layout_editor_absoluteX="35dp"
                 tools:layout_editor_absoluteY="90dp" />
 
@@ -81,7 +81,7 @@
                 android:id="@+id/reportRBother"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Other"
+                android:text="@string/other"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:layout_editor_absoluteX="134dp" />
@@ -92,7 +92,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Additional Information (optional):"
+            android:text="@string/additional_information"
             app:layout_constraintStart_toStartOf="@+id/reportTypeRG"
             app:layout_constraintTop_toBottomOf="@+id/reportTypeRG" />
 
@@ -117,7 +117,7 @@
             android:background="@drawable/rounded_square_filled_accentcolor"
             android:onClick="onReportSubmit"
             android:padding="12dp"
-            android:text="Report Post"
+            android:text="@string/report_post"
             android:textColor="#FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/reportAdditionalText"
@@ -132,7 +132,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Report Post"
+        android:text="@string/report_post"
         android:textSize="30sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
