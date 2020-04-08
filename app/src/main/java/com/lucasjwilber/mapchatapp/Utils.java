@@ -75,7 +75,7 @@ public class Utils {
             dDistance = d * 1.609344;
             if (dDistance < 0.1) {
                 iDistance = (int) Math.round(dDistance * 1000);
-                return iDistance + " meters away";
+                return iDistance + (iDistance != 1 ? " meters away" : " meter away");
             } else if (dDistance < 10){
                 //round the first decimal and remove the others
                 dDistance = Math.round(dDistance * 10);
@@ -92,12 +92,12 @@ public class Utils {
             dDistance = d * 0.8684;
             if (dDistance < 0.18939393939) { //dDistance < 1000 feet
                 iDistance = (int) Math.round(dDistance * 5280);
-                return iDistance + " feet away";
+                return iDistance + (iDistance != 1 ? " feet away" : " foot away");
             } else if (dDistance < 10){
                 //round the first decimal and remove the others
                 dDistance = Math.round(dDistance * 10);
                 dDistance = dDistance / 10;
-                return dDistance + " miles away";
+                return dDistance + (dDistance != 1 ? " miles away" : " mile away");
             } else { // if (dDistance >= 10)
                 // round it and remove decimals
                 dDistance = Math.round(dDistance * 10);

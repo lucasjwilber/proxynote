@@ -66,32 +66,32 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private ActivityMapBinding mapBinding;
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
-    FirebaseFirestore db;
-    long postQueryLimit = 500;
-    FirebaseUser currentUser;
-    public static final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
-    private static final int LOCATION_UPDATE_COOLDOWN = 15000;
-    private static final int POST_QUERY_COOLDOWN = 1750;
-    static boolean postQueryIsOnCooldown;
-    double userLat;
-    double userLng;
-    Marker userMarker;
-    LatLngBounds cameraBounds;
-    public String userCurrentAddress = "somewhere";
-    BitmapDescriptor userMarkerIcon;
-    BitmapDescriptor postOutlineYellow;
-    BitmapDescriptor postOutlineYellowOrange;
-    BitmapDescriptor postOutlineOrange;
-    BitmapDescriptor postOutlineOrangeRed;
-    BitmapDescriptor postOutlineRed;
-    BitmapDescriptor postOutlineBrown;
-    String currentSelectedPostId;
+    private FirebaseFirestore db;
+    private long postQueryLimit = 500;
+    private FirebaseUser currentUser;
+    private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
+    private final int LOCATION_UPDATE_COOLDOWN = 15000;
+    private final int POST_QUERY_COOLDOWN = 1750;
+    private boolean postQueryIsOnCooldown;
+    private double userLat;
+    private double userLng;
+    private Marker userMarker;
+    private LatLngBounds cameraBounds;
+    private String userCurrentAddress = "somewhere";
+    private BitmapDescriptor userMarkerIcon;
+    private BitmapDescriptor postOutlineYellow;
+    private BitmapDescriptor postOutlineYellowOrange;
+    private BitmapDescriptor postOutlineOrange;
+    private BitmapDescriptor postOutlineOrangeRed;
+    private BitmapDescriptor postOutlineRed;
+    private BitmapDescriptor postOutlineBrown;
+    private String currentSelectedPostId;
     private RecyclerView postRv;
     private RecyclerView.Adapter postRvAdapter;
-    boolean mapHasBeenSetUp;
+    private boolean mapHasBeenSetUp;
     SharedPreferences sharedPreferences;
-    List<Marker> postMarkers;
-    Handler periodicLocationUpdateHandler;
+    private List<Marker> postMarkers;
+    private Handler periodicLocationUpdateHandler;
     private boolean userIsEmailVerified;
     private Handler emailVerificationCheckRunnable;
 
@@ -139,7 +139,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
 
         emailVerificationCheckRunnable = new Handler();
-
     }
 
     @Override
@@ -174,6 +173,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         if (mMap != null) {
             periodicLocationUpdateHandler.removeCallbacksAndMessages(null);
 
+            //update userLat and userLng every [LOCATION_UPDATE_COOLDOWN] ms:
             periodicLocationUpdateHandler.postDelayed(new Runnable() {
                 public void run() {
                     getUserLatLng(false);
@@ -265,9 +265,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
         //remove the directions/gps/compass buttons
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
+
         mMap.setOnMarkerClickListener(this::onMarkerClick);
         mMap.setOnMapClickListener(this::onMapClick);
         mMap.setOnCameraIdleListener(this::onCameraIdle);
