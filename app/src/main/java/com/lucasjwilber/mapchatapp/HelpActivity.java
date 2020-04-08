@@ -46,7 +46,7 @@ public class HelpActivity extends AppCompatActivity {
         String userId = user != null ? user.getUid() : "unknown";
         String userEmail = user != null ? user.getEmail() : "unknown";
         QuestionOrComment qoc = new QuestionOrComment(text, userId, userEmail);
-        
+
         db.collection("questionsAndComments")
                 .add(qoc)
                 .addOnSuccessListener(s -> {

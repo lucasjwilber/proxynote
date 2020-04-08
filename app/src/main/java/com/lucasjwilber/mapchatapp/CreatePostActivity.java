@@ -1,5 +1,6 @@
 package com.lucasjwilber.mapchatapp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -197,6 +198,14 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     private void uploadImageAndPost(Post post) {
+        Handler handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                Utils.showToast(CreatePostActivity.this, "Uploading image...");
+            }
+        };
+        handler.obtainMessage().sendToTarget();
+
         String imageUUID = UUID.randomUUID().toString();
         post.setImageUUID(imageUUID);
 
@@ -204,13 +213,11 @@ public class CreatePostActivity extends AppCompatActivity {
         currentImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] imageData = baos.toByteArray();
         StorageReference imageRef = storageRef.child(imageUUID);
-        Log.i(TAG, "storage ref is " + imageRef + "\nurl is + " + imageRef.getDownloadUrl());
 
         UploadTask uploadTask = imageRef.putBytes(imageData);
+
         uploadTask.addOnSuccessListener(result -> {
-            Log.i(TAG, "uploaded image! \n" + result.toString());
             imageRef.getDownloadUrl().addOnSuccessListener(url -> {
-                Log.i(TAG, "got image url: " + url.toString());
                 post.setImageUrl(url.toString());
                 uploadPost(post);
             })
@@ -220,6 +227,8 @@ public class CreatePostActivity extends AppCompatActivity {
         }).addOnFailureListener(failure -> {
             Log.i(TAG, "failure! :" + failure.toString());
         });
+
+
     }
 
     public void uploadPost(Post post) {
