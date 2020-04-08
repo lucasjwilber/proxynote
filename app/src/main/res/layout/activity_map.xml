@@ -29,13 +29,15 @@
             android:id="@+id/addPostButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="50dp"
             android:layout_marginEnd="25dp"
             android:layout_marginBottom="25dp"
             android:clickable="true"
             android:onClick="onCreatePostButtonClick"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/create_post_button_background" />
+            app:srcCompat="@drawable/create_post_icon"
+            />
 
         <!-- post recycler view-->
         <androidx.recyclerview.widget.RecyclerView

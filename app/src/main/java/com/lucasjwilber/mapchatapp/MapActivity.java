@@ -151,10 +151,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             userIsEmailVerified = true;
         }
 
+        for (Marker m : postMarkers) m.remove();
         startGetLocationLooper();
         if (mMap != null) getPostsFromDbAndCreateMapMarkers();
 
-        //hide/refresh/show postRv, to prevent vote manipulation via out-of-date scores
+        //refresh postRv to prevent vote manipulation via out-of-date scores
         if (postRv.getVisibility() == View.VISIBLE) {
             postRv.setVisibility(View.GONE);
             postRvAdapter = null;
@@ -264,8 +265,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        //remove the directions/gps buttons
+        //remove the directions/gps/compass buttons
         mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.getUiSettings().setCompassEnabled(false);
         mMap.setOnMarkerClickListener(this::onMarkerClick);
         mMap.setOnMapClickListener(this::onMapClick);
         mMap.setOnCameraIdleListener(this::onCameraIdle);
@@ -346,7 +348,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     //center on that marker, else center on the user's location.
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(finalLat, finalLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-                    //https://developers.google.com/android/reference/com/google/android/gms/maps/GoogleMap#setMapType(int)
                     mMap.setMapType(sharedPreferences.getInt("mapType", GoogleMap.MAP_TYPE_HYBRID));
                     // mMap.setMinZoomPreference(10f);
 
@@ -393,10 +394,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onCameraIdle() {
         cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-        Log.i(TAG, "camera bounds: " + cameraBounds.toString());
-
-        // query db for posts near the user
-//        getPostsFromDbAndCreateMapMarkers();
 
         if (!postQueryIsOnCooldown) {
             getPostsFromDbAndCreateMapMarkers();
@@ -418,7 +415,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         Double latZone = Math.round(userLat * 10) / 10.0;
 
         // remove old markers
-        for (Marker m : postMarkers) m.remove();
+//        for (Marker m : postMarkers) m.remove();
 
         Log.i(TAG, "getting posts from " + cameraBounds.southwest.longitude + " to " + cameraBounds.northeast.longitude);
 
