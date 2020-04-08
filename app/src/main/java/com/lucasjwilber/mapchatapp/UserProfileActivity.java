@@ -24,9 +24,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lucasjwilber.mapchatapp.databinding.ActivityUserProfileBinding;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class UserProfileActivity extends AppCompatActivity {
 
@@ -172,8 +174,8 @@ public class UserProfileActivity extends AppCompatActivity {
 
             scoreView.setText(Integer.toString(score));
             // location removed pending geocode implementation
-//            String timeAndLocationText = new Date(time) + ", " + location;
-            String timeAndLocationText = new Date(time).toString();
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d, h:mm a", Locale.US);
+            String timeAndLocationText = sdf.format(new Date(time));
             timeAndLocationView.setText(timeAndLocationText);
             titleView.setText(title);
 
