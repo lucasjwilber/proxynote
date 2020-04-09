@@ -35,7 +35,6 @@ public class ReportActivity extends AppCompatActivity {
     }
 
     public void onReportSubmit(View v) {
-        loadingSpinner.setVisibility(View.VISIBLE);
         RadioGroup reportTypeRG = findViewById(R.id.reportTypeRG);
         String reason;
         Log.i("ljw", "checked rb is " + reportTypeRG.getCheckedRadioButtonId());
@@ -57,9 +56,12 @@ public class ReportActivity extends AppCompatActivity {
                 break;
             case -1:
             default:
-                Utils.showToast(ReportActivity.this, "Please select a reason for reporting.");
+                Utils.showToast(ReportActivity.this, "Please select a reason");
                 return;
         }
+
+        loadingSpinner.setVisibility(View.VISIBLE);
+
         EditText additionalInfoTV = findViewById(R.id.reportAdditionalText);
         String additionalInfo = additionalInfoTV.getText().toString();
         String reportId = postId + "|" + currentUser.getUid();
