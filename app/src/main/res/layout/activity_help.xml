@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     tools:context=".HelpActivity">
 
     <Button
@@ -134,6 +135,7 @@
             android:layout_marginBottom="8dp"
             android:background="@drawable/rounded_square"
             android:ems="10"
+            android:maxLength="300"
             android:gravity="start|top"
             android:inputType="textMultiLine"
             android:padding="8dp"

@@ -5,6 +5,7 @@
     android:id="@+id/createPostLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:background="@color/lightgray"
     tools:context=".CreatePostActivity">
 
@@ -25,7 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Create a Post"
+        android:text="@string/create_a_post"
         android:textSize="30sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -47,7 +48,7 @@
         android:id="@+id/titleLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Title"
+        android:text="@string/title"
         app:layout_constraintEnd_toStartOf="@+id/postTitleEditText"
         app:layout_constraintTop_toTopOf="@+id/postTitleEditText" />
 
@@ -81,7 +82,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="Text"
+        android:text="@string/text"
         app:layout_constraintEnd_toStartOf="@+id/postBodyEditText"
         app:layout_constraintTop_toBottomOf="@+id/createPostImage" />
 
@@ -107,7 +108,8 @@
         android:drawableStart="@drawable/camera"
         android:onClick="cameraButtonClicked"
         android:paddingStart="8dp"
-        android:paddingTop="3dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
         app:layout_constraintBottom_toBottomOf="@+id/postSubmitButton"
         app:layout_constraintEnd_toStartOf="@+id/postSubmitButton"
         app:layout_constraintHorizontal_bias="0.507"
@@ -123,7 +125,7 @@
         android:layout_marginTop="8dp"
         android:background="@drawable/rounded_square_filled_accentcolor"
         android:onClick="createPost"
-        android:text="Post"
+        android:text="@string/post"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/postBodyEditText"
@@ -135,7 +137,7 @@
         android:id="@+id/iconSelectLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Icon"
+        android:text="@string/icon"
         app:layout_constraintEnd_toStartOf="@+id/postIconRv"
         app:layout_constraintTop_toTopOf="@+id/postIconRv" />
 

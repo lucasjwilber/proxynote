@@ -53,6 +53,8 @@ import com.lucasjwilber.mapchatapp.databinding.ActivityMapBinding;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -94,6 +96,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private Handler periodicLocationUpdateHandler;
     private boolean userIsEmailVerified;
     private Handler emailVerificationCheckRunnable;
+    private HashSet<String> postSet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +110,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postRv = mapBinding.postRecyclerView;
         postRv.setLayoutManager(new LinearLayoutManager(this));
         postMarkers = new LinkedList<>();
+        postSet = new HashSet<>();
 
         userMarkerIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.user_location_pin));
         postOutlineYellow = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_yellow));
@@ -150,7 +154,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             userIsEmailVerified = true;
         }
 
-        for (Marker m : postMarkers) m.remove();
+        //clear post markers
+        postSet = new HashSet<>();
+        for (Marker m : postMarkers) {
+            m.remove();
+        }
         startGetLocationLooper();
         if (mMap != null) getPostsFromDbAndCreateMapMarkers();
 
@@ -158,8 +166,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         if (postRv.getVisibility() == View.VISIBLE) {
             postRv.setVisibility(View.GONE);
             postRvAdapter = null;
-            setPostRvAdapter(currentSelectedPostId);
-            postRv.setVisibility(View.VISIBLE);
         }
     }
 
@@ -416,11 +422,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         // get only posts within a certain radius of the user
         Double latZone = Math.round(userLat * 10) / 10.0;
 
-        // remove old markers
-//        for (Marker m : postMarkers) m.remove();
-
-        Log.i(TAG, "getting posts from " + cameraBounds.southwest.longitude + " to " + cameraBounds.northeast.longitude);
-
         db.collection("posts")
                 .whereLessThan("lng", cameraBounds.northeast.longitude)
                 .whereGreaterThan("lng", cameraBounds.southwest.longitude)
@@ -452,7 +453,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 // they are however present as an ArrayList of HashMaps
                                 ArrayList list = (ArrayList) document.getData().get("comments");
                                 post.setComments(Utils.turnMapsIntoListOfComments(list));
-                                createMarkerWithPost(post);
+
+                                if (!postSet.contains(post.getId())) {
+                                    createMarkerWithPost(post);
+                                    postSet.add(post.getId());
+                                    Log.i(TAG, "created marker for post " + post.getId());
+                                }
                             }
                         } else {
                             Log.i(TAG, "Error getting documents.", task.getException());
