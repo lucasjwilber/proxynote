@@ -482,6 +482,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .anchor(0, 1)
                 .zIndex(zIndex)
         );
+        borderMarker.setTag(post.getId());
 
         int score = post.getScore();
         if (score >= 20) {
@@ -536,17 +537,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public boolean onMarkerClick(Marker marker) {
         Log.i(TAG, "clicked on a marker");
 
-        if (marker.getTag() == null) {
-            Log.i(TAG, "no post tagged to the clicked on marker, hmm");
-            return true;
-        }
-
         currentSelectedPostId = (String) marker.getTag();
         setPostRvAdapter(currentSelectedPostId);
         postRv.setVisibility(View.VISIBLE);
 
-        // returning true instead would prevent the camera centering/info window opening
-        return false;
+        // returning false would center the camera on the marker and open the info window if there is one attached
+        return true;
     }
 
     private void setPostRvAdapter(String postId) {

@@ -460,6 +460,7 @@ public class CreatePostActivity extends AppCompatActivity {
             holder.imageView.setImageDrawable(icons[position]);
 
             holder.imageView.setOnClickListener(v -> onIconClick(v, holder.getAdapterPosition()));
+
             if (selectedPosition != position) {
                 holder.imageView.setBackground(null);
             }
