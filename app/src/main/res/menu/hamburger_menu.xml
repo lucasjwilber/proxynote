@@ -8,48 +8,48 @@
         android:id="@+id/menuProfile"
         android:orderInCategory="0"
         android:icon="@drawable/posticon_127881"
-        android:title="Profile" />
+        android:title="@string/my_profile" />
 
     <item
         android:id="@+id/menuSettings"
         android:orderInCategory="1"
-        android:title="Settings" >
+        android:title="@string/map_settings" >
         <menu>
             <item
                 android:id="@+id/settingsMapType"
                 android:orderInCategory="1"
-                android:title="Change map type" >
+                android:title="@string/change_map_type" >
                 <menu>
                     <item
                         android:id="@+id/mapTypeNormal"
-                        android:title="Normal" >
+                        android:title="@string/normal" >
                     </item>
                     <item
                         android:id="@+id/mapTypeSatellite"
-                        android:title="Satellite" >
+                        android:title="@string/satellite" >
                     </item>
                     <item
                         android:id="@+id/mapTypeHybrid"
-                        android:title="Hybrid" >
+                        android:title="@string/hybrid" >
                     </item>
                     <item
                         android:id="@+id/mapTypeTerrain"
-                        android:title="Terrain" >
+                        android:title="@string/terrain" >
                     </item>
                 </menu>
             </item>
             <item
                 android:id="@+id/settingsDistanceType"
                 android:orderInCategory="2"
-                android:title="Change distance type" >
+                android:title="@string/change_distance_type" >
                 <menu>
                     <item
                         android:id="@+id/distanceTypeImperial"
-                        android:title="Imperial" >
+                        android:title="@string/imperial" >
                     </item>
                     <item
                         android:id="@+id/distanceTypeMetric"
-                        android:title="Metric" >
+                        android:title="@string/metric" >
                     </item>
                 </menu>
             </item>
@@ -57,32 +57,13 @@
         </menu>
     </item>
 
-<!--    <item-->
-<!--        android:id="@+id/settingsDistanceType"-->
-<!--        android:icon="@drawable/posticon_127881"-->
-<!--        android:orderInCategory="2"-->
-<!--        android:title="Change distance units" >-->
-<!--        <menu>-->
-<!--            <item-->
-<!--                android:id="@+id/distanceTypeImperial"-->
-<!--                android:icon="@drawable/posticon_127867"-->
-<!--                android:title="Imperial" >-->
-<!--            </item>-->
-<!--            <item-->
-<!--                android:id="@+id/distanceTypeMetric"-->
-<!--                android:icon="@drawable/posticon_127867"-->
-<!--                android:title="Metric" >-->
-<!--            </item>-->
-<!--        </menu>-->
-<!--    </item>-->
-
     <item android:id="@+id/menuHelp"
-        android:title="Help"
+        android:title="@string/help"
         android:orderInCategory="3"
         />
 
     <item android:id="@+id/menuLoginLogout"
-        android:title="Login/Sign up"
+        android:title="@string/login_signup"
         android:orderInCategory="4"
         />
 </menu>
