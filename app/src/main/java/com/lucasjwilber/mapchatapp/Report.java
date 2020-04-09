@@ -2,7 +2,8 @@ package com.lucasjwilber.mapchatapp;
 
 public class Report {
     //the id format is "[post/comment id]|[reporting user id]",
-    //this is so that if a user reports a post multiple times, their last report is overwritten
+    //this makes it easier to find reports by user or post without nesting them in either object,
+    //and also makes it so that if a user reports the same post multiple times, their last report is overwritten
     private String id;
     private String reason;
     private String explanation;

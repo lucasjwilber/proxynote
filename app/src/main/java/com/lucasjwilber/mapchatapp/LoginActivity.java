@@ -131,15 +131,10 @@ public class LoginActivity extends AppCompatActivity {
                             Log.i(TAG, "signInWithEmail:success");
                             user = mAuth.getCurrentUser();
                             binding.loginProgressBar.setVisibility(View.GONE);
-                            if (user.isEmailVerified()) {
-                                finish();
-                            } else {
-                                binding.emailVerificationModal.setVisibility(View.VISIBLE);
-                                binding.loginBaseLayout.setVisibility(View.GONE);
-                            }
+                            finish();
                         } else {
                             Log.i(TAG, "signInWithEmail:failure", task.getException());
-                            Utils.showToast(LoginActivity.this, "Authentication failed.");
+                            Utils.showToast(LoginActivity.this, "Username or password incorrect.");
                             binding.loginProgressBar.setVisibility(View.GONE);
                         }
                     }
@@ -218,7 +213,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         } else {
                             Log.i(TAG, "createUserWithEmail:failure", task.getException());
-                            Utils.showToast(LoginActivity.this, "Authentication failed.");
+                            Utils.showToast(LoginActivity.this, "This email is already in use.");
                             binding.loginProgressBar.setVisibility(View.GONE);
                         }
                     }

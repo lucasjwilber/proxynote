@@ -16,10 +16,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ReportActivity extends AppCompatActivity {
 
-    String postId;
-    FirebaseUser currentUser;
-    FirebaseFirestore db;
-    ProgressBar loadingSpinner;
+    private final String TAG = "ljw";
+    private String postId;
+    private FirebaseUser currentUser;
+    private FirebaseFirestore db;
+    private ProgressBar loadingSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,13 +32,13 @@ public class ReportActivity extends AppCompatActivity {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         Intent intent = getIntent();
         postId = intent.getStringExtra("postId");
-        Log.i("ljw", "on report page for post " + postId);
+        Log.i(TAG, "on report page for post " + postId);
     }
 
     public void onReportSubmit(View v) {
         RadioGroup reportTypeRG = findViewById(R.id.reportTypeRG);
         String reason;
-        Log.i("ljw", "checked rb is " + reportTypeRG.getCheckedRadioButtonId());
+        Log.i(TAG, "checked rb is " + reportTypeRG.getCheckedRadioButtonId());
         switch (reportTypeRG.getCheckedRadioButtonId()) {
             case R.id.reportRBspam:
                 reason = "spam";
@@ -56,7 +57,7 @@ public class ReportActivity extends AppCompatActivity {
                 break;
             case -1:
             default:
-                Utils.showToast(ReportActivity.this, "Please select a reason");
+                Utils.showToast(ReportActivity.this, "Please select a reason.");
                 return;
         }
 
@@ -71,13 +72,13 @@ public class ReportActivity extends AppCompatActivity {
                 .document(reportId)
                 .set(report)
                 .addOnSuccessListener(success -> {
-                    Log.i("ljw", "successfully added report to db");
-                    Utils.showToast(ReportActivity.this, "Report submitted");
+                    Log.i(TAG, "successfully added report to db");
+                    Utils.showToast(ReportActivity.this, "Report submitted. Thank you!");
                     loadingSpinner.setVisibility(View.GONE);
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    Log.i("ljw", "error uploading report: " + e.toString());
+                    Log.e(TAG, "error uploading report: " + e.toString());
                     loadingSpinner.setVisibility(View.GONE);
                 });
     }
