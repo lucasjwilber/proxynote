@@ -11,12 +11,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lucasjwilber.mapchatapp.databinding.ActivityHelpBinding;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +28,9 @@ public class HelpActivity extends AppCompatActivity {
     private ActivityHelpBinding binding;
     private FirebaseUser user;
     private FirebaseFirestore db;
+//    private RecyclerView helpRv;
+//    private RecyclerView.Adapter helpRvAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +43,8 @@ public class HelpActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         if (user != null) binding.questionCommentModal.setVisibility(View.VISIBLE);
 
-//        binding.helpRv.setLayoutManager(new LinearLayoutManager(this));
+        binding.helpRv.setLayoutManager(new LinearLayoutManager(this));
+        binding.helpRv.setAdapter(new HelpRvAdapter());
     }
 
     public void onSubmitQuestionOrCommentButtonClicked(View v) {
@@ -61,41 +67,46 @@ public class HelpActivity extends AppCompatActivity {
         finish();
     }
 
-//    public class HelpRvAdapter extends RecyclerView.Adapter<HelpRvAdapter.HelpRvSectionViewHolder> {
-//
-//        ConstraintLayout[] layouts = new ConstraintLayout[]{
-//
-//        };
-//
-//        public HelpRvAdapter() {
-//
-//        }
-//
-//        public class HelpRvSectionViewHolder extends RecyclerView.ViewHolder {
-//
-//            HelpRvSectionViewHolder(@NonNull View itemView) {
-//                super(itemView);
-//            }
-//        }
-//
-//        @NonNull
-//        @Override
-//        public HelpRvSectionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//            ConstraintLayout l = (ConstraintLayout) LayoutInflater.from(parent.getContext())
-//                    .inflate(R.layout.post_descriptor_layout, parent, false);
-//
-//            return new HelpRvAdapter.HelpRvSectionViewHolder(l);
-//        }
-//
-//        @Override
-//        public void onBindViewHolder(@NonNull HelpRvSectionViewHolder holder, int position) {
-//
-//        }
-//
-//        @Override
-//        public int getItemCount() {
-//            return 0;
-//        }
-//
-//    }
+    public class HelpRvAdapter extends RecyclerView.Adapter<HelpRvAdapter.HelpViewHolder> {
+
+        int[] helpStringIds = new int[]{
+                R.string.general_information,
+                R.string.tip1,
+                R.string.tip2,
+                R.string.tip3,
+        };
+
+        // this is going to be entirely hardcoded so there's no need to parameterize the adapter
+        HelpRvAdapter() {}
+
+        class HelpViewHolder extends RecyclerView.ViewHolder {
+            TextView textView;
+
+            HelpViewHolder(TextView tv) {
+                super(tv);
+                textView = tv;
+            }
+        }
+
+        @NonNull
+        @Override
+        public HelpRvAdapter.HelpViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            TextView tv = (TextView) LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.help_textview, parent, false);
+
+            return new HelpViewHolder(tv);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull HelpViewHolder holder, int position) {
+            holder.textView.setText(getString(helpStringIds[position]));
+            if (position == 0) holder.textView.setTextSize(20);
+        }
+
+        @Override
+        public int getItemCount() {
+            return helpStringIds.length;
+        }
+
+    }
 }

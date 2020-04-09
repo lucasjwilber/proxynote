@@ -104,6 +104,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         // post recyclerview
         postRv = mapBinding.postRecyclerView;
+        postRv.setHasFixedSize(true);
         postRv.setLayoutManager(new LinearLayoutManager(this));
         postMarkers = new LinkedList<>();
         postSet = new HashSet<>();
