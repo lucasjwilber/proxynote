@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -21,13 +20,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
-import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -53,7 +50,6 @@ import com.lucasjwilber.mapchatapp.databinding.ActivityMapBinding;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,17 +65,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
-    private long postQueryLimit = 500;
+    private long postQueryLimit = 250;
     private FirebaseUser currentUser;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     private final int LOCATION_UPDATE_COOLDOWN = 15000;
-    private final int POST_QUERY_COOLDOWN = 1750;
+    private final int POST_QUERY_COOLDOWN = 2000;
     private boolean postQueryIsOnCooldown;
     private double userLat;
     private double userLng;
     private Marker userMarker;
     private LatLngBounds cameraBounds;
-    private String userCurrentAddress = "somewhere";
+//    private String userCurrentAddress = "somewhere";
     private BitmapDescriptor userMarkerIcon;
     private BitmapDescriptor postOutlineYellow;
     private BitmapDescriptor postOutlineYellowOrange;
@@ -162,10 +158,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         startGetLocationLooper();
         if (mMap != null) getPostsFromDbAndCreateMapMarkers();
 
-        //refresh postRv to prevent vote manipulation via out-of-date scores
+        // refresh postRv to prevent vote manipulation via out-of-date scores
         if (postRv.getVisibility() == View.VISIBLE) {
             postRv.setVisibility(View.GONE);
             postRvAdapter = null;
+
+            // check that it wasn't just deleted, to avoid NPEs
+            db.collection("posts")
+                    .document(currentSelectedPostId)
+                    .get()
+                    .addOnSuccessListener(r -> {
+                        if (r.exists()) {
+                            setPostRvAdapter(currentSelectedPostId);
+                            postRv.setVisibility(View.VISIBLE);
+                        }
+                    });
         }
     }
 

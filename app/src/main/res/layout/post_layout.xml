@@ -3,7 +3,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:animateLayoutChanges="true"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -89,7 +88,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="10dp"
         android:text="@string/text"
         android:textAlignment="viewStart"
@@ -102,12 +101,15 @@
     <EditText
         android:id="@+id/postRvPostReplyBox"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_height="55dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="45dp"
         android:background="@drawable/rounded_square_black"
         android:hint="@string/add_a_comment"
+        android:inputType="textMultiLine"
+        android:maxLength="300"
+        android:textAlignment="viewStart"
         android:textSize="16sp"
-        android:maxLength="200"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/postRvPostText" />
@@ -116,23 +118,23 @@
         android:id="@+id/postCommentCount"
         android:layout_width="wrap_content"
         android:layout_height="25dp"
-        app:layout_constraintBottom_toBottomOf="@+id/postRvPostReplyButton"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="@+id/postRvPostReplyBox"
+        app:layout_constraintTop_toBottomOf="@+id/postRvPostReplyBox"
         tools:text="comments:" />
 
     <Button
         android:id="@+id/postRvPostReplyButton"
-        android:layout_width="70dp"
+        android:layout_width="35dp"
         android:layout_height="35dp"
-        android:layout_margin="8dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="10dp"
         android:background="@drawable/rounded_square_filled_accentcolor"
-        android:padding="0dp"
-        android:text="@string/reply"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/postRvPostReplyBox"
-        app:layout_constraintTop_toBottomOf="@+id/postRvPostReplyBox" />
+        android:drawableStart="@drawable/reply"
+        android:paddingStart="6dp"
+        android:paddingBottom="1dp"
+        app:layout_constraintStart_toEndOf="@+id/postRvPostReplyBox"
+        app:layout_constraintTop_toTopOf="@+id/postRvPostReplyBox" />
 
     <TextView
         android:id="@+id/postRvUsername"
@@ -148,13 +150,13 @@
     <ProgressBar
         android:id="@+id/replySubmitProgressBar"
         style="?android:attr/progressBarStyle"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/postRvPostReplyButton"
-        app:layout_constraintEnd_toStartOf="@+id/postRvPostReplyButton"
+        app:layout_constraintStart_toStartOf="@+id/postRvPostReplyButton"
+        app:layout_constraintEnd_toEndOf="@+id/postRvPostReplyButton"
         app:layout_constraintTop_toTopOf="@+id/postRvPostReplyButton"
-        app:layout_constraintVertical_bias="0.0" />
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

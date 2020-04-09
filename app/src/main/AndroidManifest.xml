@@ -17,7 +17,6 @@
         android:roundIcon="@mipmap/mapchat_launcher_icon_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".EmailVerificationActivity"></activity>
         <activity android:name=".HelpActivity" />
         <activity android:name=".FullSizeImageActivity" />
         <activity android:name=".ReportActivity" />
