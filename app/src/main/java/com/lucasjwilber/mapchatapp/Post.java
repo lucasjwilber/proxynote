@@ -30,11 +30,10 @@ public class Post {
 
     public Post() {};
 
-    public Post(String userId, String username, String title, String text, String location, double lat, double lng) {
-        this.id = UUID.randomUUID().toString();
+    public Post(String id, String userId, String username, String title, String text, String location, double lat, double lng) {
+        this.id = id;
         this.userId = userId;
         this.username = username;
-        //TODO: if title contains [delimination string used in postStrings recyclerview in profile activity] replace it with somethign else here
         this.title = title;
         this.text = text;
         this.location = location;

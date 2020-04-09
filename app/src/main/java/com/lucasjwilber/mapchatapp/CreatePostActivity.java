@@ -74,6 +74,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private boolean iconSelected;
     private int selectedPosition;
     private ProgressBar loadingSpinner;
+    private String postAndImageId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,7 +172,10 @@ public class CreatePostActivity extends AppCompatActivity {
                                     Log.i(TAG, "IO exception:\n" + e.toString());
                                 }
 
+                                postAndImageId = UUID.randomUUID().toString();
+
                                 Post post = new Post(
+                                        postAndImageId,
                                         user.getUid(),
                                         user.getDisplayName(),
                                         postTitle,
@@ -206,13 +210,12 @@ public class CreatePostActivity extends AppCompatActivity {
         };
         handler.obtainMessage().sendToTarget();
 
-        String imageUUID = UUID.randomUUID().toString();
-        post.setImageUUID(imageUUID);
+        post.setImageUUID(postAndImageId);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         currentImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] imageData = baos.toByteArray();
-        StorageReference imageRef = storageRef.child(imageUUID);
+        StorageReference imageRef = storageRef.child(postAndImageId);
 
         UploadTask uploadTask = imageRef.putBytes(imageData);
 

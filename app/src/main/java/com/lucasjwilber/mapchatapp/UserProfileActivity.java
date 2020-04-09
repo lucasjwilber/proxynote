@@ -22,6 +22,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.lucasjwilber.mapchatapp.databinding.ActivityUserProfileBinding;
 
 import java.text.SimpleDateFormat;
@@ -32,9 +35,11 @@ import java.util.Locale;
 
 public class UserProfileActivity extends AppCompatActivity {
 
+    private final String TAG = "ljw";
     private String thisProfileOwnerId;
     private FirebaseUser currentUser;
     private FirebaseFirestore db;
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
     private ActivityUserProfileBinding binding;
     private RecyclerView.Adapter postDescriptorsRvAdapter;
     private RecyclerView.LayoutManager postDescriptorsRvLayoutManager;
@@ -62,7 +67,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         thisProfileOwnerId = intent.getStringExtra("userId");
-        Log.i("ljw", "userId is " + thisProfileOwnerId);
+        Log.i(TAG, "userId is " + thisProfileOwnerId);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null && thisProfileOwnerId.equals(currentUser.getUid())) {
@@ -76,7 +81,7 @@ public class UserProfileActivity extends AppCompatActivity {
                     .document(thisProfileOwnerId)
                     .get()
                     .addOnSuccessListener(result -> {
-                        Log.i("ljw", "successfully got user:\n" + result.toString());
+                        Log.i(TAG, "successfully got user:\n" + result.toString());
                         User user = result.toObject(User.class);
                         assert user != null;
                         binding.profileUsername.setText(user.getUsername());
@@ -88,7 +93,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         List<PostDescriptor> userPostDescriptors = user.getPostDescriptors();
 
                         if (userPostDescriptors == null || userPostDescriptors.size() == 0) {
-                            Log.i("ljw", "user hasn't made any posts, or possibly doesn't have a postDescriptors list");
+                            Log.i(TAG, "user hasn't made any posts, or possibly doesn't have a postDescriptors list");
                             String noPostsText = user.getUsername() + " hasn't made any posts yet.";
                             binding.profileNoCommentsYet.setText(noPostsText);
                             binding.profileNoCommentsYet.setVisibility(View.VISIBLE);
@@ -101,7 +106,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         binding.postDescRvProgressBar.setVisibility(View.GONE);
                     })
                     .addOnFailureListener(e -> {
-                        Log.i("ljw", "error getting user: " + e.toString());
+                        Log.i(TAG, "error getting user: " + e.toString());
                         binding.postDescRvProgressBar.setVisibility(View.GONE);
                     });
         }
@@ -203,7 +208,7 @@ public class UserProfileActivity extends AppCompatActivity {
             if (!topRVisShrunk) binding.profileAllPostsRv.scrollToPosition(position);
             topRVisShrunk = true;
 
-            Log.i("ljw", "clicked on post " + cl.getTag());
+            Log.i(TAG, "clicked on post " + cl.getTag());
             selectedPostId = cl.getTag().toString();
             binding.profileOnePostRv.setVisibility(View.GONE);
             binding.postRvProgressBar.setVisibility(View.VISIBLE);
@@ -226,10 +231,10 @@ public class UserProfileActivity extends AppCompatActivity {
                     .document(selectedPostId)
                     .get()
                     .addOnSuccessListener(response -> {
-                        Log.i("ljw", "got post!");
+                        Log.i(TAG, "got post!");
                         Post post = response.toObject(Post.class);
                         assert post != null;
-                        Log.i("ljw", "found post " + post.getId());
+                        Log.i(TAG, "found post " + post.getId());
                         ArrayList list = (ArrayList) response.getData().get("comments");
                         post.setComments(Utils.turnMapsIntoListOfComments(list));
 
@@ -248,7 +253,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
                     })
                     .addOnFailureListener(e -> {
-                        Log.i("ljw", "error getting post: " + e.toString());
+                        Log.i(TAG, "error getting post: " + e.toString());
                         binding.postRvProgressBar.setVisibility(View.GONE);
                     });
 //            }
@@ -265,18 +270,19 @@ public class UserProfileActivity extends AppCompatActivity {
         v.setEnabled(false);
         binding.deletePostProgressBar.setVisibility(View.VISIBLE);
 
+        //delete the post from "posts", then delete the post descriptor from "users"
         db.collection("posts")
                 .document(selectedPostId)
                 .delete()
                 .addOnSuccessListener(result -> {
-                    Log.i("ljw", "post deleted!");
+                    Log.i(TAG, "post deleted!");
 
                     //delete post descriptor
                     db.collection("users")
                             .document(thisProfileOwnerId)
                             .get()
                             .addOnSuccessListener(result2 -> {
-                                Log.i("ljw", "got user to delete their postdescriptor");
+                                Log.i(TAG, "got user to delete their postdescriptor");
                                 User user = result2.toObject(User.class);
                                 List<PostDescriptor> usersNewPDs = new ArrayList<>();
                                 int postScore = 0;
@@ -299,28 +305,38 @@ public class UserProfileActivity extends AppCompatActivity {
                                         .update("postDescriptors", usersNewPDs,
                                                 "totalScore", user.getTotalScore() - postScore)
                                         .addOnSuccessListener(result3 -> {
-                                            Log.i("ljw", "successfully removed the deleted post's PD");
+                                            Log.i(TAG, "successfully removed the deleted post's PD");
                                             binding.deletePostProgressBar.setVisibility(View.GONE);
                                             Utils.showToast(UserProfileActivity.this, "Post deleted.");
                                             v.setEnabled(true);
                                         })
                                         .addOnFailureListener(e -> {
-                                            Log.i("ljw", "error removing the deleted post's PD: " + e.toString());
+                                            Log.i(TAG, "error removing the deleted post's PD: " + e.toString());
                                             binding.deletePostProgressBar.setVisibility(View.GONE);
                                             v.setEnabled(true);
                                         });
 
                             })
                             .addOnFailureListener(e -> {
-                                Log.i("ljw", "error getting user to delete this PD");
+                                Log.i(TAG, "error getting user to delete this PD");
                                 binding.deletePostProgressBar.setVisibility(View.GONE);
                                 v.setEnabled(true);
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.i("ljw", "error deleting post: " + e.toString());
+                    Log.i(TAG, "error deleting post: " + e.toString());
                     binding.deletePostProgressBar.setVisibility(View.GONE);
                     v.setEnabled(true);
+                });
+
+        //delete the post's image from storage. the post in firestore and its image have the same id.
+        StorageReference imageRef = storage.getReference().child(selectedPostId);
+        imageRef.delete()
+                .addOnSuccessListener(r -> {
+                    Log.i(TAG, "deleted the post's image successfully.");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "failed deleting the image: " + e.toString());
                 });
 
         binding.deletePostModal.setVisibility(View.GONE);
@@ -353,10 +369,10 @@ public class UserProfileActivity extends AppCompatActivity {
                     .document(currentUser.getUid())
                     .update("aboutme", newAboutmeText)
                     .addOnSuccessListener(success -> {
-                        Log.i("ljw", "successfully updated aboutme");
+                        Log.i(TAG, "successfully updated aboutme");
                     })
                     .addOnFailureListener(e -> {
-                        Log.i("ljw", "failed updating aboutme: " + e.toString());
+                        Log.i(TAG, "failed updating aboutme: " + e.toString());
                     });
         }
     }
@@ -365,7 +381,7 @@ public class UserProfileActivity extends AppCompatActivity {
         Intent goToMapOnLocation = new Intent(UserProfileActivity.this, MapActivity.class);
         goToMapOnLocation.putExtra("lat", lat);
         goToMapOnLocation.putExtra("lng", lng);
-        Log.i("ljw", "sending " + lat + "/" + lng);
+        Log.i(TAG, "sending " + lat + "/" + lng);
         startActivity(goToMapOnLocation);
     }
 
