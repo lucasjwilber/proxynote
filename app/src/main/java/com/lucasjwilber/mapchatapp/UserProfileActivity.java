@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
@@ -196,14 +197,12 @@ public class UserProfileActivity extends AppCompatActivity {
             //don't load the same post again
             if (selectedDV == cl) return;
 
-//            float dip = 190f;
-//            Resources r = getResources();
-//            float px = TypedValue.applyDimension(
-//                    TypedValue.COMPLEX_UNIT_DIP,
-//                    dip,
-//                    r.getDisplayMetrics()
-//            );
-            PDVlayoutParams.height = 500;
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                PDVlayoutParams.height = 250;
+            } else {
+                PDVlayoutParams.height = 500;
+            }
+
             binding.profileAllPostsRv.setLayoutParams(PDVlayoutParams);
             if (!topRVisShrunk) binding.profileAllPostsRv.scrollToPosition(position);
             topRVisShrunk = true;

@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:textSize="30sp"
+            android:textSize="25sp"
             android:textStyle="bold"
             tools:text="username" />
 
@@ -44,7 +44,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="12dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/rounded_square_black"
@@ -179,12 +179,13 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/aboutMeLayout"
-        android:layout_width="270dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginEnd="60dp"
         android:paddingBottom="6dp"
-        app:layout_constraintEnd_toEndOf="@+id/profileAllPostsRv"
-        app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/userProfileHeader">
 
         <TextView
@@ -203,7 +204,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_square_black"
+            android:imeOptions="actionDone"
             android:inputType="textPersonName"
+            android:maxLength="60"
             android:textSize="16sp"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"

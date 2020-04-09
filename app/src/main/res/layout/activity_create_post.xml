@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:text="@string/create_a_post"
-        android:textSize="30sp"
+        android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -57,8 +57,8 @@
         android:layout_width="0dp"
         android:layout_height="45dp"
         android:layout_marginStart="40dp"
-        android:layout_marginEnd="40dp"
-        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="2dp"
         android:inputType="textPersonName"
         android:maxLength="52"
         android:textSize="18sp"
@@ -75,8 +75,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/postTitleEditText"
         app:layout_constraintStart_toStartOf="@+id/postTitleEditText"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.57"
+        app:layout_constraintTop_toBottomOf="@+id/createPostHeader"
+        app:layout_constraintVertical_bias="0.45"
         tools:visibility="visible" />
 
     <TextView
@@ -129,6 +129,7 @@
         android:onClick="createPost"
         android:text="@string/post"
         android:textColor="#FFFFFF"
+        android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/postBodyEditText"
         app:layout_constraintHorizontal_bias="0.75"
@@ -146,14 +147,15 @@
     <ProgressBar
         android:id="@+id/createPostProgressBar"
         style="?android:attr/progressBarStyleLarge"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="67dp"
+        android:layout_height="67dp"
         android:layout_centerHorizontal="true"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/postSubmitButton"
-        app:layout_constraintEnd_toStartOf="@+id/postSubmitButton"
-        app:layout_constraintStart_toEndOf="@+id/cameraButton"
-        app:layout_constraintTop_toTopOf="@+id/postSubmitButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/createPostHeader"
+        app:layout_constraintVertical_bias="0.42000002"
         tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
