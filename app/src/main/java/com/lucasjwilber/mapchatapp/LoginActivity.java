@@ -26,12 +26,14 @@ import com.lucasjwilber.mapchatapp.databinding.ActivityLoginBinding;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private final String TAG = "ljw";
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private FirebaseFirestore db;
     private boolean loginShown = true;
     private ActivityLoginBinding binding;
     private SharedPreferences sharedPreferences;
+    private final int EMAIL_VERIFICATION_CHECK_COOLDOWN = 2000;
     private Handler emailVerificationCheckRunnable;
     boolean waitingForEmailVerification;
 
@@ -126,7 +128,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.i("ljw", "signInWithEmail:success");
+                            Log.i(TAG, "signInWithEmail:success");
                             user = mAuth.getCurrentUser();
                             binding.loginProgressBar.setVisibility(View.GONE);
                             if (user.isEmailVerified()) {
@@ -136,7 +138,7 @@ public class LoginActivity extends AppCompatActivity {
                                 binding.loginBaseLayout.setVisibility(View.GONE);
                             }
                         } else {
-                            Log.i("ljw", "signInWithEmail:failure", task.getException());
+                            Log.i(TAG, "signInWithEmail:failure", task.getException());
                             Utils.showToast(LoginActivity.this, "Authentication failed.");
                             binding.loginProgressBar.setVisibility(View.GONE);
                         }
@@ -162,7 +164,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.i("ljw", "createUserWithEmail:success");
+                            Log.i(TAG, "createUserWithEmail:success");
                             user  = mAuth.getCurrentUser();
 
                             //save email for autofill next time
@@ -174,13 +176,13 @@ public class LoginActivity extends AppCompatActivity {
                             user.updateProfile(userProfileChangeRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-                                    Log.i("ljw", "updated user profile with username");
+                                    Log.i(TAG, "updated user profile with username");
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Log.i("ljw", "failed adding username to user");
+                                    Log.i(TAG, "failed adding username to user");
                                 }
                             });
 
@@ -192,26 +194,30 @@ public class LoginActivity extends AppCompatActivity {
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void aVoid) {
-                                            Log.i("ljw", "added new user to firestore");
-                                            binding.loginProgressBar.setVisibility(View.GONE);
+                                            Log.i(TAG, "added new user to firestore");
 
                                             user.sendEmailVerification()
                                                     .addOnSuccessListener(r -> {
-                                                        Log.i("ljw", "is user verified yet: " + user.isEmailVerified());
+                                                        Log.i(TAG, "is user verified yet: " + user.isEmailVerified());
                                                         waitForEmailVerification();
+                                                        binding.loginProgressBar.setVisibility(View.GONE);
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.e(TAG, "error checking for email verification: " + e.toString());
+                                                        binding.loginProgressBar.setVisibility(View.GONE);
                                                     });
                                         }
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
-                                            Log.i("ljw", "failed adding new user to firestore!\nnew user: "+newUser.toString());
+                                            Log.i(TAG, "failed adding new user to firestore!\nnew user: "+newUser.toString());
                                             binding.loginProgressBar.setVisibility(View.GONE);
                                         }
                                     });
 
                         } else {
-                            Log.i("ljw", "createUserWithEmail:failure", task.getException());
+                            Log.i(TAG, "createUserWithEmail:failure", task.getException());
                             Utils.showToast(LoginActivity.this, "Authentication failed.");
                             binding.loginProgressBar.setVisibility(View.GONE);
                         }
@@ -229,11 +235,12 @@ public class LoginActivity extends AppCompatActivity {
             .addOnSuccessListener(r -> {
                 Utils.showToast(LoginActivity.this, "Verification email sent.");
             })
-            .addOnFailureListener(e -> Log.i("ljw", "error sending ver email: " + e.toString()));
+            .addOnFailureListener(e -> Log.i(TAG, "error sending ver email: " + e.toString()));
         }
     }
 
     private void waitForEmailVerification() {
+        binding.loginBackButton.setVisibility(View.GONE);
         binding.emailVerificationModal.setVisibility(View.VISIBLE);
         binding.loginBaseLayout.setVisibility(View.GONE);
         waitingForEmailVerification = true;
@@ -249,10 +256,12 @@ public class LoginActivity extends AppCompatActivity {
                     waitingForEmailVerification = false;
                     finish();
                 } else {
-                    Log.i("ljw", "user still not verified");
-                    emailVerificationCheckRunnable.postDelayed(this, 2000);
+                    Log.i(TAG, "user still not verified");
+                    emailVerificationCheckRunnable.postDelayed(this, EMAIL_VERIFICATION_CHECK_COOLDOWN);
                 }
             }
-        }, 2000);
+        }, EMAIL_VERIFICATION_CHECK_COOLDOWN);
     }
+
+    public void onBackButtonClicked(View v) { finish(); }
 }
