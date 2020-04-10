@@ -28,7 +28,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.List;
 
-
 public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHolder> {
 
     private final String TAG = "ljw";
@@ -47,7 +46,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private TextView postScore;
     private EditText addCommentBox;
     private ProgressBar replyLoadingSpinner;
-
     private static final int POST_HEADER = 0;
     private static final int POST_COMMENT = 1;
 
@@ -175,7 +173,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     @Override
     public void onBindViewHolder(PostViewHolder holder, int position) {
         // only if it's a comment are we recycling the same view type:
-        if (position >= 1) {
+        if (getItemViewType(position) == POST_COMMENT) {
             Comment comment = post.getComments().get(position - 1);
 
             TextView commentUsername = holder.constraintLayout.findViewById(R.id.commentUsername);

@@ -16,7 +16,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -41,16 +40,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.lucasjwilber.mapchatapp.databinding.ActivityCreatePostBinding;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -58,17 +50,17 @@ import java.util.UUID;
 public class CreatePostActivity extends AppCompatActivity {
 
     private final String TAG = "ljw";
-    private static final int CAMERA__AND_STORAGE_PERMISSIONS = 69;
-    private  static final int REQUEST_IMAGE_CAPTURE = 1;
-    private String currentPhotoPath;
+    private static final int REQUEST_IMAGE_CAPTURE = 69;
+    private static final int REQUEST_VIDEO_CAPTURE = 70;
+    private String currentFilePath;
     private ActivityCreatePostBinding binding;
     private FirebaseFirestore db;
     private FirebaseUser user;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private StorageReference storageRef;
     private String userCurrentAddress;
-    private ImageView createPostImage;
     private Bitmap currentImage;
+    private Uri currentVideo;
     private int selectedIcon = 0;
     private ImageView selectedIconView;
     private boolean iconSelected;
@@ -86,7 +78,6 @@ public class CreatePostActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
         storageRef = storage.getReference();
-        createPostImage = binding.createPostImage;
         loadingSpinner = findViewById(R.id.createPostProgressBar);
 
         RecyclerView iconRv = findViewById(R.id.postIconRv);
@@ -132,8 +123,10 @@ public class CreatePostActivity extends AppCompatActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
+
                                 //get formatted address
                                 String formattedAddress = "somewhere";
+                                {
 //                                Log.i(TAG, "calling geocode api...");
 //                                try {
 //                                    URL url = new URL("https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
@@ -170,7 +163,7 @@ public class CreatePostActivity extends AppCompatActivity {
 //                                } catch (IOException e) {
 //                                    Log.e(TAG, "IO exception:\n" + e.toString());
 //                                }
-
+                                }
                                 postAndImageId = UUID.randomUUID().toString();
 
                                 Post post = new Post(
@@ -182,13 +175,12 @@ public class CreatePostActivity extends AppCompatActivity {
                                         formattedAddress,
                                         userLat,
                                         userLng);
-
                                 post.setIcon(selectedIcon);
 
-                                if (currentImage == null) {
-                                    uploadPost(post);
+                                if (currentImage != null || currentVideo != null) {
+                                    uploadMediaThenPost(post);
                                 } else {
-                                    uploadImageAndPost(post);
+                                    uploadPost(post);
                                 }
                             }
                         }).start();
@@ -200,26 +192,31 @@ public class CreatePostActivity extends AppCompatActivity {
                 });
     }
 
-    private void uploadImageAndPost(Post post) {
+    private void uploadMediaThenPost(Post post) {
         Handler handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                Utils.showToast(CreatePostActivity.this, "Uploading image...");
+                Utils.showToast(CreatePostActivity.this, "Uploading...");
             }
         };
         handler.obtainMessage().sendToTarget();
 
-        post.setImageUUID(postAndImageId);
+        StorageReference mediaRef = storageRef.child(postAndImageId);
+        post.setMediaStorageId(postAndImageId);
+        UploadTask uploadTask;
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        currentImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] imageData = baos.toByteArray();
-        StorageReference imageRef = storageRef.child(postAndImageId);
-
-        UploadTask uploadTask = imageRef.putBytes(imageData);
+        if (currentImage != null) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            currentImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] imageData = baos.toByteArray();
+            uploadTask = mediaRef.putBytes(imageData);
+        } else {
+            post.setMediaStorageId(postAndImageId);
+            uploadTask = mediaRef.putFile(currentVideo);
+        }
 
         uploadTask.addOnSuccessListener(result -> {
-            imageRef.getDownloadUrl().addOnSuccessListener(url -> {
+            mediaRef.getDownloadUrl().addOnSuccessListener(url -> {
                 post.setImageUrl(url.toString());
                 uploadPost(post);
             })
@@ -229,8 +226,6 @@ public class CreatePostActivity extends AppCompatActivity {
         }).addOnFailureListener(failure -> {
             Log.e(TAG, "failure! :" + failure.toString());
         });
-
-
     }
 
     public void uploadPost(Post post) {
@@ -290,21 +285,23 @@ public class CreatePostActivity extends AppCompatActivity {
                 });
     }
 
-    public void cameraButtonClicked(View v) {
-        Log.i(TAG, "camera button clicked");
-
+    public void onMediaButtonClicked(View v) {
         PackageManager pm = getPackageManager();
         if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
             Log.i(TAG, "package manager says this device has a camera. going to try to use it...");
-            checkVersionLaunchCamera();
+            if (v.getId() == R.id.cameraButton) {
+                checkVersionBeforeLaunchingCamera(REQUEST_IMAGE_CAPTURE);
+            } else if (v.getId() == R.id.videoButton) {
+                checkVersionBeforeLaunchingCamera(REQUEST_VIDEO_CAPTURE);
+            }
         } else {
             Utils.showToast(CreatePostActivity.this, "This device doesn't have a compatible camera.");
             Log.i(TAG, "this device doesn't have a camera to use.");
         }
+
     }
 
-    private void checkVersionLaunchCamera() {
-
+    private void checkVersionBeforeLaunchingCamera(int requestCode) {
         //if we don't have camera or storage permissions ask for both
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.CAMERA)
@@ -318,15 +315,15 @@ public class CreatePostActivity extends AppCompatActivity {
                             android.Manifest.permission.CAMERA,
                             android.Manifest.permission.WRITE_EXTERNAL_STORAGE
                     },
-                    CAMERA__AND_STORAGE_PERMISSIONS);
+                    requestCode);
             } else {
-            dispatchTakePictureIntent();
+            dispatchRecordMediaIntent(requestCode);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == CAMERA__AND_STORAGE_PERMISSIONS) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_VIDEO_CAPTURE) {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -338,7 +335,7 @@ public class CreatePostActivity extends AppCompatActivity {
                     Log.i(TAG, "camera permission granted");
 
                     //launch camera
-                    dispatchTakePictureIntent();
+                    dispatchRecordMediaIntent(requestCode);
                 }
             } else {
                 Log.i(TAG, "camera permission denied");
@@ -346,55 +343,104 @@ public class CreatePostActivity extends AppCompatActivity {
         }
     }
 
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                Log.e(TAG, "error making file: " + ex.toString());
+    private void dispatchRecordMediaIntent(int requestCode) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            // Ensure that there's a camera activity to handle the intent
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                // Create the File where the photo should go
+                File photoFile = null;
+                try {
+                    photoFile = createMediaFile(requestCode);
+                } catch (IOException ex) {
+                    Log.e(TAG, "error making file: " + ex.toString());
+                }
+                // Continue only if the File was successfully created
+                if (photoFile != null) {
+                    Uri photoURI = FileProvider.getUriForFile(this,
+                            "com.lucasjwilber.mapchatapp.fileprovider",
+                            photoFile);
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                }
             }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.lucasjwilber.mapchatapp.fileprovider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        } else if (requestCode == REQUEST_VIDEO_CAPTURE) {
+            Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+            if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+
+                // Create the File where the photo should go
+                File videoFile = null;
+                try {
+                    videoFile = createMediaFile(requestCode);
+                } catch (IOException ex) {
+                    Log.e(TAG, "error making file: " + ex.toString());
+                }
+                // Continue only if the File was successfully created
+                if (videoFile != null) {
+                    Uri videoURI = FileProvider.getUriForFile(this,
+                            "com.lucasjwilber.mapchatapp.fileprovider",
+                            videoFile);
+                    takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoURI);
+                    startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
+                }
             }
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            File photo = new File(currentPhotoPath);
-            if (photo.exists()) {
-                Bitmap imageBitmap = BitmapFactory.decodeFile(currentPhotoPath);
-                currentImage = imageBitmap;
-                createPostImage.setImageBitmap(imageBitmap);
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (resultCode == RESULT_OK) {
+            //allocate a filepath
+            File file = new File(currentFilePath);
+            if (file.exists()) {
+                if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                    Bitmap imageBitmap = BitmapFactory.decodeFile(currentFilePath);
+                    currentVideo = null;
+                    binding.createPostVideo.setVisibility(View.GONE);
+                    currentImage = imageBitmap;
+                    binding.createPostImage.setImageBitmap(imageBitmap);
+                    binding.createPostImage.setVisibility(View.VISIBLE);
+                } else if (requestCode == REQUEST_VIDEO_CAPTURE) {
+                    Uri videoUri = intent.getData();
+                    binding.createPostImage.setVisibility(View.GONE);
+                    currentImage = null;
+                    currentVideo = videoUri;
+                    binding.createPostVideo.setVisibility(View.VISIBLE);
+                    binding.createPostVideo.setVideoURI(videoUri);
+                    binding.createPostVideo.start();
+                }
             }
         }
     }
 
 
-    private File createImageFile() throws IOException {
+    private File createMediaFile(int requestCode) throws IOException {
         String timestamp = Long.toString(new Date().getTime());
-        String imageFileName = user.getDisplayName() + timestamp;
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
+        String fileName = user.getDisplayName() + timestamp;
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File image = File.createTempFile(
+                    fileName,  /* prefix */
+                    ".jpg",         /* suffix */
+                    storageDir      /* directory */
+            );
 
-        // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
+            // Save a file: path for use with ACTION_VIEW intents
+            currentFilePath = image.getAbsolutePath();
+            return image;
+        } else {
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File video = File.createTempFile(
+                    fileName,  /* prefix */
+                    ".mp4",         /* suffix */
+                    storageDir      /* directory */
+            );
+
+            // Save a file: path for use with ACTION_VIEW intents
+            currentFilePath = video.getAbsolutePath();
+            return video;
+        }
     }
 
     public void onIconClick(View v, int position) {
@@ -552,6 +598,5 @@ public class CreatePostActivity extends AppCompatActivity {
     public void onBackButtonClicked(View v) {
         finish();
     }
-
 
 }

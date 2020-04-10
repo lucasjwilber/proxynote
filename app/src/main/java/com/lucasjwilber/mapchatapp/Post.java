@@ -1,13 +1,9 @@
 package com.lucasjwilber.mapchatapp;
 
-import android.net.Uri;
-
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 
 public class Post {
     private String id;
@@ -26,7 +22,7 @@ public class Post {
     private ArrayList<Comment> comments;
     private HashMap<String, Integer> votes;
     private String imageUrl;
-    private String imageUUID;
+    private String mediaStorageId;
 
     public Post() {};
 
@@ -58,12 +54,12 @@ public class Post {
         this.imageUrl = imageUrl;
     }
 
-    public String getImageUUID() {
-        return imageUUID;
+    public String getMediaStorageId() {
+        return mediaStorageId;
     }
 
-    public void setImageUUID(String imageUUID) {
-        this.imageUUID = imageUUID;
+    public void setMediaStorageId(String mediaStorageId) {
+        this.mediaStorageId = mediaStorageId;
     }
 
     public HashMap<String, Integer> getVotes() {
