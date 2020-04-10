@@ -22,6 +22,8 @@ public class Post {
     private ArrayList<Comment> comments;
     private HashMap<String, Integer> votes;
     private String imageUrl;
+    private String videoUrl;
+    private String videoThumbnailUrl;
     private String mediaStorageId;
 
     public Post() {};
@@ -44,6 +46,22 @@ public class Post {
         votes.put(userId, 1);
 
         //if link or icon were selected, set them in the create post method before uploading the object
+    }
+
+    public String getVideoThumbnailUrl() {
+        return videoThumbnailUrl;
+    }
+
+    public void setVideoThumbnailUrl(String videoThumbnailUrl) {
+        this.videoThumbnailUrl = videoThumbnailUrl;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 
     public String getImageUrl() {

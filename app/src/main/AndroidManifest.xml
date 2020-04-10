@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".HelpActivity" />
-        <activity android:name=".FullSizeImageActivity" />
+        <activity android:name=".FullScreenMediaActivity" />
         <activity android:name=".ReportActivity" />
         <activity android:name=".UserProfileActivity" />
         <activity android:name=".CreatePostActivity" />

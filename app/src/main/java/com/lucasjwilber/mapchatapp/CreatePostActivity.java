@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -61,6 +62,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private String userCurrentAddress;
     private Bitmap currentImage;
     private Uri currentVideo;
+    private Bitmap currentVideoThumbnail;
     private int selectedIcon = 0;
     private ImageView selectedIconView;
     private boolean iconSelected;
@@ -203,22 +205,42 @@ public class CreatePostActivity extends AppCompatActivity {
 
         StorageReference mediaRef = storageRef.child(postAndImageId);
         post.setMediaStorageId(postAndImageId);
-        UploadTask uploadTask;
+        UploadTask uploadMedia;
 
         if (currentImage != null) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             currentImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] imageData = baos.toByteArray();
-            uploadTask = mediaRef.putBytes(imageData);
-        } else {
-            post.setMediaStorageId(postAndImageId);
-            uploadTask = mediaRef.putFile(currentVideo);
+            uploadMedia = mediaRef.putBytes(imageData);
+        } else { //video
+            uploadMedia = mediaRef.putFile(currentVideo);
         }
 
-        uploadTask.addOnSuccessListener(result -> {
+        uploadMedia.addOnSuccessListener(result -> {
             mediaRef.getDownloadUrl().addOnSuccessListener(url -> {
-                post.setImageUrl(url.toString());
-                uploadPost(post);
+                if (currentImage != null) {
+                    post.setImageUrl(url.toString());
+                } else { //video
+                    post.setVideoUrl(url.toString());
+
+                    //now upload the video thumbnail
+                    StorageReference thumbnailRef = storageRef.child("thumbnail" + postAndImageId);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    currentVideoThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    byte[] thumbnailData = baos.toByteArray();
+
+                    UploadTask uploadThumbnail = thumbnailRef.putBytes(thumbnailData);
+                    uploadThumbnail.addOnSuccessListener(thumbnail -> {
+                        Log.i(TAG, "uploaded video thumbnail successfully");
+                        thumbnailRef.getDownloadUrl().addOnSuccessListener(thumbnailUrl -> {
+                            post.setVideoThumbnailUrl(thumbnailUrl.toString());
+                            uploadPost(post);
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "error getting video thumbnail: " + e.toString());
+                        });
+                    });
+                }
             })
             .addOnFailureListener(e -> {
                 Log.e(TAG, "error: " + e.toString());
@@ -226,6 +248,8 @@ public class CreatePostActivity extends AppCompatActivity {
         }).addOnFailureListener(failure -> {
             Log.e(TAG, "failure! :" + failure.toString());
         });
+
+
     }
 
     public void uploadPost(Post post) {
@@ -397,14 +421,18 @@ public class CreatePostActivity extends AppCompatActivity {
                 if (requestCode == REQUEST_IMAGE_CAPTURE) {
                     Bitmap imageBitmap = BitmapFactory.decodeFile(currentFilePath);
                     currentVideo = null;
+                    currentVideoThumbnail = null;
                     binding.createPostVideo.setVisibility(View.GONE);
                     currentImage = imageBitmap;
                     binding.createPostImage.setImageBitmap(imageBitmap);
                     binding.createPostImage.setVisibility(View.VISIBLE);
                 } else if (requestCode == REQUEST_VIDEO_CAPTURE) {
-                    Uri videoUri = intent.getData();
                     binding.createPostImage.setVisibility(View.GONE);
                     currentImage = null;
+                    Uri videoUri = intent.getData();
+                    MediaMetadataRetriever mMMR = new MediaMetadataRetriever();
+                    mMMR.setDataSource(CreatePostActivity.this, videoUri);
+                    currentVideoThumbnail = mMMR.getFrameAtTime();
                     currentVideo = videoUri;
                     binding.createPostVideo.setVisibility(View.VISIBLE);
                     binding.createPostVideo.setVideoURI(videoUri);

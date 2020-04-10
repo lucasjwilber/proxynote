@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -136,15 +135,24 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 }
                 commentCount.setText(commentCountText);
 
-                ImageView postImage = l.findViewById(R.id.postRvPostImage);
-                postImage.setOnClickListener(v -> goToFullSizeImage(post.getImageUrl(), post.getTitle()));
-                if (post.getImageUrl() != null && post.getImageUrl().length() > 0) {
+                //if there's an image or video create the thumbnail
+                if ((post.getImageUrl() != null && post.getImageUrl().length() > 0) ||
+                        (post.getVideoUrl() != null && post.getVideoUrl().length() > 0)) {
+                    ImageView postImage = l.findViewById(R.id.postRvPostImage);
                     postImage.setVisibility(View.VISIBLE);
+
                     Glide.with(parent)
-                            .load(post.getImageUrl())
-//                           TODO: .transform(new RoundedCorners(px))
+                            .load(post.getImageUrl() != null ? post.getImageUrl() : post.getVideoThumbnailUrl())
                             .thumbnail(.25f)
                             .into(postImage);
+
+                    if (post.getVideoUrl() != null) {
+                        //do something to make it apparent that this is a video not an image
+                    }
+
+                    String type = post.getImageUrl() != null ? "image" : "video";
+                    String url = post.getImageUrl() != null ? post.getImageUrl() : post.getVideoUrl();
+                    postImage.setOnClickListener(v -> goToFullScreenMedia(type, url, post.getTitle()));
                 }
 
                 upvoteButton = l.findViewById(R.id.postRvHeaderVoteUpBtn);
@@ -398,9 +406,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 });
     }
 
-    private void goToFullSizeImage(String imageUrl, String title) {
-        Intent goToFullSizeImage = new Intent(context, FullSizeImageActivity.class);
-        goToFullSizeImage.putExtra("imageUrl", imageUrl);
+    private void goToFullScreenMedia(String type, String url, String title) {
+        Intent goToFullSizeImage = new Intent(context, FullScreenMediaActivity.class);
+        goToFullSizeImage.putExtra("type", type);
+        goToFullSizeImage.putExtra("url", url);
         goToFullSizeImage.putExtra("title", title);
         context.startActivity(goToFullSizeImage);
     }
