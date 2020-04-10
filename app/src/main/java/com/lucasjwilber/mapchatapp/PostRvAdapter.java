@@ -128,6 +128,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 postScore.setText(postScoreText);
 
                 if (post.getImageUrl() != null && post.getImageUrl().length() > 0) {
+                    postImage.setVisibility(View.VISIBLE);
                     int cornerRadius = 5;
                     int px = Math.round(cornerRadius * (context.getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT));
                     Glide.with(parent)

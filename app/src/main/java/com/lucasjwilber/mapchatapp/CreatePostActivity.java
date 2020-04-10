@@ -119,7 +119,6 @@ public class CreatePostActivity extends AppCompatActivity {
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(CreatePostActivity.this);
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(CreatePostActivity.this, location -> {
-                    Log.i(TAG, "successfully got location");
                     // Got last known location. In some rare situations this can be null.
 
                     double userLat;
@@ -135,42 +134,42 @@ public class CreatePostActivity extends AppCompatActivity {
                             public void run() {
                                 //get formatted address
                                 String formattedAddress = "somewhere";
-                                Log.i(TAG, "calling geocode api...");
-                                try {
-                                    URL url = new URL("https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
-                                            userLat +
-                                            "," +
-                                            userLng +
-                                            "&key=" +
-                                            getResources().getString(R.string.google_geocode_key));
-
-                                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                                    con.setRequestMethod("GET");
-                                    Log.i(TAG, "called api, reading response...");
-                                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                                    String line;
-                                    StringBuilder content = new StringBuilder();
-                                    while ((line = in.readLine()) != null) {
-                                        content.append(line);
-                                        if (line.contains("formatted_address")) {
-                                            formattedAddress = line.split("\" : \"")[1];
-                                            formattedAddress = formattedAddress.substring(0, formattedAddress.length() - 2);
-                                            Log.i(TAG, "found formatted addresss: " + formattedAddress);
-                                            break;
-                                        }
-                                    }
-                                    Log.i(TAG, content.toString());
-                                    Log.i(TAG, "formatted address is " + formattedAddress);
-                                    in.close();
-                                    con.disconnect();
-
-                                } catch (MalformedURLException e) {
-                                    Log.i(TAG, "malformedURLexception:\n" + e.toString());
-                                } catch (ProtocolException e) {
-                                    Log.i(TAG, "protocol exception:\n" + e.toString());
-                                } catch (IOException e) {
-                                    Log.i(TAG, "IO exception:\n" + e.toString());
-                                }
+//                                Log.i(TAG, "calling geocode api...");
+//                                try {
+//                                    URL url = new URL("https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
+//                                            userLat +
+//                                            "," +
+//                                            userLng +
+//                                            "&key=" +
+//                                            getResources().getString(R.string.google_geocode_key));
+//
+//                                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+//                                    con.setRequestMethod("GET");
+//                                    Log.i(TAG, "called api, reading response...");
+//                                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+//                                    String line;
+//                                    StringBuilder content = new StringBuilder();
+//                                    while ((line = in.readLine()) != null) {
+//                                        content.append(line);
+//                                        if (line.contains("formatted_address")) {
+//                                            formattedAddress = line.split("\" : \"")[1];
+//                                            formattedAddress = formattedAddress.substring(0, formattedAddress.length() - 2);
+//                                            Log.i(TAG, "found formatted addresss: " + formattedAddress);
+//                                            break;
+//                                        }
+//                                    }
+//                                    Log.i(TAG, content.toString());
+//                                    Log.i(TAG, "formatted address is " + formattedAddress);
+//                                    in.close();
+//                                    con.disconnect();
+//
+//                                } catch (MalformedURLException e) {
+//                                    Log.e(TAG, "malformedURLexception:\n" + e.toString());
+//                                } catch (ProtocolException e) {
+//                                    Log.e(TAG, "protocol exception:\n" + e.toString());
+//                                } catch (IOException e) {
+//                                    Log.e(TAG, "IO exception:\n" + e.toString());
+//                                }
 
                                 postAndImageId = UUID.randomUUID().toString();
 
@@ -197,7 +196,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Utils.showToast(CreatePostActivity.this, "Unable to get your location.");
-                    Log.i(TAG, "failed getting location: " + e.toString());
+                    Log.e(TAG, "failed getting location: " + e.toString());
                 });
     }
 
@@ -225,10 +224,10 @@ public class CreatePostActivity extends AppCompatActivity {
                 uploadPost(post);
             })
             .addOnFailureListener(e -> {
-                Log.i(TAG, "error: " + e.toString());
+                Log.e(TAG, "error: " + e.toString());
             });
         }).addOnFailureListener(failure -> {
-            Log.i(TAG, "failure! :" + failure.toString());
+            Log.e(TAG, "failure! :" + failure.toString());
         });
 
 
@@ -271,14 +270,14 @@ public class CreatePostActivity extends AppCompatActivity {
                                                 loadingSpinner.setVisibility(View.VISIBLE);
                                             })
                                             .addOnFailureListener(e -> {
-                                                Log.i(TAG, "Error updating user's post descriptors list " + e);
+                                                Log.e(TAG, "Error updating user's post descriptors list " + e);
                                                 loadingSpinner.setVisibility(View.VISIBLE);
                                             });
                                 }
 
                             })
                             .addOnFailureListener(e -> {
-                                Log.i(TAG, "Error getting user: " + e);
+                                Log.e(TAG, "Error getting user: " + e);
                                 loadingSpinner.setVisibility(View.VISIBLE);
                             });
 
@@ -286,7 +285,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
                 })
                 .addOnFailureListener(e -> {
-                    Log.i(TAG, "Error adding post to db: " + e);
+                    Log.e(TAG, "Error adding post to db: " + e);
                     loadingSpinner.setVisibility(View.VISIBLE);
                 });
     }
@@ -356,7 +355,7 @@ public class CreatePostActivity extends AppCompatActivity {
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
-                Log.i(TAG, "error making file: " + ex.toString());
+                Log.e(TAG, "error making file: " + ex.toString());
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {

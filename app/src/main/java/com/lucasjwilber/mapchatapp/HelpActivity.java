@@ -2,7 +2,6 @@ package com.lucasjwilber.mapchatapp;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,18 +17,12 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lucasjwilber.mapchatapp.databinding.ActivityHelpBinding;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 public class HelpActivity extends AppCompatActivity {
 
     private final String TAG = "ljw";
     private ActivityHelpBinding binding;
     private FirebaseUser user;
     private FirebaseFirestore db;
-//    private RecyclerView helpRv;
-//    private RecyclerView.Adapter helpRvAdapter;
 
 
     @Override
@@ -71,9 +64,10 @@ public class HelpActivity extends AppCompatActivity {
 
         int[] helpStringIds = new int[]{
                 R.string.general_information,
-                R.string.tip1,
-                R.string.tip2,
-                R.string.tip3,
+                R.string.gi1,
+                R.string.gi2,
+                R.string.gi3,
+                R.string.gi4,
         };
 
         // this is going to be entirely hardcoded so there's no need to parameterize the adapter
@@ -81,7 +75,6 @@ public class HelpActivity extends AppCompatActivity {
 
         class HelpViewHolder extends RecyclerView.ViewHolder {
             TextView textView;
-
             HelpViewHolder(TextView tv) {
                 super(tv);
                 textView = tv;
@@ -107,6 +100,5 @@ public class HelpActivity extends AppCompatActivity {
         public int getItemCount() {
             return helpStringIds.length;
         }
-
     }
 }
