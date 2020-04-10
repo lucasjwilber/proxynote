@@ -32,19 +32,19 @@ import java.util.List;
 public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHolder> {
 
     private final String TAG = "ljw";
+    private FirebaseFirestore db;
+    private FirebaseUser user;
+    private Context context;
     private Post post;
     private String currentUserId;
     private String currentUserUsername;
     private String profileOwnerId;
-    private Context context;
     private String distanceType;
     private Drawable upArrowColored;
     private Drawable downArrowColored;
     private Button upvoteButton;
     private Button downvoteButton;
     private TextView postScore;
-    private FirebaseFirestore db;
-    private FirebaseUser user;
     private EditText addCommentBox;
     private ProgressBar replyLoadingSpinner;
 
@@ -67,12 +67,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
-
-        upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
-        downArrowColored = context.getDrawable(R.drawable.arrow_down_colored);
-
         SharedPreferences prefs = context.getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");
+        upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
+        downArrowColored = context.getDrawable(R.drawable.arrow_down_colored);
     }
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
@@ -99,50 +97,38 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             case POST_HEADER:
                 l = (ConstraintLayout) LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.post_layout, parent, false);
-                upvoteButton = l.findViewById(R.id.postRvHeaderVoteUpBtn);
-                upvoteButton.setOnClickListener(v -> onVoteButtonClick(upvoteButton));
-                downvoteButton = l.findViewById(R.id.postRvHeaderVoteDownBtn);
-                downvoteButton.setOnClickListener(v -> onVoteButtonClick(downvoteButton));
-                postScore = l.findViewById(R.id.postRvHeaderScore);
-                TextView postUsername = l.findViewById(R.id.postRvUsername);
-                TextView postTimeAndPlace = l.findViewById(R.id.postRvTimeAndPlace);
-                TextView postTitle = l.findViewById(R.id.postRvHeaderTitle);
-                Button reportButton = l.findViewById(R.id.postRvHeaderReportBtn);
-                ImageView postImage = l.findViewById(R.id.postRvPostImage);
-                postImage.setOnClickListener(v -> goToFullSizeImage(post.getImageUrl(), post.getTitle()));
-                TextView postText = l.findViewById(R.id.postRvPostText);
+
                 addCommentBox = l.findViewById(R.id.postRvPostReplyBox);
-                Button addCommentButton = l.findViewById(R.id.postRvPostReplyButton);
-                addCommentButton.setOnClickListener(v -> addCommentToPost(addCommentBox.getText().toString()));
-                TextView commentCount = l.findViewById(R.id.postCommentCount);
                 replyLoadingSpinner = l.findViewById(R.id.replySubmitProgressBar);
+
+                postScore = l.findViewById(R.id.postRvHeaderScore);
+                String postScoreText = Long.toString(post.getScore());
+                postScore.setText(postScoreText);
+
+                TextView postUsername = l.findViewById(R.id.postRvUsername);
                 postUsername.setText(post.getUsername());
                 //don't let users start a new userprofile activity for the profile they're already viewing
                 if (!post.getUserId().equals(profileOwnerId)) {
                     postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
                 }
+
+                TextView postTimeAndPlace = l.findViewById(R.id.postRvTimeAndPlace);
                 postTimeAndPlace.setText(Utils.getHowLongAgo(post.getTimestamp()));
-                reportButton.setOnClickListener(v -> onReportButtonClicked());
+
+                TextView postTitle = l.findViewById(R.id.postRvHeaderTitle);
                 postTitle.setText(post.getTitle());
-                String postScoreText = Long.toString(post.getScore());
-                postScore.setText(postScoreText);
 
-                if (post.getImageUrl() != null && post.getImageUrl().length() > 0) {
-                    postImage.setVisibility(View.VISIBLE);
-                    int cornerRadius = 5;
-                    int px = Math.round(cornerRadius * (context.getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT));
-                    Glide.with(parent)
-                            .load(post.getImageUrl())
-//                           TODO: .transform(new RoundedCorners(px))
-                            .thumbnail(.25f)
-                            .into(postImage);
-                }
+                Button reportButton = l.findViewById(R.id.postRvHeaderReportBtn);
+                reportButton.setOnClickListener(v -> onReportButtonClicked());
 
-                Log.i(TAG, "comments: " + post.getComments());
-//                ArrayList list = (ArrayList) post.getComments();
-//                post.setComments(Utils.turnMapsIntoListOfComments(list));
-
+                TextView postText = l.findViewById(R.id.postRvPostText);
                 postText.setText(post.getText());
+
+                Button addCommentButton = l.findViewById(R.id.postRvPostReplyButton);
+                addCommentButton.setOnClickListener(v -> addCommentToPost(addCommentBox.getText().toString()));
+
+                TextView commentCount = l.findViewById(R.id.postCommentCount);
+                Log.i(TAG, "comments: " + post.getComments());
                 int numComments = post.getComments().size();
                 String commentCountText = "";
                 if (numComments == 1) {
@@ -152,8 +138,22 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 }
                 commentCount.setText(commentCountText);
 
-                Log.i(TAG, "post votes: " + post.getVotes().size());
+                ImageView postImage = l.findViewById(R.id.postRvPostImage);
+                postImage.setOnClickListener(v -> goToFullSizeImage(post.getImageUrl(), post.getTitle()));
+                if (post.getImageUrl() != null && post.getImageUrl().length() > 0) {
+                    postImage.setVisibility(View.VISIBLE);
+                    Glide.with(parent)
+                            .load(post.getImageUrl())
+//                           TODO: .transform(new RoundedCorners(px))
+                            .thumbnail(.25f)
+                            .into(postImage);
+                }
 
+                upvoteButton = l.findViewById(R.id.postRvHeaderVoteUpBtn);
+                upvoteButton.setOnClickListener(v -> onVoteButtonClick(upvoteButton));
+                downvoteButton = l.findViewById(R.id.postRvHeaderVoteDownBtn);
+                downvoteButton.setOnClickListener(v -> onVoteButtonClick(downvoteButton));
+                Log.i(TAG, "post votes: " + post.getVotes().size());
                 if (post.getVotes().containsKey(currentUserId)) {
                     if (post.getVotes().get(currentUserId) > 0) {
                         upvoteButton.setBackground(upArrowColored);
@@ -161,7 +161,9 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                         downvoteButton.setBackground(downArrowColored);
                     }
                 }
+
                 return new PostViewHolder(l);
+
             case POST_COMMENT:
             default:
                 l = (ConstraintLayout) LayoutInflater.from(parent.getContext())
@@ -170,17 +172,17 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         }
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(PostViewHolder holder, int position) {
-
         // only if it's a comment are we recycling the same view type:
         if (position >= 1) {
             Comment comment = post.getComments().get(position - 1);
+
             TextView commentUsername = holder.constraintLayout.findViewById(R.id.commentUsername);
-            TextView commentTimeAndPlace = holder.constraintLayout.findViewById(R.id.postRvCommentHeader);
             commentUsername.setText(comment.getUsername());
             commentUsername.setOnClickListener(v -> onUsernameClicked(comment.getUserId()));
+
+            TextView commentTimeAndPlace = holder.constraintLayout.findViewById(R.id.postRvCommentHeader);
             String commentTimeAndPlaceText = Utils.getHowLongAgo(comment.getTimestamp()) +
                     ", " +
                     Utils.getHowFarAway(comment.getDistanceFromPost(), distanceType);
@@ -215,8 +217,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             usersPreviousVote = voteMap.get(currentUserId);
         }
 
-//        Button up = findViewById(R.id.postRvHeaderVoteUpBtn);
-//        Button down = findViewById(R.id.postRvHeaderVoteDownBtn);
         int usersNewVote = 0;
         int scoreChange = 0;
 
@@ -252,7 +252,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 upvoteButton.setBackground(context.getDrawable(R.drawable.arrow_up));
             }
         }
-
 
         post.setScore(currentScore + scoreChange);
         String scoreViewText = Long.toString(currentScore + scoreChange);
@@ -304,12 +303,10 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                                                         Log.i(TAG, "couldn't update user's score: " + e.toString());
                                                     });
 
-
                                         })
                                         .addOnFailureListener(e -> {
                                             Log.i(TAG, "failed getting user: " + e.toString());
                                         });
-
 
                                 b.setEnabled(true);
                             })
