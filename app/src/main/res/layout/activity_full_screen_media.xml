@@ -38,6 +38,7 @@
         android:background="?android:attr/selectableItemBackground"
         android:drawableTop="@drawable/play_circle_outline"
         android:onClick="onPlayVideoClicked"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

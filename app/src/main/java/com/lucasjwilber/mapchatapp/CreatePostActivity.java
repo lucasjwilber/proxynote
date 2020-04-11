@@ -74,6 +74,8 @@ public class CreatePostActivity extends AppCompatActivity {
     private int selectedPosition;
     private ProgressBar loadingSpinner;
     private String postAndImageId;
+    File photoFile = null;
+    File videoFile = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -218,7 +220,7 @@ public class CreatePostActivity extends AppCompatActivity {
         //  UPLOAD IMAGE //
         if (currentImage != null) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            currentImage.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+            currentImage.compress(Bitmap.CompressFormat.JPEG, 10, baos);
             byte[] imageData = baos.toByteArray();
             UploadTask uploadImage = mediaRef.putBytes(imageData);
 
@@ -258,7 +260,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                     //now upload the video thumbnail
                                     StorageReference thumbnailRef = storageRef.child("thumbnail" + postAndImageId);
                                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                    currentVideoThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                                    currentVideoThumbnail.compress(Bitmap.CompressFormat.JPEG, 10, baos);
                                     byte[] thumbnailData = baos.toByteArray();
 
                                     UploadTask uploadThumbnail = thumbnailRef.putBytes(thumbnailData);
@@ -408,7 +410,7 @@ public class CreatePostActivity extends AppCompatActivity {
             // Ensure that there's a camera activity to handle the intent
             if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                 // Create the File where the photo should go
-                File photoFile = null;
+//                File photoFile = null;
                 try {
                     photoFile = createMediaFile(requestCode);
                 } catch (IOException ex) {
@@ -428,7 +430,7 @@ public class CreatePostActivity extends AppCompatActivity {
             if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
 
                 // Create the File where the photo should go
-                File videoFile = null;
+//                File videoFile = null;
                 try {
                     videoFile = createMediaFile(requestCode);
                 } catch (IOException ex) {
@@ -450,58 +452,54 @@ public class CreatePostActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         if (resultCode == RESULT_OK) {
-            //allocate a filepath
-            File file = new File(currentFilePath);
-            if (file.exists()) {
-                if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE) {
 
-                    //read image exif data to get orientation, and rotate the image to match that
-                    BitmapFactory.Options bounds = new BitmapFactory.Options();
-                    bounds.inJustDecodeBounds = true;
-                    BitmapFactory.decodeFile(currentFilePath, bounds);
+                //read image exif data to get orientation, and rotate the image to match that
+                BitmapFactory.Options bounds = new BitmapFactory.Options();
+                bounds.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(currentFilePath, bounds);
 
-                    BitmapFactory.Options opts = new BitmapFactory.Options();
-                    Bitmap bm = BitmapFactory.decodeFile(currentFilePath, opts);
-                    ExifInterface exif = null;
-                    try {
-                        exif = new ExifInterface(currentFilePath);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
-                    int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
-
-                    int rotationAngle = 0;
-                    if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
-                    if (orientation == ExifInterface.ORIENTATION_ROTATE_180)
-                        rotationAngle = 180;
-                    if (orientation == ExifInterface.ORIENTATION_ROTATE_270)
-                        rotationAngle = 270;
-
-                    Matrix matrix = new Matrix();
-                    matrix.setRotate(rotationAngle, (float) bm.getWidth() / 2, (float) bm.getHeight() / 2);
-                    Bitmap rotatedBitmap = Bitmap.createBitmap(bm, 0, 0, bounds.outWidth, bounds.outHeight, matrix, true);
-
-                    currentVideo = null;
-                    currentVideoThumbnail = null;
-                    binding.createPostVideo.setVisibility(View.GONE);
-                    currentImage = rotatedBitmap;
-                    binding.createPostImage.setImageBitmap(rotatedBitmap);
-                    binding.createPostImage.setVisibility(View.VISIBLE);
-
-                } else if (requestCode == REQUEST_VIDEO_CAPTURE) {
-
-                    binding.createPostImage.setVisibility(View.GONE);
-                    currentImage = null;
-                    Uri videoUri = intent.getData();
-                    MediaMetadataRetriever mMMR = new MediaMetadataRetriever();
-                    mMMR.setDataSource(CreatePostActivity.this, videoUri);
-                    currentVideoThumbnail = mMMR.getFrameAtTime();
-                    currentVideo = videoUri;
-                    binding.createPostVideo.setVisibility(View.VISIBLE);
-                    binding.createPostVideo.setVideoURI(videoUri);
-                    binding.createPostVideo.start();
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                Bitmap bm = BitmapFactory.decodeFile(currentFilePath, opts);
+                ExifInterface exif = null;
+                try {
+                    exif = new ExifInterface(currentFilePath);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+                String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+                int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
+
+                int rotationAngle = 0;
+                if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
+                if (orientation == ExifInterface.ORIENTATION_ROTATE_180)
+                    rotationAngle = 180;
+                if (orientation == ExifInterface.ORIENTATION_ROTATE_270)
+                    rotationAngle = 270;
+
+                Matrix matrix = new Matrix();
+                matrix.setRotate(rotationAngle, (float) bm.getWidth() / 2, (float) bm.getHeight() / 2);
+                Bitmap rotatedBitmap = Bitmap.createBitmap(bm, 0, 0, bounds.outWidth, bounds.outHeight, matrix, true);
+
+                currentVideo = null;
+                currentVideoThumbnail = null;
+                binding.createPostVideo.setVisibility(View.GONE);
+                currentImage = rotatedBitmap;
+                binding.createPostImage.setImageBitmap(rotatedBitmap);
+                binding.createPostImage.setVisibility(View.VISIBLE);
+
+            } else if (requestCode == REQUEST_VIDEO_CAPTURE) {
+
+                binding.createPostImage.setVisibility(View.GONE);
+                currentImage = null;
+                Uri videoUri = intent.getData();
+                MediaMetadataRetriever mMMR = new MediaMetadataRetriever();
+                mMMR.setDataSource(CreatePostActivity.this, videoUri);
+                currentVideoThumbnail = mMMR.getFrameAtTime();
+                currentVideo = videoUri;
+                binding.createPostVideo.setVisibility(View.VISIBLE);
+                binding.createPostVideo.setVideoURI(videoUri);
+                binding.createPostVideo.start();
             }
         }
     }
