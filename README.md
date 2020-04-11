@@ -5,7 +5,8 @@ Share what you've seen! Add and reply to posts on a Google map, pinned to the lo
 * Firebase Auth
 * Firestore Database
 * Firebase Storage
-* Glide
+* Glide (https://github.com/bumptech/glide)
+* Transcoder (https://github.com/natario1/Transcoder)
 
 ##Known Issues
 * Currently most views don't work in landscape orientation.

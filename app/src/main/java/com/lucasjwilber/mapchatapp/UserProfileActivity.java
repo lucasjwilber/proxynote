@@ -328,14 +328,24 @@ public class UserProfileActivity extends AppCompatActivity {
                     v.setEnabled(true);
                 });
 
-        //delete the post's image from storage. the post in firestore and its image have the same id.
-        StorageReference imageRef = storage.getReference().child(selectedPostId);
-        imageRef.delete()
+        //delete the post's image/video from storage. the storage id is the same as the post id
+        StorageReference mediaRef = storage.getReference().child(selectedPostId);
+        mediaRef.delete()
                 .addOnSuccessListener(r -> {
-                    Log.i(TAG, "deleted the post's image successfully.");
+                    Log.i(TAG, "deleted the post's media successfully.");
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "failed deleting the image: " + e.toString());
+                    Log.e(TAG, "failed deleting the media: " + e.toString());
+                });
+
+        //delete the post's video thumbnail from storage. its id is "thumbnail[postid]"
+        StorageReference thumbnailRef = storage.getReference().child("thumbnail" + selectedPostId);
+        thumbnailRef.delete()
+                .addOnSuccessListener(r -> {
+                    Log.i(TAG, "deleted the post's video thumbnail successfully.");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "failed deleting the video thumbnail: " + e.toString());
                 });
 
         binding.deletePostModal.setVisibility(View.GONE);

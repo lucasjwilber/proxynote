@@ -32,16 +32,30 @@
 
     <Button
         android:id="@+id/playVideoButton"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:visibility="gone"
-        android:text="play"
-        android:textColor="@color/white"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="20dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:drawableTop="@drawable/play_circle_outline"
         android:onClick="onPlayVideoClicked"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        tools:visibility="visible" />
+
+    <Button
+        android:id="@+id/pauseVideoButton"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="20dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:drawableTop="@drawable/pause_circle_outline"
+        android:onClick="onPauseVideoClicked"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:visibility="visible" />
 
     <Button
         android:id="@+id/closeFullSizeImage"
@@ -68,6 +82,16 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/closeFullSizeImage"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/fullScreenMediaPB"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

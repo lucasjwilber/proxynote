@@ -40,6 +40,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.lucasjwilber.mapchatapp.databinding.ActivityCreatePostBinding;
+import com.otaliastudios.transcoder.Transcoder;
+import com.otaliastudios.transcoder.TranscoderListener;
+import com.otaliastudios.transcoder.source.DataSource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -180,7 +183,11 @@ public class CreatePostActivity extends AppCompatActivity {
                                 post.setIcon(selectedIcon);
 
                                 if (currentImage != null || currentVideo != null) {
-                                    uploadMediaThenPost(post);
+                                    try {
+                                        uploadMediaThenPost(post);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
                                 } else {
                                     uploadPost(post);
                                 }
@@ -194,7 +201,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 });
     }
 
-    private void uploadMediaThenPost(Post post) {
+    private void uploadMediaThenPost(Post post) throws IOException {
         Handler handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
@@ -205,50 +212,78 @@ public class CreatePostActivity extends AppCompatActivity {
 
         StorageReference mediaRef = storageRef.child(postAndImageId);
         post.setMediaStorageId(postAndImageId);
-        UploadTask uploadMedia;
 
+        //  UPLOAD IMAGE //
         if (currentImage != null) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             currentImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] imageData = baos.toByteArray();
-            uploadMedia = mediaRef.putBytes(imageData);
-        } else { //video
-            uploadMedia = mediaRef.putFile(currentVideo);
-        }
+            UploadTask uploadImage = mediaRef.putBytes(imageData);
 
-        uploadMedia.addOnSuccessListener(result -> {
-            mediaRef.getDownloadUrl().addOnSuccessListener(url -> {
-                if (currentImage != null) {
+            uploadImage.addOnSuccessListener(result -> {
+                mediaRef.getDownloadUrl().addOnSuccessListener(url -> {
                     post.setImageUrl(url.toString());
-                } else { //video
-                    post.setVideoUrl(url.toString());
-
-                    //now upload the video thumbnail
-                    StorageReference thumbnailRef = storageRef.child("thumbnail" + postAndImageId);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    currentVideoThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                    byte[] thumbnailData = baos.toByteArray();
-
-                    UploadTask uploadThumbnail = thumbnailRef.putBytes(thumbnailData);
-                    uploadThumbnail.addOnSuccessListener(thumbnail -> {
-                        Log.i(TAG, "uploaded video thumbnail successfully");
-                        thumbnailRef.getDownloadUrl().addOnSuccessListener(thumbnailUrl -> {
-                            post.setVideoThumbnailUrl(thumbnailUrl.toString());
-                            uploadPost(post);
-                        })
-                        .addOnFailureListener(e -> {
-                            Log.e(TAG, "error getting video thumbnail: " + e.toString());
-                        });
-                    });
-                }
-            })
-            .addOnFailureListener(e -> {
-                Log.e(TAG, "error: " + e.toString());
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "error: " + e.toString());
+                });
+            }).addOnFailureListener(failure -> {
+                Log.e(TAG, "failure! :" + failure.toString());
             });
-        }).addOnFailureListener(failure -> {
-            Log.e(TAG, "failure! :" + failure.toString());
-        });
 
+        // UPLOAD VIDEO //
+        } else {
+
+            //temp file to transcode the video into, then upload
+            /* prefix */
+            /* suffix */
+            /* directory */
+            File transcodedVideoFile = File.createTempFile(
+                    "t" + user.getDisplayName(),  /* prefix */
+                    ".mp4",         /* suffix */
+                    getExternalFilesDir(Environment.DIRECTORY_MOVIES)      /* directory */
+            );
+
+            Transcoder.into(transcodedVideoFile.getAbsolutePath())
+                    .addDataSource(CreatePostActivity.this, currentVideo)
+                    .setListener(new TranscoderListener() {
+                        public void onTranscodeProgress(double progress) {}
+                        public void onTranscodeCompleted(int successCode) {
+                            Uri transcodedVideoUri = Uri.fromFile(transcodedVideoFile);
+                            UploadTask uploadVideo = mediaRef.putFile(transcodedVideoUri);
+                            uploadVideo.addOnSuccessListener(result -> {
+                                mediaRef.getDownloadUrl().addOnSuccessListener(url -> {
+                                    post.setVideoUrl(url.toString());
+
+                                    //now upload the video thumbnail
+                                    StorageReference thumbnailRef = storageRef.child("thumbnail" + postAndImageId);
+                                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                    currentVideoThumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                                    byte[] thumbnailData = baos.toByteArray();
+
+                                    UploadTask uploadThumbnail = thumbnailRef.putBytes(thumbnailData);
+                                    uploadThumbnail.addOnSuccessListener(thumbnail -> {
+                                        Log.i(TAG, "uploaded video thumbnail successfully");
+                                        thumbnailRef.getDownloadUrl().addOnSuccessListener(thumbnailUrl -> {
+                                                    post.setVideoThumbnailUrl(thumbnailUrl.toString());
+                                                    uploadPost(post);
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Log.e(TAG, "error getting video thumbnail: " + e.toString());
+                                                });
+                                    });
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "error: " + e.toString());
+                                });
+                            }).addOnFailureListener(failure -> {
+                                Log.e(TAG, "failure! :" + failure.toString());
+                            });
+                        }
+                        public void onTranscodeCanceled() {}
+                        public void onTranscodeFailed(@NonNull Throwable exception) {}
+                    }).transcode();
+        }
 
     }
 
@@ -458,7 +493,7 @@ public class CreatePostActivity extends AppCompatActivity {
             currentFilePath = image.getAbsolutePath();
             return image;
         } else {
-            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_MOVIES);
             File video = File.createTempFile(
                     fileName,  /* prefix */
                     ".mp4",         /* suffix */

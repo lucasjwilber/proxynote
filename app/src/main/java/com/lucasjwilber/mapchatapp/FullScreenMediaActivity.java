@@ -1,42 +1,64 @@
 package com.lucasjwilber.mapchatapp;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+import com.lucasjwilber.mapchatapp.databinding.ActivityFullScreenMediaBinding;
 
 public class FullScreenMediaActivity extends AppCompatActivity {
-    ImageView imageView;
-    VideoView videoView;
+    ActivityFullScreenMediaBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_full_screen_media);
+        binding = ActivityFullScreenMediaBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
         Intent intent = getIntent();
         String type = intent.getStringExtra("type");
         String url = intent.getStringExtra("url");
         String title = intent.getStringExtra("title");
-        TextView titleView = findViewById(R.id.fullSizeImageTitle);
-        titleView.setText(title);
-        imageView = findViewById(R.id.fullSizeImage);
-        videoView = findViewById(R.id.fullScreenVideo);
+
+        binding.fullSizeImageTitle.setText(title);
+
         if (type != null && type.equals("image")) {
-            Glide.with(this).load(url).into(imageView);
+            Glide.with(this)
+                    .load(url)
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            return false;
+                        }
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            binding.fullScreenMediaPB.setVisibility(View.GONE);
+                            return false;
+                        }
+                    })
+                    .into(binding.fullSizeImage);
         } else if (type != null && type.equals("video")) {
-            imageView.setVisibility(View.GONE);
-            videoView.setVisibility(View.VISIBLE);
-            Button playVideoButton = findViewById(R.id.playVideoButton);
-            playVideoButton.setVisibility(View.VISIBLE);
-            videoView.setVideoURI(Uri.parse(url));
+            binding.fullSizeImage.setVisibility(View.GONE);
+            binding.fullScreenVideo.setVisibility(View.VISIBLE);
+            binding.playVideoButton.setVisibility(View.VISIBLE);
+            binding.fullScreenVideo.setVideoURI(Uri.parse(url));
+            binding.fullScreenMediaPB.setVisibility(View.GONE);
         }
     }
 
@@ -45,6 +67,20 @@ public class FullScreenMediaActivity extends AppCompatActivity {
     }
 
     public void onPlayVideoClicked(View v) {
-        videoView.start();
+        binding.playVideoButton.setVisibility(View.GONE);
+        binding.pauseVideoButton.setVisibility(View.VISIBLE);
+        binding.fullScreenVideo.start();
+        binding.fullScreenVideo.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                binding.pauseVideoButton.setVisibility(View.GONE);
+                binding.playVideoButton.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+    public void onPauseVideoClicked(View v) {
+        binding.playVideoButton.setVisibility(View.VISIBLE);
+        binding.pauseVideoButton.setVisibility(View.GONE);
+        binding.fullScreenVideo.pause();
     }
 }
