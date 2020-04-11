@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.VideoView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -44,7 +45,6 @@ import com.google.firebase.storage.UploadTask;
 import com.lucasjwilber.mapchatapp.databinding.ActivityCreatePostBinding;
 import com.otaliastudios.transcoder.Transcoder;
 import com.otaliastudios.transcoder.TranscoderListener;
-import com.otaliastudios.transcoder.source.DataSource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -497,9 +497,13 @@ public class CreatePostActivity extends AppCompatActivity {
                 mMMR.setDataSource(CreatePostActivity.this, videoUri);
                 currentVideoThumbnail = mMMR.getFrameAtTime();
                 currentVideo = videoUri;
-                binding.createPostVideo.setVisibility(View.VISIBLE);
-                binding.createPostVideo.setVideoURI(videoUri);
-                binding.createPostVideo.start();
+                VideoView vv = binding.createPostVideo;
+                vv.setVisibility(View.VISIBLE);
+                vv.setVideoURI(videoUri);
+                vv.setOnCompletionListener(complete -> {
+                    vv.start();
+                });
+                vv.start();
             }
         }
     }

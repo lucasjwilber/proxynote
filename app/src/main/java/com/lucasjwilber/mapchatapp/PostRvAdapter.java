@@ -147,12 +147,18 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                             .into(postImage);
 
                     if (post.getVideoUrl() != null) {
-                        //do something to make it apparent that this is a video not an image
+                        ImageView playButton = l.findViewById(R.id.postRvPlayButton);
+                        playButton.setVisibility(View.VISIBLE);
                     }
 
                     String type = post.getImageUrl() != null ? "image" : "video";
                     String url = post.getImageUrl() != null ? post.getImageUrl() : post.getVideoUrl();
-                    postImage.setOnClickListener(v -> goToFullScreenMedia(type, url, post.getTitle()));
+                    postImage.setOnClickListener(v -> goToFullScreenMedia(
+                            type,
+                            url,
+                            post.getTitle(),
+                            post.getVideoThumbnailUrl()
+                    ));
                 }
 
                 upvoteButton = l.findViewById(R.id.postRvHeaderVoteUpBtn);
@@ -406,12 +412,13 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 });
     }
 
-    private void goToFullScreenMedia(String type, String url, String title) {
-        Intent goToFullSizeImage = new Intent(context, FullScreenMediaActivity.class);
-        goToFullSizeImage.putExtra("type", type);
-        goToFullSizeImage.putExtra("url", url);
-        goToFullSizeImage.putExtra("title", title);
-        context.startActivity(goToFullSizeImage);
+    private void goToFullScreenMedia(String type, String url, String title, String videoThumbnailUrl) {
+        Intent goToFullScreenMedia = new Intent(context, FullScreenMediaActivity.class);
+        goToFullScreenMedia.putExtra("type", type);
+        goToFullScreenMedia.putExtra("url", url);
+        goToFullScreenMedia.putExtra("title", title);
+        goToFullScreenMedia.putExtra("videoThumbnail", videoThumbnailUrl);
+        context.startActivity(goToFullScreenMedia);
     }
 
 }
