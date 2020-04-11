@@ -148,7 +148,7 @@ public class Utils {
         }
     }
 
-    private static Bitmap getBitmap(int drawableRes, Context context) {
+    static Bitmap getBitmap(int drawableRes, Context context) {
         Drawable drawable = context.getResources().getDrawable(drawableRes);
         Canvas canvas = new Canvas();
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);

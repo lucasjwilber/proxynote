@@ -108,13 +108,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postMarkers = new LinkedList<>();
         postSet = new HashSet<>();
 
-        userMarkerIcon = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.user_location_pin));
-        postOutlineYellow = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_yellow));
-        postOutlineYellowOrange = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_yelloworange));
-        postOutlineOrange = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_orange));
-        postOutlineOrangeRed = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_orangered));
-        postOutlineRed = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_red));
-        postOutlineBrown = BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.postoutline_brown));
+        userMarkerIcon = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.user_location_pin, MapActivity.this));
+        postOutlineYellow = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_yellow, MapActivity.this));
+        postOutlineYellowOrange = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_yelloworange, MapActivity.this));
+        postOutlineOrange = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_orange, MapActivity.this));
+        postOutlineOrangeRed = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_orangered, MapActivity.this));
+        postOutlineRed = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_red, MapActivity.this));
+        postOutlineBrown = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_brown, MapActivity.this));
 
         db = FirebaseFirestore.getInstance();
         sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
@@ -523,16 +523,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postRv.setAdapter(null);
         mapBinding.mapLoginSuggestionModal.setVisibility(View.GONE);
         mapBinding.verifyEmailReminder.setVisibility(View.GONE);
-    }
-
-    private Bitmap getBitmap(int drawableRes) {
-        Drawable drawable = getResources().getDrawable(drawableRes);
-        Canvas canvas = new Canvas();
-        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        canvas.setBitmap(bitmap);
-        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-        drawable.draw(canvas);
-        return bitmap;
     }
 
     @Override
