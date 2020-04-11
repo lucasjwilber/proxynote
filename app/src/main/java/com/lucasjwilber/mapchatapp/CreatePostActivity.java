@@ -58,6 +58,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private final String TAG = "ljw";
     private static final int REQUEST_IMAGE_CAPTURE = 69;
     private static final int REQUEST_VIDEO_CAPTURE = 70;
+    private static final int MAX_VIDEO_DURATION = 20;
     private String currentFilePath;
     private ActivityCreatePostBinding binding;
     private FirebaseFirestore db;
@@ -442,6 +443,7 @@ public class CreatePostActivity extends AppCompatActivity {
                             "com.lucasjwilber.mapchatapp.fileprovider",
                             videoFile);
                     takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoURI);
+                    takeVideoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, MAX_VIDEO_DURATION);
                     startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
                 }
             }

@@ -216,8 +216,14 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             Utils.showToast(context, "You must be logged in to vote.");
             return;
         } else if (!user.isEmailVerified()) {
-            Utils.showToast(context, "Please verify your email first.");
-            return;
+            //reload and check again first
+            user.reload()
+                    .addOnSuccessListener(r -> {
+                        if (!user.isEmailVerified()) {
+                            Utils.showToast(context, "Please verify your email first.");
+                            return;
+                        }
+                    });
         }
         // need to disable the button until the firestore transaction is complete, otherwise users
         // could cast multiple votes by spamming the button
@@ -344,8 +350,14 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             Utils.showToast(context, "You must be signed in to report a post.");
             return;
         } else if (!user.isEmailVerified()) {
-            Utils.showToast(context, "Please verify your email first.");
-            return;
+            //reload and check again first
+            user.reload()
+                .addOnSuccessListener(r -> {
+                    if (!user.isEmailVerified()) {
+                        Utils.showToast(context, "Please verify your email first.");
+                        return;
+                    }
+                });
         }
         Intent goToReportActivity = new Intent(context, ReportActivity.class);
         goToReportActivity.putExtra("postId", post.getId());
@@ -358,8 +370,14 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             Utils.showToast(context, "You must be logged in to comment.");
             return;
         } else if (!user.isEmailVerified()) {
-            Utils.showToast(context, "Please verify your email first.");
-            return;
+            //reload and check again first
+            user.reload()
+                    .addOnSuccessListener(r -> {
+                        if (!user.isEmailVerified()) {
+                            Utils.showToast(context, "Please verify your email first.");
+                            return;
+                        }
+                    });
         } else if (commentText.equals("") || commentText.length() == 0) {
             Utils.showToast(context, "Please write a comment first.");
             return;

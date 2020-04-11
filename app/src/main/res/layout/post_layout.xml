@@ -162,13 +162,13 @@
 
     <ImageView
         android:id="@+id/postRvPlayButton"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/postRvPostImage"
         app:layout_constraintEnd_toEndOf="@+id/postRvPostImage"
         app:layout_constraintStart_toStartOf="@+id/postRvPostImage"
         app:layout_constraintTop_toTopOf="@+id/postRvPostImage"
-        app:srcCompat="@drawable/play_circle_outline" />
+        app:srcCompat="@drawable/video_opaque" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

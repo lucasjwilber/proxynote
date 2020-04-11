@@ -20,6 +20,7 @@ import com.lucasjwilber.mapchatapp.databinding.ActivityFullScreenMediaBinding;
 
 public class FullScreenMediaActivity extends AppCompatActivity {
     ActivityFullScreenMediaBinding binding;
+    Uri video;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +54,9 @@ public class FullScreenMediaActivity extends AppCompatActivity {
 
         // if it's a video load the video
         if (type != null && type.equals("video")) {
+            video = Uri.parse(url);
             VideoView vv = binding.fullScreenVideo;
-            vv.setVideoURI(Uri.parse(url));
+            vv.setVideoURI(video);
             vv.setOnInfoListener((mp, what, extra) -> {
                 if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
                     binding.fullScreenMediaPB.setVisibility(View.GONE);

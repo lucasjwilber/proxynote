@@ -68,7 +68,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private long postQueryLimit = 250;
     private FirebaseUser currentUser;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
-    private final int LOCATION_UPDATE_COOLDOWN = 15000;
+    private final int LOCATION_UPDATE_COOLDOWN = 30000;
     private final int POST_QUERY_COOLDOWN = 2000;
     private boolean postQueryIsOnCooldown;
     private double userLat;
@@ -147,9 +147,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         super.onResume();
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null && currentUser.isEmailVerified()) {
-            userIsEmailVerified = true;
-        }
 
         //clear post markers
         postSet = new HashSet<>();
@@ -159,12 +156,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         startGetLocationLooper();
         if (mMap != null) getPostsFromDbAndCreateMapMarkers();
 
-        // refresh postRv to prevent vote manipulation via out-of-date scores
+        // if the postRv is open, refresh it to prevent vote manipulation via out-of-date scores
         if (postRv.getVisibility() == View.VISIBLE) {
             postRv.setVisibility(View.GONE);
             postRvAdapter = null;
 
-            // check that it wasn't just deleted, to avoid NPEs
+            // make sure it wasn't just deleted before showing it
             db.collection("posts")
                     .document(currentSelectedPostId)
                     .get()
@@ -187,7 +184,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         if (mMap != null) {
             periodicLocationUpdateHandler.removeCallbacksAndMessages(null);
 
-            //update userLat and userLng every [LOCATION_UPDATE_COOLDOWN] ms:
+            //update userLat and userLng on a loop:
             periodicLocationUpdateHandler.postDelayed(new Runnable() {
                 public void run() {
                     getUserLatLng(false);
@@ -397,10 +394,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             mapBinding.mapLoginSuggestion.setText(text);
             mapBinding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
             return;
-        } else if (!userIsEmailVerified) {
-            mapBinding.verifyEmailReminder.setVisibility(View.VISIBLE);
-            startVerificationListener();
-            return;
+        } else if (!currentUser.isEmailVerified()) {
+            //reload and check again first
+            currentUser.reload()
+                .addOnSuccessListener(r -> {
+                    if (!currentUser.isEmailVerified()) {
+                        Utils.showToast(MapActivity.this, "Please verify your email first.");
+                        return;
+                    }
+                });
         } else {
             Intent goToCreatePostAct = new Intent(this, CreatePostActivity.class);
             startActivity(goToCreatePostAct);
@@ -603,25 +605,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         Utils.showToast(MapActivity.this, "Verification email sent.");
                     });
         }
-    }
-
-    private void startVerificationListener() {
-        emailVerificationCheckRunnable.postDelayed(new Runnable() {
-            public void run() {
-                if (currentUser != null) {
-                    currentUser.reload();
-                }
-                if (currentUser != null && currentUser.isEmailVerified()) {
-                    emailVerificationCheckRunnable.removeCallbacksAndMessages(null);
-                    userIsEmailVerified = true;
-                    Utils.showToast(MapActivity.this, "Email verified!");
-                    mapBinding.verifyEmailReminder.setVisibility(View.GONE);
-                } else {
-                    Log.i(TAG, "user still not verified");
-                    emailVerificationCheckRunnable.postDelayed(this, 2000);
-                }
-            }
-        }, 2000);
     }
 
 }
