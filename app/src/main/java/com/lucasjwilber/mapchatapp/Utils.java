@@ -16,6 +16,32 @@ import java.util.HashMap;
 
 public class Utils {
 
+    private static int[] iconIds = new int[] {
+            R.drawable.posticon_127867,
+            R.drawable.posticon_127881,
+            R.drawable.posticon_128021,
+            R.drawable.posticon_128064,
+            R.drawable.posticon_128076,
+            R.drawable.posticon_128077,
+            R.drawable.posticon_128078,
+            R.drawable.posticon_128293,
+            R.drawable.posticon_128405,
+            R.drawable.posticon_128514,
+            R.drawable.posticon_128517,
+            R.drawable.posticon_128521,
+            R.drawable.posticon_128522,
+            R.drawable.posticon_128525,
+            R.drawable.posticon_128526,
+            R.drawable.posticon_128528,
+            R.drawable.posticon_128557,
+            R.drawable.posticon_128580,
+            R.drawable.posticon_128591,
+            R.drawable.posticon_129300,
+            R.drawable.posticon_129314,
+            R.drawable.posticon_129315,
+            R.drawable.posticon_9996,
+    };
+
     static ArrayList<Comment> turnMapsIntoListOfComments(ArrayList<HashMap> mapList) {
         ArrayList<Comment> comments = new ArrayList<>();
 
@@ -133,106 +159,18 @@ public class Utils {
     }
 
     static BitmapDescriptor getPostIconBitmapDescriptor(int code, Context context) {
-        switch (code) {
-            case 127867:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_127867, context));
-            case 127881:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_127881, context));
-            case 128064:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128064, context));
-            case 128076:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128076, context));
-            case 128077:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128077, context));
-            case 128078:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128078, context));
-            case 128293:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128293, context));
-            case 128405:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128405, context));
-            case 128514:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128514, context));
-            case 128517:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128517, context));
-            case 128521:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128521, context));
-            case 128522:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128522, context));
-            case 128525:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128525, context));
-            case 128526:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128526, context));
-            case 128528:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128528, context));
-            case 128557:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128557, context));
-            case 128580:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128580, context));
-            case 128591:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_128591, context));
-            case 129300:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_129300, context));
-            case 129314:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_129314, context));
-            case 129315:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_129315, context));
-            case 9996:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_9996, context));
-            case 0:
-            default:
-                return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_default, context));
+        if (code < 0 || code >= iconIds.length) {
+            return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_default, context));
+        } else {
+            return BitmapDescriptorFactory.fromBitmap(getBitmap(iconIds[code], context));
         }
     }
 
     static Bitmap getPostIconBitmap(int code, Context context) {
-        switch (code) {
-            case 127867:
-                return getBitmap(R.drawable.posticon_127867, context);
-            case 127881:
-                return getBitmap(R.drawable.posticon_127881, context);
-            case 128064:
-                return getBitmap(R.drawable.posticon_128064, context);
-            case 128076:
-                return getBitmap(R.drawable.posticon_128076, context);
-            case 128077:
-                return getBitmap(R.drawable.posticon_128077, context);
-            case 128078:
-                return getBitmap(R.drawable.posticon_128078, context);
-            case 128293:
-                return getBitmap(R.drawable.posticon_128293, context);
-            case 128405:
-                return getBitmap(R.drawable.posticon_128405, context);
-            case 128514:
-                return getBitmap(R.drawable.posticon_128514, context);
-            case 128517:
-                return getBitmap(R.drawable.posticon_128517, context);
-            case 128521:
-                return getBitmap(R.drawable.posticon_128521, context);
-            case 128522:
-                return getBitmap(R.drawable.posticon_128522, context);
-            case 128525:
-                return getBitmap(R.drawable.posticon_128525, context);
-            case 128526:
-                return getBitmap(R.drawable.posticon_128526, context);
-            case 128528:
-                return getBitmap(R.drawable.posticon_128528, context);
-            case 128557:
-                return getBitmap(R.drawable.posticon_128557, context);
-            case 128580:
-                return getBitmap(R.drawable.posticon_128580, context);
-            case 128591:
-                return getBitmap(R.drawable.posticon_128591, context);
-            case 129300:
-                return getBitmap(R.drawable.posticon_129300, context);
-            case 129314:
-                return getBitmap(R.drawable.posticon_129314, context);
-            case 129315:
-                return getBitmap(R.drawable.posticon_129315, context);
-            case 9996:
-                return getBitmap(R.drawable.posticon_9996, context);
-            case 0:
-            default:
-                return getBitmap(R.drawable.posticon_default, context);
+        if (code < 0 || code >= iconIds.length) {
+            return getBitmap(R.drawable.posticon_default, context);
+        } else {
+            return getBitmap(iconIds[code], context);
         }
     }
 

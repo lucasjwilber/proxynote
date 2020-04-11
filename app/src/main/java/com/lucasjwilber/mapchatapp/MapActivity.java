@@ -90,7 +90,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     SharedPreferences sharedPreferences;
     private List<Marker> postMarkers;
     private Handler periodicLocationUpdateHandler;
-    private boolean userIsEmailVerified;
     private Handler emailVerificationCheckRunnable;
     private HashSet<String> postSet;
 

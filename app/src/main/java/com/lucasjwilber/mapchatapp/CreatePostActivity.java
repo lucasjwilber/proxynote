@@ -556,6 +556,7 @@ public class CreatePostActivity extends AppCompatActivity {
             icons = new Drawable[]{
                     context.getDrawable(R.drawable.posticon_127867),
                     context.getDrawable(R.drawable.posticon_127881),
+                    context.getDrawable(R.drawable.posticon_128021),
                     context.getDrawable(R.drawable.posticon_128064),
                     context.getDrawable(R.drawable.posticon_128076),
                     context.getDrawable(R.drawable.posticon_128077),
@@ -608,77 +609,82 @@ public class CreatePostActivity extends AppCompatActivity {
                 holder.imageView.setBackground(getDrawable(R.drawable.postoutline_accent));
             }
 
-            switch (position) {
-                case 0:
-                    holder.imageView.setTag(127867);
-                    break;
-                case 1:
-                    holder.imageView.setTag(127881);
-                    break;
-                case 2:
-                    holder.imageView.setTag(128064);
-                    break;
-                case 3:
-                    holder.imageView.setTag(128076);
-                    break;
-                case 4:
-                    holder.imageView.setTag(128077);
-                    break;
-                case 5:
-                    holder.imageView.setTag(128078);
-                    break;
-                case 6:
-                    holder.imageView.setTag(128293);
-                    break;
-                case 7:
-                    holder.imageView.setTag(128405);
-                    break;
-                case 8:
-                    holder.imageView.setTag(128514);
-                    break;
-                case 9:
-                    holder.imageView.setTag(128517);
-                    break;
-                case 10:
-                    holder.imageView.setTag(128521);
-                    break;
-                case 11:
-                    holder.imageView.setTag(128522);
-                    break;
-                case 12:
-                    holder.imageView.setTag(128525);
-                    break;
-                case 13:
-                    holder.imageView.setTag(128526);
-                    break;
-                case 14:
-                    holder.imageView.setTag(128528);
-                    break;
-                case 15:
-                    holder.imageView.setTag(128557);
-                    break;
-                case 16:
-                    holder.imageView.setTag(128580);
-                    break;
-                case 17:
-                    holder.imageView.setTag(128591);
-                    break;
-                case 18:
-                    holder.imageView.setTag(129300);
-                    break;
-                case 19:
-                    holder.imageView.setTag(129314);
-                    break;
-                case 20:
-                    holder.imageView.setTag(129315);
-                    break;
-                case 21:
-                    holder.imageView.setTag(9996);
-                    break;
-                default:
-                    holder.imageView.setTag(0);
-                    break;
-            }
+            holder.imageView.setTag(position);
+
+//            switch (position) {
+//                case 0:
+//                    holder.imageView.setTag(127867);
+//                    break;
+//                case 1:
+//                    holder.imageView.setTag(127881);
+//                    break;
+//                case 2:
+//                    holder.imageView.setTag(128021);
+//                    break;
+//                case 2:
+//                    holder.imageView.setTag(128064);
+//                    break;
+//                case 3:
+//                    holder.imageView.setTag(128076);
+//                    break;
+//                case 4:
+//                    holder.imageView.setTag(128077);
+//                    break;
+//                case 5:
+//                    holder.imageView.setTag(128078);
+//                    break;
+//                case 6:
+//                    holder.imageView.setTag(128293);
+//                    break;
+//                case 7:
+//                    holder.imageView.setTag(128405);
+//                    break;
+//                case 8:
+//                    holder.imageView.setTag(128514);
+//                    break;
+//                case 9:
+//                    holder.imageView.setTag(128517);
+//                    break;
+//                case 10:
+//                    holder.imageView.setTag(128521);
+//                    break;
+//                case 11:
+//                    holder.imageView.setTag(128522);
+//                    break;
+//                case 12:
+//                    holder.imageView.setTag(128525);
+//                    break;
+//                case 13:
+//                    holder.imageView.setTag(128526);
+//                    break;
+//                case 14:
+//                    holder.imageView.setTag(128528);
+//                    break;
+//                case 15:
+//                    holder.imageView.setTag(128557);
+//                    break;
+//                case 16:
+//                    holder.imageView.setTag(128580);
+//                    break;
+//                case 17:
+//                    holder.imageView.setTag(128591);
+//                    break;
+//                case 18:
+//                    holder.imageView.setTag(129300);
+//                    break;
+//                case 19:
+//                    holder.imageView.setTag(129314);
+//                    break;
+//                case 20:
+//                    holder.imageView.setTag(129315);
+//                    break;
+//                case 21:
+//                    holder.imageView.setTag(9996);
+//                    break;
+//                default:
+//                    holder.imageView.setTag(0);
+//                    break;
+//            }
         }
 
         @Override
