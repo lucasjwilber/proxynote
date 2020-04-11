@@ -64,7 +64,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private FirebaseUser user;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private StorageReference storageRef;
-    private String userCurrentAddress;
+//    private String userCurrentAddress;
     private Bitmap currentImage;
     private Uri currentVideo;
     private Bitmap currentVideoThumbnail;
