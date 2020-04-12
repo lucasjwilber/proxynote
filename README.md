@@ -14,6 +14,7 @@ Lucas Wilber
 ##Acknowledgments
 * Wikimedia Commons for emoji SVGs: https://commons.wikimedia.org/wiki/Emoji
 * remove.bg for help making the logo
+* trello.com for project planning and management
 * Google's Android and Firebase developer documentation
 * TheLittleNaruto for custom Toast info: https://stackoverflow.com/questions/11288475/custom-toast-on-android-a-simple-example
 * grantespo for VideoView info: https://stackoverflow.com/questions/37865482/firebase-storage-video-streaming
