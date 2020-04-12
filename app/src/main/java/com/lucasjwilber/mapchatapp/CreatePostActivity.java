@@ -9,13 +9,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -128,51 +126,10 @@ public class CreatePostActivity extends AppCompatActivity {
                         userLng = location.getLongitude();
                         Log.i(TAG, "lat: " + userLat + "\nlong: " + userLng);
 
-
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
 
-                                //get formatted address
-                                String formattedAddress = "somewhere";
-                                {
-//                                Log.i(TAG, "calling geocode api...");
-//                                try {
-//                                    URL url = new URL("https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
-//                                            userLat +
-//                                            "," +
-//                                            userLng +
-//                                            "&key=" +
-//                                            getResources().getString(R.string.google_geocode_key));
-//
-//                                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-//                                    con.setRequestMethod("GET");
-//                                    Log.i(TAG, "called api, reading response...");
-//                                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-//                                    String line;
-//                                    StringBuilder content = new StringBuilder();
-//                                    while ((line = in.readLine()) != null) {
-//                                        content.append(line);
-//                                        if (line.contains("formatted_address")) {
-//                                            formattedAddress = line.split("\" : \"")[1];
-//                                            formattedAddress = formattedAddress.substring(0, formattedAddress.length() - 2);
-//                                            Log.i(TAG, "found formatted addresss: " + formattedAddress);
-//                                            break;
-//                                        }
-//                                    }
-//                                    Log.i(TAG, content.toString());
-//                                    Log.i(TAG, "formatted address is " + formattedAddress);
-//                                    in.close();
-//                                    con.disconnect();
-//
-//                                } catch (MalformedURLException e) {
-//                                    Log.e(TAG, "malformedURLexception:\n" + e.toString());
-//                                } catch (ProtocolException e) {
-//                                    Log.e(TAG, "protocol exception:\n" + e.toString());
-//                                } catch (IOException e) {
-//                                    Log.e(TAG, "IO exception:\n" + e.toString());
-//                                }
-                                }
                                 postAndImageId = UUID.randomUUID().toString();
 
                                 Post post = new Post(
@@ -181,7 +138,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                         user.getDisplayName(),
                                         postTitle,
                                         postBody,
-                                        formattedAddress,
+                                        "somewhere",
                                         userLat,
                                         userLng);
                                 post.setIcon(selectedIcon);
@@ -430,7 +387,6 @@ public class CreatePostActivity extends AppCompatActivity {
             if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
 
                 // Create the File where the photo should go
-//                File videoFile = null;
                 try {
                     videoFile = createMediaFile(requestCode);
                 } catch (IOException ex) {

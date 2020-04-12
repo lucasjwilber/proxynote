@@ -44,8 +44,6 @@ public class Post {
         this.comments = new ArrayList<>();
         this.votes = new HashMap<>();
         votes.put(userId, 1);
-
-        //if link or icon were selected, set them in the create post method before uploading the object
     }
 
     public String getVideoThumbnailUrl() {

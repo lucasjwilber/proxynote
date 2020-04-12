@@ -75,7 +75,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private double userLng;
     private Marker userMarker;
     private LatLngBounds cameraBounds;
-//    private String userCurrentAddress = "somewhere";
     private BitmapDescriptor userMarkerIcon;
     private BitmapDescriptor postOutlineYellow;
     private BitmapDescriptor postOutlineYellowOrange;

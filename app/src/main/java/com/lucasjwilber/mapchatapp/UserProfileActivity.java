@@ -6,19 +6,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -43,26 +39,20 @@ public class UserProfileActivity extends AppCompatActivity {
     private ActivityUserProfileBinding binding;
     private RecyclerView.Adapter postDescriptorsRvAdapter;
     private RecyclerView.LayoutManager postDescriptorsRvLayoutManager;
-    private ViewGroup.LayoutParams PDVlayoutParams;
     private RecyclerView.Adapter postRvAdapter;
     private ConstraintLayout selectedDV;
-    private Button selectedDVdeleteButton;
-    private Button selectedDVviewLocationButton;
     private String selectedPostId;
     private LatLng selectedPostLatLng;
     private boolean userIsOnTheirOwnProfile;
     private boolean aboutMeBeingEdited;
-    private boolean topRVisShrunk;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityUserProfileBinding.inflate(getLayoutInflater());
-        View view = binding.getRoot();
-        setContentView(view);
+        setContentView(binding.getRoot());
 
         binding.profileOnePostRv.setLayoutManager(new LinearLayoutManager(this));
-        PDVlayoutParams = binding.profileAllPostsRv.getLayoutParams();
 
         db = FirebaseFirestore.getInstance();
 
@@ -115,22 +105,18 @@ public class UserProfileActivity extends AppCompatActivity {
 
     //list of post descriptors RV:
     public class PostSelectAdapter extends RecyclerView.Adapter<PostSelectAdapter.PostTitleViewholder> {
-
         List<PostDescriptor> userPostDescriptors;
 
         public PostSelectAdapter(List<PostDescriptor> userPostDescriptors) {
             this.userPostDescriptors = userPostDescriptors;
         }
 
-
         public class PostTitleViewholder extends RecyclerView.ViewHolder {
             ConstraintLayout constraintLayout;
-
             PostTitleViewholder(ConstraintLayout view) {
                 super(view);
                 constraintLayout = view;
             }
-
         }
 
         @Override
@@ -150,19 +136,14 @@ public class UserProfileActivity extends AppCompatActivity {
             String title = pd.getTitle();
             int icon = pd.getIcon();
             long time = pd.getTimestamp();
-            String location = pd.getLocation();
             holder.constraintLayout.setTag(new LatLng(pd.getLat(), pd.getLng()));
 
             ImageView iconView = holder.constraintLayout.findViewById(R.id.postdescriptorIcon);
             TextView scoreView = holder.constraintLayout.findViewById(R.id.postdescriptorScore);
-            TextView timeAndLocationView = holder.constraintLayout.findViewById(R.id.postdescriptorTimeAndLocation);
+            TextView timeView = holder.constraintLayout.findViewById(R.id.postdescriptorTimeAndLocation);
             TextView titleView = holder.constraintLayout.findViewById(R.id.postdescriptorTitle);
-//            Button deleteButton = holder.constraintLayout.findViewById(R.id.deletePostButton);
-//            Button viewLocationButton = holder.constraintLayout.findViewById(R.id.viewOnMapButton);
-//            viewLocationButton.setOnClickListener(v -> onViewLocationClicked(pd.getLat(), pd.getLng()));
             ConstraintLayout cl = holder.constraintLayout;
-//            holder.constraintLayout.setOnClickListener(v -> onPostDescriptorClicked(cl, position, deleteButton, viewLocationButton));
-            holder.constraintLayout.setOnClickListener(v -> onPostDescriptorClicked(cl, position));
+            holder.constraintLayout.setOnClickListener(v -> onPostDescriptorClicked(cl));
 
             iconView.setImageBitmap(Utils.getPostIconBitmap(icon, getApplicationContext()));
             if (score >= 20) {
@@ -180,10 +161,9 @@ public class UserProfileActivity extends AppCompatActivity {
             }
 
             scoreView.setText(Integer.toString(score));
-            // location removed pending geocode implementation
             SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d, h:mm a", Locale.US);
-            String timeAndLocationText = sdf.format(new Date(time));
-            timeAndLocationView.setText(timeAndLocationText);
+            String timeText = sdf.format(new Date(time));
+            timeView.setText(timeText);
             titleView.setText(title);
 
             holder.constraintLayout.setTag(pd.getId());
@@ -194,19 +174,7 @@ public class UserProfileActivity extends AppCompatActivity {
             return userPostDescriptors.size();
         }
 
-        public void onPostDescriptorClicked(ConstraintLayout cl, int position) {
-            //don't load the same post again
-//            if (selectedDV == cl) return;
-
-//            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//                PDVlayoutParams.height = 250;
-//            } else {
-//                PDVlayoutParams.height = 500;
-//            }
-
-//            binding.profileAllPostsRv.setLayoutParams(PDVlayoutParams);
-//            if (!topRVisShrunk) binding.profileAllPostsRv.scrollToPosition(position);
-//            topRVisShrunk = true;
+        public void onPostDescriptorClicked(ConstraintLayout cl) {
 
             Log.i(TAG, "clicked on post " + cl.getTag());
             selectedPostId = cl.getTag().toString();
@@ -221,17 +189,11 @@ public class UserProfileActivity extends AppCompatActivity {
 
             if (selectedDV != null) {
                 selectedDV.setBackgroundColor(getResources().getColor(R.color.white));
-//                selectedDVdeleteButton.setVisibility(View.GONE);
-//                selectedDVviewLocationButton.setVisibility(View.GONE);
             }
             selectedDV = cl;
-//            selectedDVdeleteButton = deleteButton;
-//            selectedDVviewLocationButton = viewLocationButton;
             cl.setBackgroundColor(getResources().getColor(R.color.lightgray));
 
-//            viewLocationButton.setVisibility(View.VISIBLE);
             if (userIsOnTheirOwnProfile) {
-//                deleteButton.setVisibility(View.VISIBLE);
                 binding.profDeletePostBtn.setVisibility(View.VISIBLE);
             }
             db.collection("posts")
@@ -245,7 +207,6 @@ public class UserProfileActivity extends AppCompatActivity {
                         post.setComments(Utils.turnMapsIntoListOfComments(list));
                         selectedPostLatLng = new LatLng(post.getLat(), post.getLng());
 
-//                            cachedPosts.put(selectedPostId, post);
                         postRvAdapter = new PostRvAdapter(
                                 post,
                                 UserProfileActivity.this,
@@ -269,7 +230,6 @@ public class UserProfileActivity extends AppCompatActivity {
                         }
 
                         binding.profileOnePostRv.setAdapter(postRvAdapter);
-//                        binding.profileOnePostRv.setBackground(getResources().getDrawable(R.drawable.rounded_square_black));
                         binding.profileOnePostRv.setVisibility(View.VISIBLE);
                         binding.postRvProgressBar.setVisibility(View.GONE);
 
@@ -278,7 +238,6 @@ public class UserProfileActivity extends AppCompatActivity {
                         Log.i(TAG, "error getting post: " + e.toString());
                         binding.postRvProgressBar.setVisibility(View.GONE);
                     });
-//            }
         }
 
     }
@@ -410,13 +369,6 @@ public class UserProfileActivity extends AppCompatActivity {
         }
     }
 
-//    public void onViewLocationClicked(double lat, double lng) {
-//        Intent goToMapOnLocation = new Intent(UserProfileActivity.this, MapActivity.class);
-//        goToMapOnLocation.putExtra("lat", lat);
-//        goToMapOnLocation.putExtra("lng", lng);
-//        Log.i(TAG, "sending " + lat + "/" + lng);
-//        startActivity(goToMapOnLocation);
-//    }
     public void onViewLocationClicked(View v) {
         Intent goToMapOnLocation = new Intent(UserProfileActivity.this, MapActivity.class);
         goToMapOnLocation.putExtra("lat", selectedPostLatLng.latitude);
