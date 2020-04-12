@@ -435,7 +435,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         goToFullScreenMedia.putExtra("type", type);
         goToFullScreenMedia.putExtra("url", url);
         goToFullScreenMedia.putExtra("title", title);
-        goToFullScreenMedia.putExtra("videoThumbnail", videoThumbnailUrl);
+        goToFullScreenMedia.putExtra("videoThumbnailUrl", videoThumbnailUrl);
         context.startActivity(goToFullScreenMedia);
     }
 

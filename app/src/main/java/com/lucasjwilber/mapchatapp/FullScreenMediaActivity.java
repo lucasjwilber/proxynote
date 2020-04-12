@@ -38,7 +38,7 @@ public class FullScreenMediaActivity extends AppCompatActivity {
 
         // load the image, or if it's a video load the thumbnail initially
         Glide.with(this)
-                .load((type != null && type.equals("image")) ? url : videoThumbnailUrl)
+                .load(type.equals("image") ? url : videoThumbnailUrl)
                 .listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -53,7 +53,7 @@ public class FullScreenMediaActivity extends AppCompatActivity {
                 .into(binding.fullSizeImage);
 
         // if it's a video load the video
-        if (type != null && type.equals("video")) {
+        if (type.equals("video")) {
             video = Uri.parse(url);
             VideoView vv = binding.fullScreenVideo;
             vv.setVideoURI(video);
