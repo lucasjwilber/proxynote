@@ -21,7 +21,7 @@ public class Utils {
     // re-ordering the recyclerview in the create post activity easier (they'll appear in the same order that they are in in
     // this array:
 
-    // WARNING: re-ordering these will change the icons for all posts retroactively!
+    // WARNING: re-ordering these will change the icons for all posts retroactively! add new icons to the end only.
     private static int[] iconIds = new int[] {
             R.drawable.posticon_127867,
             R.drawable.posticon_127881,

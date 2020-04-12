@@ -178,14 +178,15 @@ public class UserProfileActivity extends AppCompatActivity {
 
             Log.i(TAG, "clicked on post " + cl.getTag());
             selectedPostId = cl.getTag().toString();
-            binding.profileOnePostRv.setVisibility(View.GONE);
+            binding.profileOnePostRv.setAdapter(null);
+            binding.profPostRvContainer.setVisibility(View.VISIBLE);
+            binding.profPostRvButtons.setVisibility(View.VISIBLE);
+            binding.postRvProgressBar.setVisibility(View.VISIBLE);
+
             binding.aboutMeLayout.setVisibility(View.INVISIBLE);
             binding.allPostsLabel.setVisibility(View.INVISIBLE);
             binding.aboutMeEditBtn.setVisibility(View.INVISIBLE);
             binding.closeUserProfile.setVisibility(View.INVISIBLE);
-            binding.profPostRvContainer.setVisibility(View.VISIBLE);
-            binding.profPostRvButtons.setVisibility(View.VISIBLE);
-            binding.postRvProgressBar.setVisibility(View.VISIBLE);
 
             if (selectedDV != null) {
                 selectedDV.setBackgroundColor(getResources().getColor(R.color.white));
