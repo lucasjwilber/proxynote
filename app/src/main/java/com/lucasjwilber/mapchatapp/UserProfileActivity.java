@@ -17,6 +17,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -47,6 +49,7 @@ public class UserProfileActivity extends AppCompatActivity {
     private Button selectedDVdeleteButton;
     private Button selectedDVviewLocationButton;
     private String selectedPostId;
+    private LatLng selectedPostLatLng;
     private boolean userIsOnTheirOwnProfile;
     private boolean aboutMeBeingEdited;
     private boolean topRVisShrunk;
@@ -154,11 +157,12 @@ public class UserProfileActivity extends AppCompatActivity {
             TextView scoreView = holder.constraintLayout.findViewById(R.id.postdescriptorScore);
             TextView timeAndLocationView = holder.constraintLayout.findViewById(R.id.postdescriptorTimeAndLocation);
             TextView titleView = holder.constraintLayout.findViewById(R.id.postdescriptorTitle);
-            Button deleteButton = holder.constraintLayout.findViewById(R.id.deletePostButton);
-            Button viewLocationButton = holder.constraintLayout.findViewById(R.id.viewOnMapButton);
-            viewLocationButton.setOnClickListener(v -> onViewLocationClicked(pd.getLat(), pd.getLng()));
+//            Button deleteButton = holder.constraintLayout.findViewById(R.id.deletePostButton);
+//            Button viewLocationButton = holder.constraintLayout.findViewById(R.id.viewOnMapButton);
+//            viewLocationButton.setOnClickListener(v -> onViewLocationClicked(pd.getLat(), pd.getLng()));
             ConstraintLayout cl = holder.constraintLayout;
-            holder.constraintLayout.setOnClickListener(v -> onPostDescriptorClicked(cl, position, deleteButton, viewLocationButton));
+//            holder.constraintLayout.setOnClickListener(v -> onPostDescriptorClicked(cl, position, deleteButton, viewLocationButton));
+            holder.constraintLayout.setOnClickListener(v -> onPostDescriptorClicked(cl, position));
 
             iconView.setImageBitmap(Utils.getPostIconBitmap(icon, getApplicationContext()));
             if (score >= 20) {
@@ -190,49 +194,56 @@ public class UserProfileActivity extends AppCompatActivity {
             return userPostDescriptors.size();
         }
 
-        public void onPostDescriptorClicked(ConstraintLayout cl, int position, Button deleteButton, Button viewLocationButton) {
+        public void onPostDescriptorClicked(ConstraintLayout cl, int position) {
             //don't load the same post again
-            if (selectedDV == cl) return;
+//            if (selectedDV == cl) return;
 
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                PDVlayoutParams.height = 250;
-            } else {
-                PDVlayoutParams.height = 500;
-            }
+//            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//                PDVlayoutParams.height = 250;
+//            } else {
+//                PDVlayoutParams.height = 500;
+//            }
 
-            binding.profileAllPostsRv.setLayoutParams(PDVlayoutParams);
-            if (!topRVisShrunk) binding.profileAllPostsRv.scrollToPosition(position);
-            topRVisShrunk = true;
+//            binding.profileAllPostsRv.setLayoutParams(PDVlayoutParams);
+//            if (!topRVisShrunk) binding.profileAllPostsRv.scrollToPosition(position);
+//            topRVisShrunk = true;
 
             Log.i(TAG, "clicked on post " + cl.getTag());
             selectedPostId = cl.getTag().toString();
             binding.profileOnePostRv.setVisibility(View.GONE);
+            binding.aboutMeLayout.setVisibility(View.INVISIBLE);
+            binding.allPostsLabel.setVisibility(View.INVISIBLE);
+            binding.aboutMeEditBtn.setVisibility(View.INVISIBLE);
+            binding.closeUserProfile.setVisibility(View.INVISIBLE);
+            binding.profPostRvContainer.setVisibility(View.VISIBLE);
+            binding.profPostRvButtons.setVisibility(View.VISIBLE);
             binding.postRvProgressBar.setVisibility(View.VISIBLE);
 
             if (selectedDV != null) {
                 selectedDV.setBackgroundColor(getResources().getColor(R.color.white));
-                selectedDVdeleteButton.setVisibility(View.GONE);
-                selectedDVviewLocationButton.setVisibility(View.GONE);
+//                selectedDVdeleteButton.setVisibility(View.GONE);
+//                selectedDVviewLocationButton.setVisibility(View.GONE);
             }
             selectedDV = cl;
-            selectedDVdeleteButton = deleteButton;
-            selectedDVviewLocationButton = viewLocationButton;
+//            selectedDVdeleteButton = deleteButton;
+//            selectedDVviewLocationButton = viewLocationButton;
             cl.setBackgroundColor(getResources().getColor(R.color.lightgray));
 
-            viewLocationButton.setVisibility(View.VISIBLE);
+//            viewLocationButton.setVisibility(View.VISIBLE);
             if (userIsOnTheirOwnProfile) {
-                deleteButton.setVisibility(View.VISIBLE);
+//                deleteButton.setVisibility(View.VISIBLE);
+                binding.profDeletePostBtn.setVisibility(View.VISIBLE);
             }
             db.collection("posts")
                     .document(selectedPostId)
                     .get()
                     .addOnSuccessListener(response -> {
-                        Log.i(TAG, "got post!");
                         Post post = response.toObject(Post.class);
                         assert post != null;
                         Log.i(TAG, "found post " + post.getId());
                         ArrayList list = (ArrayList) response.getData().get("comments");
                         post.setComments(Utils.turnMapsIntoListOfComments(list));
+                        selectedPostLatLng = new LatLng(post.getLat(), post.getLng());
 
 //                            cachedPosts.put(selectedPostId, post);
                         postRvAdapter = new PostRvAdapter(
@@ -242,8 +253,23 @@ public class UserProfileActivity extends AppCompatActivity {
                                 currentUser != null ? currentUser.getDisplayName() : null,
                                 thisProfileOwnerId,
                                 db);
+
+                        if (post.getScore() >= 20) {
+                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_red));
+                        } else if (post.getScore() >= 15) {
+                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_orangered));
+                        } else if (post.getScore() >= 10) {
+                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_orange));
+                        } else if (post.getScore() >= 5) {
+                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_yelloworange));
+                        } else if (post.getScore() <= -5) {
+                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_brown));
+                        } else {
+                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_yellow));
+                        }
+
                         binding.profileOnePostRv.setAdapter(postRvAdapter);
-                        binding.profileOnePostRv.setBackground(getResources().getDrawable(R.drawable.rounded_square_black));
+//                        binding.profileOnePostRv.setBackground(getResources().getDrawable(R.drawable.rounded_square_black));
                         binding.profileOnePostRv.setVisibility(View.VISIBLE);
                         binding.postRvProgressBar.setVisibility(View.GONE);
 
@@ -272,6 +298,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 .delete()
                 .addOnSuccessListener(result -> {
                     Log.i(TAG, "post deleted!");
+                    hidePostRv(null);
 
                     //delete post descriptor
                     db.collection("users")
@@ -383,12 +410,27 @@ public class UserProfileActivity extends AppCompatActivity {
         }
     }
 
-    public void onViewLocationClicked(double lat, double lng) {
+//    public void onViewLocationClicked(double lat, double lng) {
+//        Intent goToMapOnLocation = new Intent(UserProfileActivity.this, MapActivity.class);
+//        goToMapOnLocation.putExtra("lat", lat);
+//        goToMapOnLocation.putExtra("lng", lng);
+//        Log.i(TAG, "sending " + lat + "/" + lng);
+//        startActivity(goToMapOnLocation);
+//    }
+    public void onViewLocationClicked(View v) {
         Intent goToMapOnLocation = new Intent(UserProfileActivity.this, MapActivity.class);
-        goToMapOnLocation.putExtra("lat", lat);
-        goToMapOnLocation.putExtra("lng", lng);
-        Log.i(TAG, "sending " + lat + "/" + lng);
+        goToMapOnLocation.putExtra("lat", selectedPostLatLng.latitude);
+        goToMapOnLocation.putExtra("lng", selectedPostLatLng.longitude);
         startActivity(goToMapOnLocation);
+    }
+
+    public void hidePostRv(View v) {
+        binding.profPostRvContainer.setVisibility(View.GONE);
+        binding.profPostRvButtons.setVisibility(View.GONE);
+        binding.aboutMeLayout.setVisibility(View.VISIBLE);
+        binding.aboutMeEditBtn.setVisibility(View.VISIBLE);
+        binding.closeUserProfile.setVisibility(View.VISIBLE);
+        binding.allPostsLabel.setVisibility(View.VISIBLE);
     }
 
     public void onBackButtonClicked(View v) {

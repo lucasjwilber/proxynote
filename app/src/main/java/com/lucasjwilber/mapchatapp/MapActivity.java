@@ -392,6 +392,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             String text = "You must be logged in to post.";
             mapBinding.mapLoginSuggestion.setText(text);
             mapBinding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
+//            Utils.showToast(MapActivity.this, "You must be logged in to post.");
+//            //todo: flash menu button
             return;
         } else if (!currentUser.isEmailVerified()) {
             //reload and check again first

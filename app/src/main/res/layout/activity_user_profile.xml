@@ -44,7 +44,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="12dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="42dp"
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/rounded_square_black"
@@ -66,28 +66,179 @@
         app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
         app:layout_constraintTop_toTopOf="@+id/profileAllPostsRv" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/profileOnePostRv"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/profPostRvButtons"
+        android:layout_width="0dp"
+        android:layout_height="70dp"
+        android:animateLayoutChanges="true"
+        android:background="@color/darkgray"
+        android:clickable="true"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="4dp"
+            app:layout_constraintBottom_toBottomOf="@+id/profClosePostRvBtn"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <Button
+                android:id="@+id/profDeletePostBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:drawableTop="@drawable/delete"
+                android:onClick="onDeleteButtonClick"
+                android:text="delete"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                app:layout_constraintEnd_toStartOf="@+id/profViewOnMapBtn"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <Button
+                android:id="@+id/profViewOnMapBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackground"
+                android:drawableTop="@drawable/view_location"
+                android:onClick="onViewLocationClicked"
+                android:text="view on map"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <Button
+            android:id="@+id/profClosePostRvBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackground"
+            android:drawableTop="@drawable/close_x_accentcolor"
+            android:onClick="hidePostRv"
+            android:text="close"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/profPostRvContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="2dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/profileAllPostsRv"
-        app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
-        app:layout_constraintTop_toBottomOf="@+id/profileAllPostsRv" />
-
-    <ProgressBar
-        android:id="@+id/postRvProgressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
+        android:animateLayoutChanges="true"
+        android:background="#50000000"
+        android:clickable="true"
+        android:onClick="hidePostRv"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/profileOnePostRv"
-        app:layout_constraintEnd_toEndOf="@+id/profileOnePostRv"
-        app:layout_constraintStart_toStartOf="@+id/profileOnePostRv"
-        app:layout_constraintTop_toTopOf="@+id/profileOnePostRv" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profPostRvButtons"
+        tools:visibility="visible">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/profileOnePostRv"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/rounded_square_yellow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/postRvProgressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/profileOnePostRv"
+            app:layout_constraintEnd_toEndOf="@+id/profileOnePostRv"
+            app:layout_constraintStart_toStartOf="@+id/profileOnePostRv"
+            app:layout_constraintTop_toTopOf="@+id/profileOnePostRv" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/deletePostModal"
+            android:layout_width="354dp"
+            android:layout_height="211dp"
+            android:layout_margin="25dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_square_black_lightgrayfill"
+            android:clickable="true"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.491"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/confirm_delete"
+                android:textAlignment="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.19"
+                tools:text="Are you sure you want to delete this post?" />
+
+            <Button
+                android:id="@+id/yesDeleteButton"
+                android:layout_width="60dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="40dp"
+                android:background="@drawable/rounded_square_accentcolor"
+                android:onClick="yesDelete"
+                android:text="@string/yes"
+                android:textColor="@color/colorAccent"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/textView2"
+                app:layout_constraintTop_toBottomOf="@+id/textView2"
+                tools:text="Yes" />
+
+            <Button
+                android:id="@+id/noDeleteButton"
+                android:layout_width="60dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="40dp"
+                android:background="@drawable/rounded_square_accentcolor"
+                android:onClick="noDelete"
+                android:text="@string/no"
+                android:textColor="@color/colorAccent"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/textView2"
+                app:layout_constraintTop_toBottomOf="@+id/textView2"
+                tools:text="No" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:id="@+id/allPostsLabel"
@@ -111,60 +262,6 @@
         app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
         app:layout_constraintTop_toTopOf="@+id/profileAllPostsRv" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/deletePostModal"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="25dp"
-        android:visibility="gone"
-        android:background="@drawable/rounded_square_black"
-        app:layout_constraintBottom_toBottomOf="@+id/profileAllPostsRv"
-        app:layout_constraintEnd_toEndOf="@+id/profileAllPostsRv"
-        app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
-        app:layout_constraintTop_toTopOf="@+id/profileAllPostsRv">
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/confirm_delete"
-            android:textAlignment="center"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Are you sure you want to delete this post?" />
-
-        <Button
-            android:id="@+id/yesDeleteButton"
-            android:layout_width="60dp"
-            android:layout_height="30dp"
-            android:layout_marginStart="40dp"
-            android:background="@drawable/rounded_square_accentcolor"
-            android:onClick="yesDelete"
-            android:text="@string/yes"
-            android:textColor="@color/colorAccent"
-            android:textSize="15sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/textView2"
-            app:layout_constraintTop_toBottomOf="@+id/textView2"
-            tools:text="Yes" />
-
-        <Button
-            android:id="@+id/noDeleteButton"
-            android:layout_width="60dp"
-            android:layout_height="30dp"
-            android:layout_marginEnd="40dp"
-            android:background="@drawable/rounded_square_accentcolor"
-            android:onClick="noDelete"
-            android:text="@string/no"
-            android:textColor="@color/colorAccent"
-            android:textSize="15sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/textView2"
-            app:layout_constraintTop_toBottomOf="@+id/textView2"
-            tools:text="No" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
     <ProgressBar
         android:id="@+id/deletePostProgressBar"
         style="?android:attr/progressBarStyle"
@@ -182,6 +279,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="60dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="60dp"
         android:paddingBottom="6dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -206,7 +304,7 @@
             android:background="@drawable/rounded_square_black"
             android:imeOptions="actionDone"
             android:inputType="textPersonName"
-            android:maxLength="60"
+            android:maxLength="120"
             android:textSize="16sp"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
