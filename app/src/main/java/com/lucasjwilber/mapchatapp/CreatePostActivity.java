@@ -63,7 +63,6 @@ public class CreatePostActivity extends AppCompatActivity {
     private FirebaseUser user;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private StorageReference storageRef;
-//    private String userCurrentAddress;
     private Bitmap currentImage;
     private Uri currentVideo;
     private Bitmap currentVideoThumbnail;
@@ -502,36 +501,11 @@ public class CreatePostActivity extends AppCompatActivity {
 
     public class IconSelectAdapter extends RecyclerView.Adapter<IconSelectAdapter.IconViewholder> {
 
-        //when adding new icons be sure to update onBindViewholder() below and getPostIcon() in Utils
-        private int[] icons = new int[]{
-                R.drawable.posticon_127867,
-                R.drawable.posticon_127881,
-                R.drawable.posticon_128021,
-                R.drawable.posticon_128064,
-                R.drawable.posticon_128076,
-                R.drawable.posticon_128077,
-                R.drawable.posticon_128078,
-                R.drawable.posticon_128293,
-                R.drawable.posticon_128405,
-                R.drawable.posticon_128514,
-                R.drawable.posticon_128517,
-                R.drawable.posticon_128521,
-                R.drawable.posticon_128522,
-                R.drawable.posticon_128525,
-                R.drawable.posticon_128526,
-                R.drawable.posticon_128528,
-                R.drawable.posticon_128557,
-                R.drawable.posticon_128580,
-                R.drawable.posticon_128591,
-                R.drawable.posticon_129300,
-                R.drawable.posticon_129314,
-                R.drawable.posticon_129315,
-                R.drawable.posticon_9996,
-        };
+        private int[] icons = Utils.getIcons();
 
-        public IconSelectAdapter() { }
+        IconSelectAdapter() { }
 
-        public class IconViewholder extends RecyclerView.ViewHolder {
+        class IconViewholder extends RecyclerView.ViewHolder {
             ImageView imageView;
             IconViewholder(ImageView view) {
                 super(view);
@@ -557,7 +531,6 @@ public class CreatePostActivity extends AppCompatActivity {
             if (iconSelected && selectedPosition == position) {
                 holder.imageView.setBackground(getDrawable(R.drawable.postoutline_accent));
             }
-
             holder.imageView.setTag(position);
         }
 

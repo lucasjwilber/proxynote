@@ -45,6 +45,8 @@ public class Utils {
             R.drawable.posticon_9996,
     };
 
+    static int[] getIcons() { return iconIds; }
+
     // since ImageViews require a bitmap while map markers require a bitmap descriptor, this returns a bitmap
     // if a bitmap descriptor is needed it is translated inline rather than using a separate function
     static Bitmap getPostIconBitmap(int code, Context context) {
