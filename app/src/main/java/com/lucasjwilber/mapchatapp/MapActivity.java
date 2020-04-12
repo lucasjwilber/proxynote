@@ -12,9 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -65,7 +62,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
-    private long postQueryLimit = 250;
+    private long postQueryLimit = 100;
     private FirebaseUser currentUser;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     private final int LOCATION_UPDATE_COOLDOWN = 30000;
@@ -107,13 +104,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postMarkers = new LinkedList<>();
         postSet = new HashSet<>();
 
-        userMarkerIcon = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.user_location_pin, MapActivity.this));
-        postOutlineYellow = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_yellow, MapActivity.this));
-        postOutlineYellowOrange = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_yelloworange, MapActivity.this));
-        postOutlineOrange = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_orange, MapActivity.this));
-        postOutlineOrangeRed = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_orangered, MapActivity.this));
-        postOutlineRed = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_red, MapActivity.this));
-        postOutlineBrown = BitmapDescriptorFactory.fromBitmap(Utils.getBitmap(R.drawable.postoutline_brown, MapActivity.this));
+        userMarkerIcon = Utils.getBitmapDescriptorFromSvg(R.drawable.user_location_pin, MapActivity.this);
+        postOutlineYellow = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yellow, MapActivity.this);
+        postOutlineYellowOrange = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yelloworange, MapActivity.this);
+        postOutlineOrange = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_orange, MapActivity.this);
+        postOutlineOrangeRed = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_orangered, MapActivity.this);
+        postOutlineRed = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_red, MapActivity.this);
+        postOutlineBrown = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_brown, MapActivity.this);
 
         db = FirebaseFirestore.getInstance();
         sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
@@ -506,7 +503,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .position(new LatLng(post.getLat(), post.getLng()))
                 .anchor(-0.4f, 1.575f)
                 .zIndex(zIndex + 1f)
-                .icon(Utils.getPostIconBitmapDescriptor(post.getIcon(), this))
+                .icon(BitmapDescriptorFactory.fromBitmap(Utils.getPostIconBitmap(post.getIcon(), this)))
         );
         iconMarker.setTag(post.getId());
 

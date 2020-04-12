@@ -67,7 +67,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private Bitmap currentImage;
     private Uri currentVideo;
     private Bitmap currentVideoThumbnail;
-    private int selectedIcon = -1;
+    private int selectedIcon = -1;  // this is the code for the default icon
     private ImageView selectedIconView;
     private boolean iconSelected;
     private int selectedPosition;

@@ -16,6 +16,9 @@ import java.util.HashMap;
 
 public class Utils {
 
+    // the name is the unicode translated to decimal. this was originally done to allow me to store these names as primitives
+    // but i've since then refactored the Post icon field value to represent the index of the icon in this array, which makes
+    // re-ordering the recyclerview in the create post activity easier.
     private static int[] iconIds = new int[] {
             R.drawable.posticon_127867,
             R.drawable.posticon_127881,
@@ -41,6 +44,34 @@ public class Utils {
             R.drawable.posticon_129315,
             R.drawable.posticon_9996,
     };
+
+    // since ImageViews require a bitmap while map markers require a bitmap descriptor, this returns a bitmap
+    // if a bitmap descriptor is needed it is translated inline rather than using a separate function
+    static Bitmap getPostIconBitmap(int code, Context context) {
+        Drawable drawable;
+        if (code < 0 || code > iconIds.length) {
+            drawable = context.getDrawable(R.drawable.posticon_default);
+        } else {
+            drawable = context.getDrawable(iconIds[code]);
+        }
+        Canvas canvas = new Canvas();
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
+    //this is used primarily to get the post outlines and user-location pin
+    static BitmapDescriptor getBitmapDescriptorFromSvg(int resourceId, Context context) {
+        Drawable drawable = context.getDrawable(resourceId);
+        Canvas canvas = new Canvas();
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
 
     static ArrayList<Comment> turnMapsIntoListOfComments(ArrayList<HashMap> mapList) {
         ArrayList<Comment> comments = new ArrayList<>();
@@ -148,33 +179,7 @@ public class Utils {
         }
     }
 
-    static Bitmap getBitmap(int drawableRes, Context context) {
-        Drawable drawable = context.getResources().getDrawable(drawableRes);
-        Canvas canvas = new Canvas();
-        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        canvas.setBitmap(bitmap);
-        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-        drawable.draw(canvas);
-        return bitmap;
-    }
-
-    static BitmapDescriptor getPostIconBitmapDescriptor(int code, Context context) {
-        if (code < 0 || code >= iconIds.length) {
-            return BitmapDescriptorFactory.fromBitmap(getBitmap(R.drawable.posticon_default, context));
-        } else {
-            return BitmapDescriptorFactory.fromBitmap(getBitmap(iconIds[code], context));
-        }
-    }
-
-    static Bitmap getPostIconBitmap(int code, Context context) {
-        if (code < 0 || code >= iconIds.length) {
-            return getBitmap(R.drawable.posticon_default, context);
-        } else {
-            return getBitmap(iconIds[code], context);
-        }
-    }
-
-    public static void showToast(Context context, String message) {
+    static void showToast(Context context, String message) {
         Toast toast = Toast.makeText(context,
                 message,
                 Toast.LENGTH_SHORT);
