@@ -1,44 +1,33 @@
 package com.lucasjwilber.mapchatapp;
 
-//the purpose of this class is to provide a link between posts and users without nesting all posts in users
+// the purpose of this class is to provide a link between posts and users without nesting all posts in users.
+// it also makes the query used for populating a user's profile more lightweight
 
 public class PostDescriptor {
-    String id;
+    public String id;
+    private boolean isAnonymous;
     private String title;
     private long timestamp;
     private int score;
     private int icon;
-    private String location;
-    private double lat;
-    private double lng;
 
     public PostDescriptor() {};
 
-    public PostDescriptor(String id, String title, long timestamp, int score, int icon, String location, double lat, double lng) {
+    public PostDescriptor(String id, boolean isAnonymous, String title, long timestamp, int score, int icon) {
         this.id = id;
+        this.isAnonymous = isAnonymous;
         this.title = title;
         this.timestamp = timestamp;
         this.score = score;
         this.icon = icon;
-        this.location = location;
-        this.lat = lat;
-        this.lng = lng;
     }
 
-    public double getLat() {
-        return lat;
+    public boolean isAnonymous() {
+        return isAnonymous;
     }
 
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
-
-    public double getLng() {
-        return lng;
-    }
-
-    public void setLng(double lng) {
-        this.lng = lng;
+    public void setAnonymous(boolean anonymous) {
+        isAnonymous = anonymous;
     }
 
     public String getId() {
@@ -79,13 +68,5 @@ public class PostDescriptor {
 
     public void setIcon(int icon) {
         this.icon = icon;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
     }
 }

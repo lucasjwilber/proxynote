@@ -129,7 +129,7 @@
         android:id="@+id/cameraButton"
         android:layout_width="45dp"
         android:layout_height="45dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginEnd="64dp"
         android:background="@drawable/rounded_square_filled_accentcolor"
         android:drawableStart="@drawable/camera"
         android:onClick="onMediaButtonClicked"
@@ -139,14 +139,13 @@
         app:layout_constraintBottom_toBottomOf="@+id/postSubmitButton"
         app:layout_constraintEnd_toStartOf="@+id/postSubmitButton"
         app:layout_constraintTop_toTopOf="@+id/postSubmitButton"
-        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintVertical_bias="0.6"
         app:srcCompat="@color/colorAccent" />
 
     <Button
         android:id="@+id/videoButton"
         android:layout_width="45dp"
         android:layout_height="45dp"
-        android:layout_marginStart="20dp"
         android:background="@drawable/rounded_square_filled_accentcolor"
         android:drawableStart="@drawable/video"
         android:onClick="onMediaButtonClicked"
@@ -154,14 +153,15 @@
         android:paddingTop="2dp"
         android:paddingBottom="2dp"
         app:layout_constraintBottom_toBottomOf="@+id/postSubmitButton"
-        app:layout_constraintStart_toEndOf="@+id/postSubmitButton"
+        app:layout_constraintEnd_toStartOf="@+id/postSubmitButton"
+        app:layout_constraintStart_toEndOf="@+id/cameraButton"
         app:layout_constraintTop_toTopOf="@+id/postSubmitButton"
         app:layout_constraintVertical_bias="0.5"
         app:srcCompat="@color/colorAccent" />
 
     <Button
         android:id="@+id/postSubmitButton"
-        android:layout_width="120dp"
+        android:layout_width="100dp"
         android:layout_height="50dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/rounded_square_filled_accentcolor"
@@ -170,8 +170,7 @@
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/postBodyEditText"
         app:layout_constraintTop_toBottomOf="@+id/postBodyEditText" />
 
     <TextView
@@ -194,5 +193,15 @@
         app:layout_constraintStart_toStartOf="@+id/postTitleEditText"
         app:layout_constraintTop_toTopOf="@+id/postTitleEditText"
         tools:visibility="visible" />
+
+    <CheckBox
+        android:id="@+id/anonymousCheckbox"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:text="Anonymous"
+        app:layout_constraintBottom_toBottomOf="@+id/postSubmitButton"
+        app:layout_constraintStart_toStartOf="@+id/postBodyEditText"
+        app:layout_constraintTop_toTopOf="@+id/postSubmitButton"
+        app:layout_constraintVertical_bias="0.2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

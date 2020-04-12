@@ -103,9 +103,11 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 postScore.setText(postScoreText);
 
                 TextView postUsername = l.findViewById(R.id.postRvUsername);
-                postUsername.setText(post.getUsername());
-                //don't let users start a new userprofile activity for the profile they're already viewing
-                if (!post.getUserId().equals(profileOwnerId)) {
+                postUsername.setText(post.isAnonymous() ? "Anonymous" : post.getUsername());
+                //don't link to profile from anonymous posts
+                if (post.isAnonymous()) {
+                    postUsername.setTextColor(context.getResources().getColor(R.color.black));
+                } else {
                     postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
                 }
 

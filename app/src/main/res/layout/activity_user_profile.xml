@@ -37,6 +37,7 @@
             android:layout_marginBottom="10dp"
             android:textSize="20sp"
             tools:text="10" />
+
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -79,54 +80,43 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <Button
+            android:id="@+id/profViewOnMapBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginBottom="4dp"
-            app:layout_constraintBottom_toBottomOf="@+id/profClosePostRvBtn"
-            app:layout_constraintStart_toStartOf="parent">
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackground"
+            android:drawableTop="@drawable/view_location"
+            android:onClick="onViewLocationClicked"
+            android:text="@string/view_on_map"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <Button
-                android:id="@+id/profDeletePostBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="30dp"
-                android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
-                android:drawableTop="@drawable/delete"
-                android:onClick="onDeleteButtonClick"
-                android:text="@string/delete"
-                android:textColor="@color/white"
-                android:visibility="gone"
-                app:layout_constraintEnd_toStartOf="@+id/profViewOnMapBtn"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
-
-            <Button
-                android:id="@+id/profViewOnMapBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
-                android:drawableTop="@drawable/view_location"
-                android:onClick="onViewLocationClicked"
-                android:text="@string/view_on_map"
-                android:textColor="@color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/profDeletePostBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?android:attr/selectableItemBackground"
+            android:drawableTop="@drawable/delete"
+            android:onClick="onDeleteButtonClick"
+            android:text="@string/delete"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
 
         <Button
             android:id="@+id/profClosePostRvBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:layout_marginBottom="4dp"
             android:layout_weight="1"
             android:background="?android:attr/selectableItemBackground"
             android:drawableTop="@drawable/close_x_accentcolor"
@@ -136,6 +126,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

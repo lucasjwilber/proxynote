@@ -130,17 +130,19 @@ public class CreatePostActivity extends AppCompatActivity {
                             public void run() {
 
                                 postAndImageId = UUID.randomUUID().toString();
+                                String username = binding.anonymousCheckbox.isChecked() ? "Anonymous" : user.getDisplayName();
 
                                 Post post = new Post(
                                         postAndImageId,
                                         user.getUid(),
-                                        user.getDisplayName(),
+                                        username,
                                         postTitle,
                                         postBody,
                                         "somewhere",
                                         userLat,
                                         userLng);
                                 post.setIcon(selectedIcon);
+                                if (binding.anonymousCheckbox.isChecked()) post.setAnonymous(true);
 
                                 if (currentImage != null || currentVideo != null) {
                                     try {
@@ -264,13 +266,11 @@ public class CreatePostActivity extends AppCompatActivity {
                                     List<PostDescriptor> postDescriptors = user.getPostDescriptors();
                                     postDescriptors.add(new PostDescriptor(
                                             post.getId(),
+                                            post.isAnonymous(),
                                             post.getTitle(),
                                             post.getTimestamp(),
                                             post.getScore(),
-                                            post.getIcon(),
-                                            post.getLocation(),
-                                            post.getLat(),
-                                            post.getLng()
+                                            post.getIcon()
                                     ));
 
                                     db.collection("users")

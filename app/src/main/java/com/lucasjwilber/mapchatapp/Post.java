@@ -25,6 +25,7 @@ public class Post {
     private String videoUrl;
     private String videoThumbnailUrl;
     private String mediaStorageId;
+    private boolean anonymous;
 
     public Post() {};
 
@@ -44,6 +45,14 @@ public class Post {
         this.comments = new ArrayList<>();
         this.votes = new HashMap<>();
         votes.put(userId, 1);
+    }
+
+    public boolean isAnonymous() {
+        return anonymous;
+    }
+
+    public void setAnonymous(boolean anonymous) {
+        this.anonymous = anonymous;
     }
 
     public String getVideoThumbnailUrl() {

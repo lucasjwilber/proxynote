@@ -81,7 +81,15 @@ public class UserProfileActivity extends AppCompatActivity {
                                 (user.getTotalScore() == 1 || user.getTotalScore() == -1 ? " point)" : " points)");
                         binding.profileScore.setText(userScoreText);
                         binding.aboutMeTV.setText(user.getAboutme());
+
                         List<PostDescriptor> userPostDescriptors = user.getPostDescriptors();
+
+                        //don't show anonymous posts unless the owner is the one viewing
+                        if (!userIsOnTheirOwnProfile) {
+                            for (PostDescriptor pd : userPostDescriptors) {
+                                if (pd.isAnonymous()) userPostDescriptors.remove(pd);
+                            }
+                        }
 
                         if (userPostDescriptors == null || userPostDescriptors.size() == 0) {
                             Log.i(TAG, "user hasn't made any posts, or possibly doesn't have a postDescriptors list");
@@ -136,7 +144,6 @@ public class UserProfileActivity extends AppCompatActivity {
             String title = pd.getTitle();
             int icon = pd.getIcon();
             long time = pd.getTimestamp();
-            holder.constraintLayout.setTag(new LatLng(pd.getLat(), pd.getLng()));
 
             ImageView iconView = holder.constraintLayout.findViewById(R.id.postdescriptorIcon);
             TextView scoreView = holder.constraintLayout.findViewById(R.id.postdescriptorScore);
