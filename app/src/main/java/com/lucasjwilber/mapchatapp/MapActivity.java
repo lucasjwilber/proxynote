@@ -51,6 +51,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         PopupMenu.OnMenuItemClickListener,
@@ -62,7 +63,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
-    private long postQueryLimit = 100;
+    private long postQueryLimit = 50;
     private FirebaseUser currentUser;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     private final int LOCATION_UPDATE_COOLDOWN = 30000;
@@ -85,8 +86,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private boolean mapHasBeenSetUp;
     SharedPreferences sharedPreferences;
     private List<Marker> postMarkers;
+    private boolean areMarkersShown;
     private Handler periodicLocationUpdateHandler;
-    private Handler emailVerificationCheckRunnable;
     private HashSet<String> postSet;
 
     @Override
@@ -133,21 +134,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         } else {
             getUserLatLng(true);
         }
-
-        emailVerificationCheckRunnable = new Handler();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        //clear post markers
+        //clear posts and markers from memory
         postSet = new HashSet<>();
         for (Marker m : postMarkers) {
             m.remove();
         }
+
         startGetLocationLooper();
         if (mMap != null) getPostsFromDbAndCreateMapMarkers();
 
@@ -357,7 +356,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(finalLat, finalLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                     mMap.setMapType(sharedPreferences.getInt("mapType", GoogleMap.MAP_TYPE_HYBRID));
-                    // mMap.setMinZoomPreference(10f);
+                    mMap.setMinZoomPreference(6f);
 
                     if (userMarker != null) userMarker.remove();
                     userMarker = mMap.addMarker(new MarkerOptions()
@@ -426,25 +425,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void getPostsFromDbAndCreateMapMarkers() {
-        // get only posts within a certain radius of the user
-        Double latZone = Math.round(userLat * 10) / 10.0;
+        String latZoneSize = Utils.getLatZoneSize(cameraBounds.northeast.latitude, cameraBounds.southwest.latitude);
+        List<Double> latZonesToQuery = Utils.getLatQueryRange(cameraBounds.northeast.latitude, cameraBounds.southwest.latitude);
 
+        Log.i(TAG, "current zoom is " + mMap.getCameraPosition().zoom);
         db.collection("posts")
                 .whereLessThan("lng", cameraBounds.northeast.longitude)
                 .whereGreaterThan("lng", cameraBounds.southwest.longitude)
-                // firestore only allows one range query, so latitude is broken into zones and we get the closest ones with a logical OR
-                // the max is 10, we use 9 to make it symmetrical
-                // the range of 0.9 latitude is about 54 miles
-                .whereIn("latZone", Arrays.asList(
-                        latZone - 0.4f,
-                        latZone - 0.3f,
-                        latZone - 0.2f,
-                        latZone - 0.1f,
-                        latZone,
-                        latZone + 0.1f,
-                        latZone + 0.2f,
-                        latZone + 0.3f,
-                        latZone + 0.4f))
+                .whereIn(latZoneSize, latZonesToQuery)
                 .orderBy("lng")
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(postQueryLimit)
@@ -455,16 +443,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                                 Post post = Objects.requireNonNull(document.toObject(Post.class));
-
-                                // for whatever reason the Post created by document.toObject doesn't include the comments list
-                                // they are however present as an ArrayList of HashMaps
+                                Log.i(TAG, task.getResult().size() + "posts retrieved");
                                 ArrayList list = (ArrayList) document.getData().get("comments");
                                 post.setComments(Utils.turnMapsIntoListOfComments(list));
-
                                 if (!postSet.contains(post.getId())) {
                                     createMarkerWithPost(post);
                                     postSet.add(post.getId());
-                                    Log.i(TAG, "created marker for post " + post.getId());
                                 }
                             }
                         } else {
@@ -472,6 +456,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         }
                     }
                 });
+
     }
 
     public void createMarkerWithPost(Post post) {
@@ -513,7 +498,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     public void onMapClick(LatLng latlng) {
         hideAllModals();
-        emailVerificationCheckRunnable.removeCallbacksAndMessages(null);
     }
 
     private void hideAllModals() {
@@ -592,6 +576,41 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         Utils.showToast(MapActivity.this, "Verification email sent.");
                     });
         }
+    }
+
+    private void create900testPosts() {
+        //47.6264893
+        //long: -122.3582504
+        double lat = 47.6264893;
+        double lng = -122.3582504;
+
+        for (int i = 0; i < 30; i++) {
+            for (int j = 0; j < 30; j++) {
+                Post post = new Post(
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        UUID.randomUUID().toString(),
+                        lat,
+                        lng
+                );
+
+                lng += 0.01;
+
+                db.collection("posts")
+                        .add(post);
+            }
+            lat -= 0.01;
+            lng = -122.3582504;
+        }
+    }
+
+    public void toggleMarkerVisibility(View v) {
+        for (Marker marker : postMarkers) marker.setVisible(areMarkersShown);
+        v.setBackground(areMarkersShown ? getDrawable(R.drawable.visibility) : getDrawable(R.drawable.visibility_off));
+        areMarkersShown = !areMarkersShown;
     }
 
 }

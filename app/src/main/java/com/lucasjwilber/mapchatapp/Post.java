@@ -15,9 +15,10 @@ public class Post {
     private String location;
     private double lat;
     private double lng;
-    private double latZone;
-    private double lngZone;
-    private int icon;
+    private double smallLatZone;
+    private double mediumLatZone;
+    private double largeLatZone;
+    private int icon = -1;
     private int score;
     private ArrayList<Comment> comments;
     private HashMap<String, Integer> votes;
@@ -25,7 +26,7 @@ public class Post {
     private String videoUrl;
     private String videoThumbnailUrl;
     private String mediaStorageId;
-    private boolean anonymous;
+    private boolean isAnonymous;
 
     public Post() {};
 
@@ -38,8 +39,9 @@ public class Post {
         this.location = location;
         this.lat = lat;
         this.lng = lng;
-        this.latZone = Math.round(lat * 10) / 10.0;
-        this.lngZone = Math.round(lng * 10) / 10.0;
+        this.smallLatZone = Math.round(lat * 10) / 10.0; //eg 47.6
+        this.mediumLatZone = Math.round(lat); //eg 47
+        this.largeLatZone = Math.round(lat / 10) * 10; //eg 50
         this.timestamp = new Date().getTime();
         this.score = 1;
         this.comments = new ArrayList<>();
@@ -47,12 +49,28 @@ public class Post {
         votes.put(userId, 1);
     }
 
+    public double getMediumLatZone() {
+        return mediumLatZone;
+    }
+
+    public void setMediumLatZone(double mediumLatZone) {
+        this.mediumLatZone = mediumLatZone;
+    }
+
+    public double getLargeLatZone() {
+        return largeLatZone;
+    }
+
+    public void setLargeLatZone(double largeLatZone) {
+        this.largeLatZone = largeLatZone;
+    }
+
     public boolean isAnonymous() {
-        return anonymous;
+        return isAnonymous;
     }
 
     public void setAnonymous(boolean anonymous) {
-        this.anonymous = anonymous;
+        this.isAnonymous = anonymous;
     }
 
     public String getVideoThumbnailUrl() {
@@ -95,20 +113,12 @@ public class Post {
         this.votes = votes;
     }
 
-    public double getLatZone() {
-        return latZone;
+    public double getSmallLatZone() {
+        return smallLatZone;
     }
 
-    public void setLatZone(double latZone) {
-        this.latZone = latZone;
-    }
-
-    public double getLngZone() {
-        return lngZone;
-    }
-
-    public void setLngZone(double lngZone) {
-        this.lngZone = lngZone;
+    public void setSmallLatZone(double smallLatZone) {
+        this.smallLatZone = smallLatZone;
     }
 
     public String getId() {

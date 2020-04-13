@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -13,14 +14,16 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 public class Utils {
+
+    private static final String TAG = "ljw";
 
     // the name is the unicode translated to decimal. this was originally done to allow me to store these names as primitives
     // but i've since then refactored the Post icon field value to represent the index of the icon in this array, which makes
     // re-ordering the recyclerview in the create post activity easier (they'll appear in the same order that they are in in
     // this array:
-
     // WARNING: re-ordering these will change the icons for all posts retroactively! add new icons to the end only.
     private static int[] iconIds = new int[] {
             R.drawable.posticon_128514,
@@ -254,6 +257,93 @@ public class Utils {
         View toastView = toast.getView();
         toastView.setBackground(context.getResources().getDrawable(R.drawable.rounded_square_accentcolor));
         toast.show();
+    }
+
+    static String getLatZoneSize(double top, double bottom) {
+        double latHeight = Math.abs(top - bottom);
+        if (latHeight < 1) {
+            return "smallLatZone";
+        } else if (latHeight >= 1 && latHeight < 10) {
+            return "mediumLatZone";
+        } else {
+            return "largeLatZone";
+        }
+    }
+
+    static List<Double> getLatQueryRange(double top, double bottom) {
+        double centerOfScreenLat = Math.max(top, bottom)
+                - (Math.abs(top - bottom) / 2);
+        Log.i(TAG, "screen is centered on latitude " + centerOfScreenLat);
+
+        List<Double> latZonesToQuery = new ArrayList<>();
+
+        double latHeight = Math.abs(top - bottom);
+
+        // by default add the latZone we're in and the ones above and below,
+        // then add more based on the latitude boundaries of the screen
+        if (latHeight < 1) {
+            double smallLatZone = Math.round(centerOfScreenLat * 10) / 10.0;
+            latZonesToQuery.add(smallLatZone);
+            latZonesToQuery.add(smallLatZone - 0.1f);
+            latZonesToQuery.add(smallLatZone + 0.1f);
+
+            if (latHeight >= 0.2) {
+                latZonesToQuery.add(smallLatZone - 0.2f);
+                latZonesToQuery.add(smallLatZone + 0.2f);
+            }
+            if (latHeight >= 0.3) {
+                latZonesToQuery.add(smallLatZone - 0.3f);
+                latZonesToQuery.add(smallLatZone + 0.3f);
+            }
+            if (latHeight >= 0.4) {
+                latZonesToQuery.add(smallLatZone - 0.4f);
+                latZonesToQuery.add(smallLatZone + 0.4f);
+            }
+            Log.i(TAG, "using small latZones");
+        } else if (latHeight >= 1 && latHeight < 10) {
+            double mediumLatZone = Math.round(centerOfScreenLat);
+
+            latZonesToQuery.add(mediumLatZone);
+            latZonesToQuery.add(mediumLatZone - 1);
+            latZonesToQuery.add(mediumLatZone + 1);
+
+            if (latHeight >= 2) {
+                latZonesToQuery.add(mediumLatZone - 2);
+                latZonesToQuery.add(mediumLatZone + 2);
+            }
+            if (latHeight >= 3) {
+                latZonesToQuery.add(mediumLatZone - 3);
+                latZonesToQuery.add(mediumLatZone + 3);
+            }
+            if (latHeight >= 4) {
+                latZonesToQuery.add(mediumLatZone - 4);
+                latZonesToQuery.add(mediumLatZone + 4);
+            }
+            Log.i(TAG, "using medium latZones");
+        } else {
+            double largeLatZone = Math.round(centerOfScreenLat / 10) * 10;
+
+            latZonesToQuery.add(largeLatZone);
+            latZonesToQuery.add(largeLatZone - 10);
+            latZonesToQuery.add(largeLatZone + 10);
+
+            if (latHeight >= 20) {
+                latZonesToQuery.add(largeLatZone - 20);
+                latZonesToQuery.add(largeLatZone + 20);
+            }
+            if (latHeight >= 30) {
+                latZonesToQuery.add(largeLatZone - 30);
+                latZonesToQuery.add(largeLatZone + 30);
+            }
+            if (latHeight >= 40) {
+                latZonesToQuery.add(largeLatZone - 40);
+                latZonesToQuery.add(largeLatZone + 40);
+            }
+            Log.i(TAG, "using large latZones");
+        }
+
+        Log.i(TAG, "querying " + latZonesToQuery.size() + " latZones");
+        return latZonesToQuery;
     }
 
 }
