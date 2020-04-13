@@ -25,6 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
+            android:textColor="@color/darkgray"
             android:textSize="25sp"
             android:textStyle="bold"
             tools:text="username" />
@@ -35,6 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginBottom="10dp"
+            android:textColor="@color/darkgray"
             android:textSize="20sp"
             tools:text="10" />
 
@@ -283,6 +285,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
             android:layout_marginTop="6dp"
+            android:textColor="@color/darkgray"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

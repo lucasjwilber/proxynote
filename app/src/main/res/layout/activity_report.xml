@@ -50,6 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/spam"
+                android:textColor="@color/darkgray"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:layout_editor_absoluteX="29dp" />
 
@@ -58,6 +59,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/personal_information"
+                android:textColor="@color/darkgray"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:layout_editor_absoluteX="33dp" />
@@ -67,6 +69,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/threatening"
+                android:textColor="@color/darkgray"
                 tools:layout_editor_absoluteX="35dp"
                 tools:layout_editor_absoluteY="90dp" />
 
@@ -75,6 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/vulgar_or_offensive"
+                android:textColor="@color/darkgray"
                 tools:layout_editor_absoluteX="35dp"
                 tools:layout_editor_absoluteY="90dp" />
 
@@ -83,6 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/other"
+                android:textColor="@color/darkgray"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:layout_editor_absoluteX="134dp" />
@@ -94,6 +99,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="@string/additional_information"
+            android:textColor="@color/darkgray"
             app:layout_constraintStart_toStartOf="@+id/reportTypeRG"
             app:layout_constraintTop_toBottomOf="@+id/reportTypeRG" />
 
