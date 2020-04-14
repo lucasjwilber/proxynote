@@ -15,9 +15,9 @@ public class Post {
     private String location;
     private double lat;
     private double lng;
-    private double smallLatZone;
-    private double mediumLatZone;
-    private double largeLatZone;
+    private String smallZone;
+    private String mediumZone;
+    private String largeZone;
     private int icon = -1;
     private int score;
     private ArrayList<Comment> comments;
@@ -39,9 +39,9 @@ public class Post {
         this.location = location;
         this.lat = lat;
         this.lng = lng;
-        this.smallLatZone = Math.round(lat * 10) / 10.0; //eg 47.6
-        this.mediumLatZone = Math.round(lat); //eg 47
-        this.largeLatZone = Math.round(lat / 10) * 10; //eg 50
+        this.smallZone = Utils.getSmallZone(lat, lng); //eg 46.8
+        this.mediumZone = Utils.getMediumZone(lat, lng); //eg 47
+        this.largeZone = Utils.getLargeZone(lat, lng); //eg 50
         this.timestamp = new Date().getTime();
         this.score = 1;
         this.comments = new ArrayList<>();
@@ -49,20 +49,20 @@ public class Post {
         votes.put(userId, 1);
     }
 
-    public double getMediumLatZone() {
-        return mediumLatZone;
+    public String getMediumZone() {
+        return mediumZone;
     }
 
-    public void setMediumLatZone(double mediumLatZone) {
-        this.mediumLatZone = mediumLatZone;
+    public void setMediumZone(String mediumZone) {
+        this.mediumZone = mediumZone;
     }
 
-    public double getLargeLatZone() {
-        return largeLatZone;
+    public String getLargeZone() {
+        return largeZone;
     }
 
-    public void setLargeLatZone(double largeLatZone) {
-        this.largeLatZone = largeLatZone;
+    public void setLargeZone(String largeZone) {
+        this.largeZone = largeZone;
     }
 
     public boolean isAnonymous() {
@@ -113,12 +113,12 @@ public class Post {
         this.votes = votes;
     }
 
-    public double getSmallLatZone() {
-        return smallLatZone;
+    public String getSmallZone() {
+        return smallZone;
     }
 
-    public void setSmallLatZone(double smallLatZone) {
-        this.smallLatZone = smallLatZone;
+    public void setSmallZone(String smallZone) {
+        this.smallZone = smallZone;
     }
 
     public String getId() {

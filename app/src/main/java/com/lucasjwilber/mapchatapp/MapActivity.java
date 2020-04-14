@@ -88,7 +88,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private List<Marker> postMarkers;
     private boolean areMarkersShown;
     private Handler periodicLocationUpdateHandler;
-    private HashSet<String> postSet;
+    private HashSet<String> zoneQueryCache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +103,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postRv.setHasFixedSize(true);
         postRv.setLayoutManager(new LinearLayoutManager(this));
         postMarkers = new LinkedList<>();
-        postSet = new HashSet<>();
+        zoneQueryCache = new HashSet<>();
 
         userMarkerIcon = Utils.getBitmapDescriptorFromSvg(R.drawable.user_location_pin, MapActivity.this);
         postOutlineYellow = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yellow, MapActivity.this);
@@ -134,6 +134,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         } else {
             getUserLatLng(true);
         }
+
     }
 
     @Override
@@ -141,14 +142,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         super.onResume();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        //clear posts and markers from memory
-        postSet = new HashSet<>();
-        for (Marker m : postMarkers) {
-            m.remove();
-        }
-
         startGetLocationLooper();
-        if (mMap != null) getPostsFromDbAndCreateMapMarkers();
+        if (mMap != null) getZonesToQuery();
 
         // if the postRv is open, refresh it to prevent vote manipulation via out-of-date scores
         if (postRv.getVisibility() == View.VISIBLE) {
@@ -388,15 +383,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             mapBinding.mapLoginSuggestion.setText(text);
             mapBinding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
 //            Utils.showToast(MapActivity.this, "You must be logged in to post.");
-//            //todo: flash menu button
-            return;
+//            //todo: flash menu button]
         } else if (!currentUser.isEmailVerified()) {
             //reload and check again first
             currentUser.reload()
                 .addOnSuccessListener(r -> {
                     if (!currentUser.isEmailVerified()) {
                         Utils.showToast(MapActivity.this, "Please verify your email first.");
-                        return;
                     }
                 });
         } else {
@@ -408,32 +401,59 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onCameraIdle() {
         cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+        Log.i(TAG, "current zoom is " + mMap.getCameraPosition().zoom);
 
-        if (!postQueryIsOnCooldown) {
-            getPostsFromDbAndCreateMapMarkers();
-            postQueryIsOnCooldown = true;
-            Log.i(TAG, "post query is on cooldown");
-
-            Handler postQueryCooldownHandler = new Handler();
-            postQueryCooldownHandler.postDelayed(new Runnable() {
-                public void run() {
-                    postQueryIsOnCooldown = false;
-                    Log.i(TAG, "post query is off cooldown");
-                }
-            }, POST_QUERY_COOLDOWN);
-        }
+        getPosts();
     }
 
-    public void getPostsFromDbAndCreateMapMarkers() {
-        String latZoneSize = Utils.getLatZoneSize(cameraBounds.northeast.latitude, cameraBounds.southwest.latitude);
-        List<Double> latZonesToQuery = Utils.getLatQueryRange(cameraBounds.northeast.latitude, cameraBounds.southwest.latitude);
+    private void getPosts() {
+        String zoneType = Utils.getZoneSize(cameraBounds);
+        Log.i(TAG, "zoneType is " + zoneType);
+        List<String> zonesToQuery = getZonesToQuery();
 
-        Log.i(TAG, "current zoom is " + mMap.getCameraPosition().zoom);
+        Log.i(TAG, "querying " + zonesToQuery.size() + " zones");
+
+        //it's unlikely, but if there are more than 10 zones on screen we can only query 10 at a time:
+        if (zonesToQuery.size() > 10) {
+            String[] zones = (String[]) zonesToQuery.toArray();
+            //query 10 at a time:
+            while (zones.length > 10) {
+                Log.i(TAG, "there are more than 10 zones, querying 10 at a time...");
+                String[] nextTenZones = Arrays.copyOfRange(zones, 0, 9);
+                List<String> ntzAsList = Arrays.asList(nextTenZones);
+                queryAListOfZones(zoneType, ntzAsList);
+                zones = Arrays.copyOfRange(zones, 10, zones.length - 1);
+            }
+            //convert the remainder back to a list:
+            zonesToQuery = Arrays.asList(zones);
+        }
+
+        //query the (remaining) zones:
+        if (zonesToQuery.size() > 0) queryAListOfZones(zoneType, zonesToQuery);
+    }
+
+    private List<String> getZonesToQuery() {
+        //based on the screen boundaries, get a list of the actual zones to query
+        List<String> zonesOnScreen = Utils.getZonesOnScreen(cameraBounds);
+        Log.i(TAG, "the " + zonesOnScreen.toString() + " zones are on screen");
+
+        List<String> zonesToQuery = new ArrayList<>();
+
+        //check/add to cache
+        for (String zone : zonesOnScreen) {
+            if (!zoneQueryCache.contains(zone)) {
+                zonesToQuery.add(zone);
+                zoneQueryCache.add(zone);
+                Log.i(TAG, "cached zone " + zone);
+            }
+        }
+        Log.i(TAG, "there are " + zoneQueryCache.size() + " zones in the cache");
+        return zonesToQuery;
+    }
+
+    private void queryAListOfZones(String zoneType, List<String> zones) {
         db.collection("posts")
-                .whereLessThan("lng", cameraBounds.northeast.longitude)
-                .whereGreaterThan("lng", cameraBounds.southwest.longitude)
-                .whereIn(latZoneSize, latZonesToQuery)
-                .orderBy("lng")
+                .whereIn(zoneType, zones)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(postQueryLimit)
                 .get()
@@ -446,17 +466,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 Log.i(TAG, task.getResult().size() + "posts retrieved");
                                 ArrayList list = (ArrayList) document.getData().get("comments");
                                 post.setComments(Utils.turnMapsIntoListOfComments(list));
-                                if (!postSet.contains(post.getId())) {
-                                    createMarkerWithPost(post);
-                                    postSet.add(post.getId());
-                                }
+                                createMarkerWithPost(post);
                             }
                         } else {
                             Log.i(TAG, "Error getting documents.", task.getException());
                         }
                     }
                 });
-
     }
 
     public void createMarkerWithPost(Post post) {

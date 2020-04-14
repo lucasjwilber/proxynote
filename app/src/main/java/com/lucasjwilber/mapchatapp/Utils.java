@@ -6,14 +6,19 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Utils {
@@ -259,91 +264,103 @@ public class Utils {
         toast.show();
     }
 
-    static String getLatZoneSize(double top, double bottom) {
-        double latHeight = Math.abs(top - bottom);
-        if (latHeight < 1) {
-            return "smallLatZone";
-        } else if (latHeight >= 1 && latHeight < 10) {
-            return "mediumLatZone";
+    static String getSmallZone(double lat, double lng) {
+        return (Math.round(lat * 10) / 10.0) + "/" + (Math.round(lng * 10) / 10.0);
+    }
+    static String getMediumZone(double lat, double lng) {
+        return Math.round(lat) + "/" + Math.round(lng);
+    }
+    static String getLargeZone(double lat, double lng) {
+        return (Math.round(lat / 10) * 10) + "/" + (Math.round(lng / 10) * 10);
+    }
+
+    //this determines what size zones to query based on the boundaries of the screen
+    static String getZoneSize(LatLngBounds cameraBounds) {
+        double latHeight = Math.abs(cameraBounds.northeast.latitude - cameraBounds.southwest.latitude);
+        double lngHeight = Math.abs(cameraBounds.northeast.longitude - cameraBounds.southwest.longitude);
+        //use the larger side of the screen to determine how far zoomed in we are
+        double maxDifference = Math.max(latHeight, lngHeight);
+
+        //once the long side of the screen needs more than 10 zones to fill it, use the next larger
+        //zone size. when we start using largeZones the screen is showing about 690 miles on the long side
+        if (maxDifference < 1) {
+            return "smallZone";
+        } else if (maxDifference >= 1 && maxDifference < 10) {
+            return "mediumZone";
         } else {
-            return "largeLatZone";
+            return "largeZone";
         }
     }
 
-    static List<Double> getLatQueryRange(double top, double bottom) {
-        double centerOfScreenLat = Math.max(top, bottom)
-                - (Math.abs(top - bottom) / 2);
-        Log.i(TAG, "screen is centered on latitude " + centerOfScreenLat);
+    static List<String> getZonesOnScreen(LatLngBounds cameraBounds) {
 
-        List<Double> latZonesToQuery = new ArrayList<>();
+        double left = cameraBounds.southwest.longitude;
+        double right = cameraBounds.northeast.longitude;
+        double top = cameraBounds.northeast.latitude;
+        double bottom = cameraBounds.southwest.latitude;
 
-        double latHeight = Math.abs(top - bottom);
-
-        // by default add the latZone we're in and the ones above and below,
-        // then add more based on the latitude boundaries of the screen
-        if (latHeight < 1) {
-            double smallLatZone = Math.round(centerOfScreenLat * 10) / 10.0;
-            latZonesToQuery.add(smallLatZone);
-            latZonesToQuery.add(smallLatZone - 0.1f);
-            latZonesToQuery.add(smallLatZone + 0.1f);
-
-            if (latHeight >= 0.2) {
-                latZonesToQuery.add(smallLatZone - 0.2f);
-                latZonesToQuery.add(smallLatZone + 0.2f);
-            }
-            if (latHeight >= 0.3) {
-                latZonesToQuery.add(smallLatZone - 0.3f);
-                latZonesToQuery.add(smallLatZone + 0.3f);
-            }
-            if (latHeight >= 0.4) {
-                latZonesToQuery.add(smallLatZone - 0.4f);
-                latZonesToQuery.add(smallLatZone + 0.4f);
-            }
-            Log.i(TAG, "using small latZones");
-        } else if (latHeight >= 1 && latHeight < 10) {
-            double mediumLatZone = Math.round(centerOfScreenLat);
-
-            latZonesToQuery.add(mediumLatZone);
-            latZonesToQuery.add(mediumLatZone - 1);
-            latZonesToQuery.add(mediumLatZone + 1);
-
-            if (latHeight >= 2) {
-                latZonesToQuery.add(mediumLatZone - 2);
-                latZonesToQuery.add(mediumLatZone + 2);
-            }
-            if (latHeight >= 3) {
-                latZonesToQuery.add(mediumLatZone - 3);
-                latZonesToQuery.add(mediumLatZone + 3);
-            }
-            if (latHeight >= 4) {
-                latZonesToQuery.add(mediumLatZone - 4);
-                latZonesToQuery.add(mediumLatZone + 4);
-            }
-            Log.i(TAG, "using medium latZones");
+        String zoneSize = getZoneSize(cameraBounds);
+        if (zoneSize.equals("smallZone")) {
+            left = (left >= 0) ? (Math.floor(left * 10) / 10.0) : (Math.ceil(left * 10) / 10.0);
+            right = (right >= 0) ? (Math.ceil(right * 10) / 10.0) : (Math.floor(right * 10) / 10.0);
+            top = (top >= 0) ? (Math.ceil(top * 10) / 10.0) : (Math.floor(top * 10) / 10.0);
+            bottom = (bottom >= 0) ? (Math.floor(bottom * 10) / 10.0) : (Math.ceil(bottom * 10) / 10.0);
+        } else if (zoneSize.equals("mediumZone")) {
+            left = (left >= 0) ? Math.floor(left) : Math.ceil(left);
+            right = (right >= 0) ? Math.ceil(right) : Math.floor(right);
+            top = (top >= 0) ? Math.ceil(top) : Math.floor(top);
+            bottom = (bottom >= 0) ? Math.floor(bottom) : Math.ceil(bottom);
         } else {
-            double largeLatZone = Math.round(centerOfScreenLat / 10) * 10;
-
-            latZonesToQuery.add(largeLatZone);
-            latZonesToQuery.add(largeLatZone - 10);
-            latZonesToQuery.add(largeLatZone + 10);
-
-            if (latHeight >= 20) {
-                latZonesToQuery.add(largeLatZone - 20);
-                latZonesToQuery.add(largeLatZone + 20);
-            }
-            if (latHeight >= 30) {
-                latZonesToQuery.add(largeLatZone - 30);
-                latZonesToQuery.add(largeLatZone + 30);
-            }
-            if (latHeight >= 40) {
-                latZonesToQuery.add(largeLatZone - 40);
-                latZonesToQuery.add(largeLatZone + 40);
-            }
-            Log.i(TAG, "using large latZones");
+            left = (left >= 0) ? (Math.floor(left / 10) * 10.0) : (Math.ceil(left / 10) * 10.0);
+            right = (right >= 0) ? (Math.ceil(right / 10) * 10.0) : (Math.floor(right / 10) * 10.0);
+            top = (top >= 0) ? (Math.ceil(top / 10) * 10.0) : (Math.floor(top / 10) * 10.0);
+            bottom = (bottom >= 0) ? (Math.floor(bottom / 10) * 10.0) : (Math.ceil(bottom / 10) * 10.0);
         }
 
-        Log.i(TAG, "querying " + latZonesToQuery.size() + " latZones");
-        return latZonesToQuery;
+        List<String> zonesOnScreen = new ArrayList<>();
+
+        //iterate over the screen left-right, top-bottom, and add all zones on screen to the list
+        double leftLng = left;
+        double rightLng = right;
+        //in case the antimeridian is on the screen, transform -179 to 181, -178 to 182, etc, for the loop counter
+        if (rightLng < leftLng) rightLng += 360;
+
+        double topLat = top;
+
+        while (leftLng <= rightLng) {
+
+            while (topLat >= bottom) {
+                //add zone to list
+                if (zoneSize.equals("smallZone")) {
+                    zonesOnScreen.add(getSmallZone(topLat, leftLng));
+                    topLat -= 0.1;
+                } else if (zoneSize.equals("mediumZone")) {
+                    zonesOnScreen.add(getMediumZone(topLat, leftLng));
+                    topLat -= 1;
+                } else {
+                    zonesOnScreen.add(getLargeZone(topLat, leftLng));
+                    topLat -= 10;
+                }
+            }
+
+            //the loop counter (leftLng) always increases to avoid an infinite loop
+            //the actual longitude (left) flips signs at 180
+            if (zoneSize.equals("smallZone")) {
+                leftLng += 0.1;
+                left += 0.1;
+                if (left == 180.1) left = -179.9;
+            } else if (zoneSize.equals("mediumZone")) {
+                leftLng += 1;
+                left += 1;
+                if (left == 181) left = -179;
+            } else {
+                leftLng += 10;
+                left += 10;
+                if (left == 190) left = -170;
+            }
+        }
+
+        return zonesOnScreen;
     }
 
 }
