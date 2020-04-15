@@ -47,6 +47,7 @@ import com.lucasjwilber.mapchatapp.databinding.ActivityMapBinding;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,7 +64,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
-    private long postQueryLimit = 250; //how many posts are returned per zone
+    //todo:
+    private long postQueryLimit = 2; //how many posts are returned per zone
     private FirebaseUser currentUser;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     private final int LOCATION_UPDATE_COOLDOWN = 30000;
@@ -289,6 +291,23 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 editor = sharedPreferences.edit().putString("distanceType", "metric");
                 editor.apply();
                 return true;
+            case R.id.filterAgeNone:
+                editor = sharedPreferences.edit().putLong("postMaxAge", 0L);
+                editor.apply();
+                //todo: refresh posts/clear cache vvv
+                return true;
+            case R.id.filterAgeOneDay:
+                editor = sharedPreferences.edit().putLong("postMaxAge", 86400000L);
+                editor.apply();
+                return true;
+            case R.id.filterAgeThreeDays:
+                editor = sharedPreferences.edit().putLong("postMaxAge", 259200000L);
+                editor.apply();
+                return true;
+            case R.id.filterAgeOneWeek:
+                editor = sharedPreferences.edit().putLong("postMaxAge", 604800000L);
+                editor.apply();
+                return true;
             default:
                 return false;
         }
@@ -489,8 +508,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     private void queryAListOfZones(List<String> zones) {
+        long maxAge = sharedPreferences.getLong("postMaxAge", 0L);
+        long maxTime = 0;
+        if (maxAge != 0) {
+            maxTime = new Date().getTime() - maxAge;
+        }
+
         db.collection("posts")
                 .whereIn(Utils.getZoneType(cameraBounds), zones)
+                .whereGreaterThan("timestamp", maxTime)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(postQueryLimit)
                 .get()

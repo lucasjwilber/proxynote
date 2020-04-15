@@ -11,13 +11,12 @@
         android:title="@string/my_profile" />
 
     <item
-        android:id="@+id/menuSettings"
         android:orderInCategory="1"
         android:title="@string/map_settings" >
         <menu>
             <item
                 android:id="@+id/settingsMapType"
-                android:orderInCategory="1"
+                android:orderInCategory="0"
                 android:title="@string/change_map_type" >
                 <menu>
                     <item
@@ -40,7 +39,7 @@
             </item>
             <item
                 android:id="@+id/settingsDistanceType"
-                android:orderInCategory="2"
+                android:orderInCategory="1"
                 android:title="@string/change_distance_type" >
                 <menu>
                     <item
@@ -53,9 +52,36 @@
                     </item>
                 </menu>
             </item>
+            <item
+                android:id="@+id/menuFilterAge"
+                android:orderInCategory="2"
+                android:title="@string/max_post_age" >
+                <menu>
+                    <item
+                        android:id="@+id/filterAgeNone"
+                        android:title="@string/none" >
+                    </item>
+                    <item
+                        android:id="@+id/filterAgeOneDay"
+                        android:title="@string/one_day" >
+                    </item>
+                    <item
+                        android:id="@+id/filterAgeThreeDays"
+                        android:title="@string/three_days" >
+                    </item>
+                    <item
+                        android:id="@+id/filterAgeOneWeek"
+                        android:title="@string/seven_days" >
+                    </item>
+                </menu>
+            </item>
+
 
         </menu>
     </item>
+
+
+
 
     <item android:id="@+id/menuHelp"
         android:title="@string/help"

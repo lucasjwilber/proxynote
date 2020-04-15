@@ -44,7 +44,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.41"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loginActLogo" />
+        app:layout_constraintTop_toBottomOf="@+id/loginActLogo"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/textView6"
