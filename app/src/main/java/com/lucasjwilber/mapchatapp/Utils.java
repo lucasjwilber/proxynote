@@ -6,19 +6,15 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 public class Utils {
@@ -264,28 +260,32 @@ public class Utils {
         toast.show();
     }
 
+
     static String getSmallZone(double lat, double lng) {
-        return (Math.round(lat * 10) / 10.0) + "/" + (Math.round(lng * 10) / 10.0);
+        return (Math.floor(lat * 10) / 10.0) + "/" + (Math.floor(lng * 10) / 10.0);
     }
     static String getMediumZone(double lat, double lng) {
-        return Math.round(lat) + "/" + Math.round(lng);
+        return Math.floor(lat) + "/" + Math.floor(lng);
     }
     static String getLargeZone(double lat, double lng) {
-        return (Math.round(lat / 10) * 10) + "/" + (Math.round(lng / 10) * 10);
+        return (Math.floor(lat / 10) * 10.0) + "/" + (Math.floor(lng / 10) * 10.0);
     }
 
-    //this determines what size zones to query based on the boundaries of the screen
-    static String getZoneSize(LatLngBounds cameraBounds) {
-        double latHeight = Math.abs(cameraBounds.northeast.latitude - cameraBounds.southwest.latitude);
-        double lngHeight = Math.abs(cameraBounds.northeast.longitude - cameraBounds.southwest.longitude);
-        //use the larger side of the screen to determine how far zoomed in we are
-        double maxDifference = Math.max(latHeight, lngHeight);
+    static String getZoneType(LatLngBounds cameraBounds) {
+        double left = cameraBounds.southwest.longitude;
+        double right = cameraBounds.northeast.longitude;
+        double top = cameraBounds.northeast.latitude;
+        double bottom = cameraBounds.southwest.latitude;
 
-        //once the long side of the screen needs more than 10 zones to fill it, use the next larger
-        //zone size. when we start using largeZones the screen is showing about 690 miles on the long side
-        if (maxDifference < 1) {
+        //account for antimeridian
+        if (right < left) right += 360;
+
+        //get the longer side of the screen's distance:
+        double longSideDistance = Math.max(Math.abs(left - right), Math.abs(top - bottom));
+
+        if (longSideDistance < 1) {
             return "smallZone";
-        } else if (maxDifference >= 1 && maxDifference < 10) {
+        } else if (longSideDistance < 10) {
             return "mediumZone";
         } else {
             return "largeZone";
@@ -293,73 +293,53 @@ public class Utils {
     }
 
     static List<String> getZonesOnScreen(LatLngBounds cameraBounds) {
-
         double left = cameraBounds.southwest.longitude;
         double right = cameraBounds.northeast.longitude;
         double top = cameraBounds.northeast.latitude;
         double bottom = cameraBounds.southwest.latitude;
 
-        String zoneSize = getZoneSize(cameraBounds);
-        if (zoneSize.equals("smallZone")) {
-            left = (left >= 0) ? (Math.floor(left * 10) / 10.0) : (Math.ceil(left * 10) / 10.0);
-            right = (right >= 0) ? (Math.ceil(right * 10) / 10.0) : (Math.floor(right * 10) / 10.0);
-            top = (top >= 0) ? (Math.ceil(top * 10) / 10.0) : (Math.floor(top * 10) / 10.0);
-            bottom = (bottom >= 0) ? (Math.floor(bottom * 10) / 10.0) : (Math.ceil(bottom * 10) / 10.0);
-        } else if (zoneSize.equals("mediumZone")) {
-            left = (left >= 0) ? Math.floor(left) : Math.ceil(left);
-            right = (right >= 0) ? Math.ceil(right) : Math.floor(right);
-            top = (top >= 0) ? Math.ceil(top) : Math.floor(top);
-            bottom = (bottom >= 0) ? Math.floor(bottom) : Math.ceil(bottom);
-        } else {
-            left = (left >= 0) ? (Math.floor(left / 10) * 10.0) : (Math.ceil(left / 10) * 10.0);
-            right = (right >= 0) ? (Math.ceil(right / 10) * 10.0) : (Math.floor(right / 10) * 10.0);
-            top = (top >= 0) ? (Math.ceil(top / 10) * 10.0) : (Math.floor(top / 10) * 10.0);
-            bottom = (bottom >= 0) ? (Math.floor(bottom / 10) * 10.0) : (Math.ceil(bottom / 10) * 10.0);
-        }
+        Log.i(TAG, "l/r/t/b is " + left + " " + right + " " + top + " " + bottom);
 
         List<String> zonesOnScreen = new ArrayList<>();
 
-        //iterate over the screen left-right, top-bottom, and add all zones on screen to the list
-        double leftLng = left;
-        double rightLng = right;
-        //in case the antimeridian is on the screen, transform -179 to 181, -178 to 182, etc, for the loop counter
-        if (rightLng < leftLng) rightLng += 360;
+        //we need a separate counter for looping through longitude because when
+        //it crosses the antimeridian it goes from 180 to -180
+        double leftCounter = left;
+        double rightCounter = right;
 
-        double topLat = top;
+        //account for antimeridian:
+        if (leftCounter > rightCounter) rightCounter += 360;
 
-        while (leftLng <= rightLng) {
+        String zoneType = getZoneType(cameraBounds);
 
-            while (topLat >= bottom) {
-                //add zone to list
-                if (zoneSize.equals("smallZone")) {
-                    zonesOnScreen.add(getSmallZone(topLat, leftLng));
-                    topLat -= 0.1;
-                } else if (zoneSize.equals("mediumZone")) {
-                    zonesOnScreen.add(getMediumZone(topLat, leftLng));
-                    topLat -= 1;
+        while (leftCounter <= rightCounter) {
+            while (bottom <= top) {
+                if (zoneType.equals("smallZone")) {
+                    zonesOnScreen.add(getSmallZone(bottom, left));
+                    bottom += 0.1;
+                } else if (zoneType.equals("mediumZone")) {
+                    zonesOnScreen.add(getMediumZone(bottom, left));
+                    bottom += 1;
                 } else {
-                    zonesOnScreen.add(getLargeZone(topLat, leftLng));
-                    topLat -= 10;
+                    zonesOnScreen.add(getLargeZone(bottom, left));
+                    bottom += 10;
                 }
             }
 
-            //the loop counter (leftLng) always increases to avoid an infinite loop
-            //the actual longitude (left) flips signs at 180
-            if (zoneSize.equals("smallZone")) {
-                leftLng += 0.1;
+            if (zoneType.equals("smallZone")) {
                 left += 0.1;
-                if (left == 180.1) left = -179.9;
-            } else if (zoneSize.equals("mediumZone")) {
-                leftLng += 1;
+                leftCounter += 0.1;
+            } else if (zoneType.equals("mediumZone")) {
                 left += 1;
-                if (left == 181) left = -179;
+                leftCounter += 1;
             } else {
-                leftLng += 10;
                 left += 10;
-                if (left == 190) left = -170;
+                leftCounter += 10;
             }
-        }
 
+            //account for antimeridian:
+            if (left >= 180.0) left = -180.0;
+        }
         return zonesOnScreen;
     }
 

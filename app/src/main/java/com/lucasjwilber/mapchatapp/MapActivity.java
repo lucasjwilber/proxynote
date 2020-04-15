@@ -63,17 +63,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
-    private long postQueryLimit = 50;
+    private long postQueryLimit = 250; //how many posts are returned per zone
     private FirebaseUser currentUser;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     private final int LOCATION_UPDATE_COOLDOWN = 30000;
-    private final int POST_QUERY_COOLDOWN = 2000;
-    private boolean postQueryIsOnCooldown;
     private double userLat;
     private double userLng;
     private Marker userMarker;
     private LatLngBounds cameraBounds;
-    private BitmapDescriptor userMarkerIcon;
+    private BitmapDescriptor userLocationIcon;
     private BitmapDescriptor postOutlineYellow;
     private BitmapDescriptor postOutlineYellowOrange;
     private BitmapDescriptor postOutlineOrange;
@@ -85,27 +83,40 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private RecyclerView.Adapter postRvAdapter;
     private boolean mapHasBeenSetUp;
     SharedPreferences sharedPreferences;
-    private List<Marker> postMarkers;
     private boolean areMarkersShown;
     private Handler periodicLocationUpdateHandler;
-    private HashSet<String> zoneQueryCache;
+    private List<Marker> markersListSmall;
+    private List<Marker> markersListMedium;
+    private List<Marker> markersListLarge;
+    private List<Marker> currentMarkersList;
+    private HashSet<String> zoneQueryCacheSmall;
+    private HashSet<String> zoneQueryCacheMedium;
+    private HashSet<String> zoneQueryCacheLarge;
+    private HashSet<String> currentQueryCache;
+    private float currentZoom;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mapBinding = ActivityMapBinding.inflate(getLayoutInflater());
-        View view = mapBinding.getRoot();
-        setContentView(view);
+        setContentView(mapBinding.getRoot());
 
-        // post recyclerview
         postRv = mapBinding.postRecyclerView;
         postRv.setHasFixedSize(true);
         postRv.setLayoutManager(new LinearLayoutManager(this));
-        postMarkers = new LinkedList<>();
-        zoneQueryCache = new HashSet<>();
 
-        userMarkerIcon = Utils.getBitmapDescriptorFromSvg(R.drawable.user_location_pin, MapActivity.this);
+        db = FirebaseFirestore.getInstance();
+        sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
+        periodicLocationUpdateHandler = new Handler();
+
+        markersListSmall = new LinkedList<>();
+        markersListMedium = new LinkedList<>();
+        markersListLarge = new LinkedList<>();
+        currentQueryCache = zoneQueryCacheSmall;
+        currentMarkersList = markersListSmall;
+
+        userLocationIcon = Utils.getBitmapDescriptorFromSvg(R.drawable.user_location_pin, MapActivity.this);
         postOutlineYellow = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yellow, MapActivity.this);
         postOutlineYellowOrange = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yelloworange, MapActivity.this);
         postOutlineOrange = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_orange, MapActivity.this);
@@ -113,9 +124,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postOutlineRed = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_red, MapActivity.this);
         postOutlineBrown = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_brown, MapActivity.this);
 
-        db = FirebaseFirestore.getInstance();
-        sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
-        periodicLocationUpdateHandler = new Handler();
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -142,11 +150,34 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         super.onResume();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
+//        createTestPosts();
+
+        //post data may have changed. delete all stored markers, clear the caches, and get posts
+        for (Marker marker : markersListSmall) marker.remove();
+        for (Marker marker : markersListMedium) marker.remove();
+        for (Marker marker : markersListLarge) marker.remove();
+        zoneQueryCacheSmall = new HashSet<>();
+        zoneQueryCacheMedium = new HashSet<>();
+        zoneQueryCacheLarge = new HashSet<>();
+        if (mMap != null) {
+            if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
+                currentQueryCache = zoneQueryCacheSmall;
+                currentMarkersList = markersListSmall;
+            } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
+                currentQueryCache = zoneQueryCacheMedium;
+                currentMarkersList = markersListMedium;
+            } else {
+                currentQueryCache = zoneQueryCacheLarge;
+                currentMarkersList = markersListLarge;
+            }
+            Log.i(TAG, "getting posts from onresume");
+            getPosts();
+        }
+
         startGetLocationLooper();
-        if (mMap != null) getZonesToQuery();
 
         // if the postRv is open, refresh it to prevent vote manipulation via out-of-date scores
-        if (postRv.getVisibility() == View.VISIBLE) {
+        if (postRv.getVisibility() == View.VISIBLE && mMap != null) {
             postRv.setVisibility(View.GONE);
             postRvAdapter = null;
 
@@ -161,6 +192,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         }
                     });
         }
+
     }
 
     @Override
@@ -313,7 +345,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         userMarker = mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(userLat, userLng))
                                 .title("My Location")
-                                .icon(userMarkerIcon));
+                                .icon(userLocationIcon));
 
                         startGetLocationLooper();
                     }
@@ -351,13 +383,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(finalLat, finalLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                     mMap.setMapType(sharedPreferences.getInt("mapType", GoogleMap.MAP_TYPE_HYBRID));
-                    mMap.setMinZoomPreference(6f);
+                    mMap.setMinZoomPreference(5f);
 
                     if (userMarker != null) userMarker.remove();
                     userMarker = mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(userLat, userLng))
                             .title("My Location")
-                            .icon(userMarkerIcon));
+                            .icon(userLocationIcon));
 
                     //sleep for a moment because zooming and centering the camera at the same time
                     // causes an issue where the camera ends up zoomed on the wrong location.
@@ -401,59 +433,64 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onCameraIdle() {
         cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-        Log.i(TAG, "current zoom is " + mMap.getCameraPosition().zoom);
 
+        //set cache and marker list based on zoom
+        currentZoom = mMap.getCameraPosition().zoom;
+        if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
+            currentQueryCache = zoneQueryCacheSmall;
+            currentMarkersList = markersListSmall;
+        } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
+            currentQueryCache = zoneQueryCacheMedium;
+            currentMarkersList = markersListMedium;
+        } else {
+            currentQueryCache = zoneQueryCacheLarge;
+            currentMarkersList = markersListLarge;
+        }
+
+        Log.i(TAG, "getting posts from onCameraIdle");
         getPosts();
     }
 
     private void getPosts() {
-        String zoneType = Utils.getZoneSize(cameraBounds);
-        Log.i(TAG, "zoneType is " + zoneType);
-        List<String> zonesToQuery = getZonesToQuery();
+        List<String> zonesOnScreen = Utils.getZonesOnScreen(cameraBounds);
+        Log.i(TAG, "the " + zonesOnScreen.toString() + " zones are on screen");
+        Log.i(TAG, "current zoom is " + currentZoom);
 
-        Log.i(TAG, "querying " + zonesToQuery.size() + " zones");
+        List<String> zonesToQuery = new ArrayList<>();
 
-        //it's unlikely, but if there are more than 10 zones on screen we can only query 10 at a time:
+        //check the zones on screen against the cache
+        for (String zone : zonesOnScreen) {
+            if (!currentQueryCache.contains(zone)) {
+                zonesToQuery.add(zone);
+                currentQueryCache.add(zone);
+                Log.i(TAG, "cached zone " + zone);
+            }
+        }
+        Log.i(TAG, "currentQueryCache length is " + currentQueryCache.size());
+        Log.i(TAG, "zonesToQuery length is " + zonesToQuery.size());
+
+        //if there are more than 10 zones on screen we can only query 10 at a time:
         if (zonesToQuery.size() > 10) {
-            String[] zones = (String[]) zonesToQuery.toArray();
+            String[] zones = zonesToQuery.toArray(new String[0]);
             //query 10 at a time:
             while (zones.length > 10) {
-                Log.i(TAG, "there are more than 10 zones, querying 10 at a time...");
                 String[] nextTenZones = Arrays.copyOfRange(zones, 0, 9);
                 List<String> ntzAsList = Arrays.asList(nextTenZones);
-                queryAListOfZones(zoneType, ntzAsList);
+                //query this batch of 10 zones
+                queryAListOfZones(ntzAsList);
+                //remove those 10 from the array
                 zones = Arrays.copyOfRange(zones, 10, zones.length - 1);
             }
             //convert the remainder back to a list:
             zonesToQuery = Arrays.asList(zones);
         }
-
         //query the (remaining) zones:
-        if (zonesToQuery.size() > 0) queryAListOfZones(zoneType, zonesToQuery);
+        if (zonesToQuery.size() > 0) queryAListOfZones(zonesToQuery);
     }
 
-    private List<String> getZonesToQuery() {
-        //based on the screen boundaries, get a list of the actual zones to query
-        List<String> zonesOnScreen = Utils.getZonesOnScreen(cameraBounds);
-        Log.i(TAG, "the " + zonesOnScreen.toString() + " zones are on screen");
-
-        List<String> zonesToQuery = new ArrayList<>();
-
-        //check/add to cache
-        for (String zone : zonesOnScreen) {
-            if (!zoneQueryCache.contains(zone)) {
-                zonesToQuery.add(zone);
-                zoneQueryCache.add(zone);
-                Log.i(TAG, "cached zone " + zone);
-            }
-        }
-        Log.i(TAG, "there are " + zoneQueryCache.size() + " zones in the cache");
-        return zonesToQuery;
-    }
-
-    private void queryAListOfZones(String zoneType, List<String> zones) {
+    private void queryAListOfZones(List<String> zones) {
         db.collection("posts")
-                .whereIn(zoneType, zones)
+                .whereIn(Utils.getZoneType(cameraBounds), zones)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(postQueryLimit)
                 .get()
@@ -463,7 +500,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                                 Post post = Objects.requireNonNull(document.toObject(Post.class));
-                                Log.i(TAG, task.getResult().size() + "posts retrieved");
                                 ArrayList list = (ArrayList) document.getData().get("comments");
                                 post.setComments(Utils.turnMapsIntoListOfComments(list));
                                 createMarkerWithPost(post);
@@ -508,8 +544,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         );
         iconMarker.setTag(post.getId());
 
-        postMarkers.add(borderMarker);
-        postMarkers.add(iconMarker);
+        currentMarkersList.add(borderMarker);
+        currentMarkersList.add(iconMarker);
     }
 
     public void onMapClick(LatLng latlng) {
@@ -594,14 +630,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
-    private void create900testPosts() {
+    private void createTestPosts() {
         //47.6264893
         //long: -122.3582504
         double lat = 47.6264893;
         double lng = -122.3582504;
 
-        for (int i = 0; i < 30; i++) {
-            for (int j = 0; j < 30; j++) {
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++) {
                 Post post = new Post(
                         UUID.randomUUID().toString(),
                         UUID.randomUUID().toString(),
@@ -613,18 +649,20 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         lng
                 );
 
-                lng += 0.01;
+                lng -= 0.005;
 
                 db.collection("posts")
                         .add(post);
             }
-            lat -= 0.01;
+            lat += 0.05;
             lng = -122.3582504;
         }
     }
 
     public void toggleMarkerVisibility(View v) {
-        for (Marker marker : postMarkers) marker.setVisible(areMarkersShown);
+        for (Marker marker : markersListSmall) marker.setVisible(areMarkersShown);
+        for (Marker marker : markersListMedium) marker.setVisible(areMarkersShown);
+        for (Marker marker : markersListLarge) marker.setVisible(areMarkersShown);
         v.setBackground(areMarkersShown ? getDrawable(R.drawable.visibility) : getDrawable(R.drawable.visibility_off));
         areMarkersShown = !areMarkersShown;
     }

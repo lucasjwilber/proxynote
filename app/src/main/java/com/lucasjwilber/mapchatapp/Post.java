@@ -117,8 +117,8 @@ public class Post {
         return smallZone;
     }
 
-    public void setSmallZone(String smallZone) {
-        this.smallZone = smallZone;
+    public void setSmallZone(String zone) {
+        this.smallZone = zone;
     }
 
     public String getId() {
