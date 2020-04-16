@@ -297,44 +297,38 @@ public class Utils {
         double top = cameraBounds.northeast.latitude;
         double bottom = cameraBounds.southwest.latitude;
 
-        Log.i(TAG, "l/r/t/b is " + left + " " + right + " " + top + " " + bottom);
-
         List<String> zonesOnScreen = new ArrayList<>();
 
-        //we need a separate counter for looping through longitude because when
-        //it crosses the antimeridian it goes from 180 to -180
         double leftCounter = left;
         double rightCounter = right;
-
+        double bottomCounter = bottom;
         //account for antimeridian:
         if (leftCounter > rightCounter) rightCounter += 360;
 
         String zoneType = getZoneType(cameraBounds);
+        double increment;
+        if (zoneType.equals("smallZone")) {
+            increment = 0.1;
+        } else if (zoneType.equals("mediumZone")) {
+            increment = 1;
+        } else {
+            increment = 10;
+        }
 
         while (leftCounter <= rightCounter) {
-            while (bottom <= top) {
+            while (bottomCounter <= top) {
                 if (zoneType.equals("smallZone")) {
-                    zonesOnScreen.add(getSmallZone(bottom, left));
-                    bottom += 0.1;
+                    zonesOnScreen.add(getSmallZone(bottomCounter, left));
                 } else if (zoneType.equals("mediumZone")) {
-                    zonesOnScreen.add(getMediumZone(bottom, left));
-                    bottom += 1;
+                    zonesOnScreen.add(getMediumZone(bottomCounter, left));
                 } else {
-                    zonesOnScreen.add(getLargeZone(bottom, left));
-                    bottom += 10;
+                    zonesOnScreen.add(getLargeZone(bottomCounter, left));
                 }
+                bottomCounter += increment;
             }
-
-            if (zoneType.equals("smallZone")) {
-                left += 0.1;
-                leftCounter += 0.1;
-            } else if (zoneType.equals("mediumZone")) {
-                left += 1;
-                leftCounter += 1;
-            } else {
-                left += 10;
-                leftCounter += 10;
-            }
+            bottomCounter = bottom;
+            left += increment;
+            leftCounter += increment;
 
             //account for antimeridian:
             if (left >= 180.0) left = -180.0;

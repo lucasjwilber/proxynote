@@ -512,7 +512,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private void getPosts() {
         List<String> zonesOnScreen = Utils.getZonesOnScreen(cameraBounds);
         Log.i(TAG, "the " + zonesOnScreen.toString() + " zones are on screen");
-        Log.i(TAG, "current zoom is " + currentZoom);
+        Log.i(TAG, "zoneType is " + Utils.getZoneType(cameraBounds));
+
 
         List<String> zonesToQuery = new ArrayList<>();
 
@@ -524,8 +525,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 Log.i(TAG, "cached zone " + zone);
             }
         }
-        Log.i(TAG, "currentQueryCache length is " + currentQueryCache.size());
-        Log.i(TAG, "zonesToQuery length is " + zonesToQuery.size());
 
         //if there are more than 10 zones on screen we can only query 10 at a time:
         if (zonesToQuery.size() > 10) {
@@ -547,15 +546,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     private void queryAListOfZones(List<String> zones) {
-        long maxAge = sharedPreferences.getLong("postMaxAge", 0L);
-        long maxTime = 0;
-        if (maxAge != 0) {
-            maxTime = new Date().getTime() - maxAge;
-        }
+//        long maxAge = sharedPreferences.getLong("postMaxAge", 0L);
+//        long maxTime = 0;
+//        if (maxAge != 0) {
+//            maxTime = new Date().getTime() - maxAge;
+//        }
 
         db.collection("posts")
                 .whereIn(Utils.getZoneType(cameraBounds), zones)
-                .whereGreaterThan("timestamp", maxTime)
+//                .whereGreaterThan("timestamp", maxTime)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .limit(postQueryLimit)
                 .get()
