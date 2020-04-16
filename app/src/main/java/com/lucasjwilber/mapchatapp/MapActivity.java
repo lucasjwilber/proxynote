@@ -251,7 +251,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             case R.id.mapStyleLightGray:
             case R.id.mapStyleDarkGray:
             case R.id.mapStyleCobalt:
-            case R.id.mapStyleGoldenBrown:
             case R.id.mapStyleSatellite:
                 return setMapStyle(item.getItemId());
 
@@ -294,7 +293,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private boolean setMapStyle(int id) {
         SharedPreferences.Editor editor;
         switch (id) {
-            default:
             case R.id.mapStyleDay:
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 try {
@@ -335,21 +333,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     Log.e(TAG, "Can't find style. Error: ", e);
                 }
                 return true;
+            default:
             case R.id.mapStyleCobalt:
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 try {
                     mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.cobalt));
                     editor = sharedPreferences.edit().putInt("mapStyle", R.id.mapStyleCobalt);
-                    editor.apply();
-                } catch (Resources.NotFoundException e) {
-                    Log.e(TAG, "Can't find style. Error: ", e);
-                }
-                return true;
-            case R.id.mapStyleGoldenBrown:
-                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                try {
-                    mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.vintage_old_golden_brown));
-                    editor = sharedPreferences.edit().putInt("mapStyle", R.id.mapStyleGoldenBrown);
                     editor.apply();
                 } catch (Resources.NotFoundException e) {
                     Log.e(TAG, "Can't find style. Error: ", e);
@@ -452,7 +441,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(finalLat, finalLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 
-                    setMapStyle(sharedPreferences.getInt("mapStyle", R.id.mapStyleDay));
+                    setMapStyle(sharedPreferences.getInt("mapStyle", R.id.mapStyleCobalt));
 
                     mMap.setMinZoomPreference(5f);
 

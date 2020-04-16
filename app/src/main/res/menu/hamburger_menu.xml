@@ -36,10 +36,6 @@
                 android:title="@string/cobalt" >
             </item>
             <item
-                android:id="@+id/mapStyleGoldenBrown"
-                android:title="@string/golden_brown" >
-            </item>
-            <item
                 android:id="@+id/mapStyleSatellite"
                 android:title="@string/satellite" >
             </item>
