@@ -66,7 +66,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
-    //todo:
     private long postQueryLimit = 500; //how many posts are returned per zone
     private FirebaseUser currentUser;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
@@ -157,26 +156,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 //        createTestPosts();
 
         //post data may have changed. delete all stored markers, clear the caches, and get posts
-        for (Marker marker : markersListSmall) marker.remove();
-        for (Marker marker : markersListMedium) marker.remove();
-        for (Marker marker : markersListLarge) marker.remove();
-        zoneQueryCacheSmall = new HashSet<>();
-        zoneQueryCacheMedium = new HashSet<>();
-        zoneQueryCacheLarge = new HashSet<>();
-        if (mMap != null) {
-            if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
-                currentQueryCache = zoneQueryCacheSmall;
-                currentMarkersList = markersListSmall;
-            } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
-                currentQueryCache = zoneQueryCacheMedium;
-                currentMarkersList = markersListMedium;
-            } else {
-                currentQueryCache = zoneQueryCacheLarge;
-                currentMarkersList = markersListLarge;
-            }
-            Log.i(TAG, "getting posts from onresume");
-            getPosts();
-        }
+        refreshMapData(null);
 
         startGetLocationLooper();
 
@@ -189,8 +169,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             db.collection("posts")
                     .document(currentSelectedPostId)
                     .get()
-                    .addOnSuccessListener(r -> {
-                        if (r.exists()) {
+                    .addOnSuccessListener(result -> {
+                        if (result.exists()) {
                             setPostRvAdapter(currentSelectedPostId);
                             postRv.setVisibility(View.VISIBLE);
                         }
@@ -289,19 +269,22 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 //            case R.id.filterAgeNone:
 //                editor = sharedPreferences.edit().putLong("postMaxAge", 0L);
 //                editor.apply();
-//                //todo: refresh posts/clear cache vvv
+//                refreshMapData(null);
 //                return true;
 //            case R.id.filterAgeOneDay:
 //                editor = sharedPreferences.edit().putLong("postMaxAge", 86400000L);
 //                editor.apply();
+//                refreshMapData(null);
 //                return true;
 //            case R.id.filterAgeThreeDays:
 //                editor = sharedPreferences.edit().putLong("postMaxAge", 259200000L);
 //                editor.apply();
+//                refreshMapData(null);
 //                return true;
 //            case R.id.filterAgeOneWeek:
 //                editor = sharedPreferences.edit().putLong("postMaxAge", 604800000L);
 //                editor.apply();
+//                refreshMapData(null);
 //                return true;
             default:
                 return false;
@@ -502,8 +485,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             String text = "You must be logged in to post.";
             mapBinding.mapLoginSuggestion.setText(text);
             mapBinding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
-//            Utils.showToast(MapActivity.this, "You must be logged in to post.");
-//            //todo: flash menu button]
         } else if (!currentUser.isEmailVerified()) {
             //reload and check again first
             currentUser.reload()
@@ -652,6 +633,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postRv.setAdapter(null);
         mapBinding.mapLoginSuggestionModal.setVisibility(View.GONE);
         mapBinding.verifyEmailReminder.setVisibility(View.GONE);
+        mapBinding.mapPostRvProgressBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -674,12 +656,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     .document(postId)
                     .get()
                     .addOnSuccessListener(result -> {
-                        Log.i(TAG, "got post " + result.getId());
                         Post post = result.toObject(Post.class);
-                        if (post != null) {
-                            ArrayList list = (ArrayList) result.getData().get("comments");
-                            post.setComments(Utils.turnMapsIntoListOfComments(list));
+                        if (post == null) {
+                            Utils.showToast(MapActivity.this, "This post no longer exists.");
+                            hideAllModals();
+                            return;
                         }
+
+                        ArrayList list = (ArrayList) result.getData().get("comments");
+                        post.setComments(Utils.turnMapsIntoListOfComments(list));
 
                         postRvAdapter = new PostRvAdapter(
                                 post,
@@ -760,6 +745,28 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         for (Marker marker : markersListLarge) marker.setVisible(areMarkersShown);
         v.setBackground(areMarkersShown ? getDrawable(R.drawable.visibility) : getDrawable(R.drawable.visibility_off));
         areMarkersShown = !areMarkersShown;
+    }
+
+    public void refreshMapData(View v) {
+        for (Marker marker : markersListSmall) marker.remove();
+        for (Marker marker : markersListMedium) marker.remove();
+        for (Marker marker : markersListLarge) marker.remove();
+        zoneQueryCacheSmall = new HashSet<>();
+        zoneQueryCacheMedium = new HashSet<>();
+        zoneQueryCacheLarge = new HashSet<>();
+        if (mMap != null) {
+            if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
+                currentQueryCache = zoneQueryCacheSmall;
+                currentMarkersList = markersListSmall;
+            } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
+                currentQueryCache = zoneQueryCacheMedium;
+                currentMarkersList = markersListMedium;
+            } else {
+                currentQueryCache = zoneQueryCacheLarge;
+                currentMarkersList = markersListLarge;
+            }
+            getPosts();
+        }
     }
 
 }

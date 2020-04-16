@@ -17,27 +17,27 @@
         <menu>
             <item
                 android:id="@+id/mapStyleDay"
-                android:title="Day" >
+                android:title="@string/day" >
             </item>
             <item
                 android:id="@+id/mapStyleNight"
-                android:title="Night" >
+                android:title="@string/night" >
             </item>
             <item
                 android:id="@+id/mapStyleLightGray"
-                android:title="Light Gray" >
+                android:title="@string/light_gray" >
             </item>
             <item
                 android:id="@+id/mapStyleDarkGray"
-                android:title="Dark Gray" >
+                android:title="@string/dark_gray" >
             </item>
             <item
                 android:id="@+id/mapStyleCobalt"
-                android:title="Cobalt" >
+                android:title="@string/cobalt" >
             </item>
             <item
                 android:id="@+id/mapStyleGoldenBrown"
-                android:title="Golden Brown" >
+                android:title="@string/golden_brown" >
             </item>
             <item
                 android:id="@+id/mapStyleSatellite"

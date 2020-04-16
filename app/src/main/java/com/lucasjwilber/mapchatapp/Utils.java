@@ -94,13 +94,12 @@ public class Utils {
             R.drawable.posticon_11088,
             R.drawable.posticon_127379,
             R.drawable.posticon_128680,
-            R.drawable.posticon_128684,
             R.drawable.posticon_128761,
             R.drawable.posticon_128286,
             R.drawable.posticon_128139,
             R.drawable.posticon_128175,
             R.drawable.posticon_128178,
-            R.drawable.posticon_128138,
+//            R.drawable.posticon_128138, //cigarette
             R.drawable.posticon_2615,
             R.drawable.posticon_2620,
             R.drawable.posticon_127752,
@@ -108,8 +107,8 @@ public class Utils {
             R.drawable.posticon_2049,
             R.drawable.posticon_8252,
             R.drawable.posticon_127790,
-            R.drawable.posticon_127814,
-            R.drawable.posticon_127825,
+//            R.drawable.posticon_127814, //eggplant
+//            R.drawable.posticon_127825, //peach
             R.drawable.posticon_9203,
             R.drawable.posticon_9762,
             R.drawable.posticon_9888,

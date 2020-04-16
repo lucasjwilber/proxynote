@@ -16,8 +16,8 @@
 
         <ImageButton
             android:id="@+id/menuButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="14dp"
             android:onClick="showMenu"
@@ -27,23 +27,34 @@
             />
 
         <ImageView
-            android:layout_width="41dp"
-            android:layout_height="41dp"
+            android:layout_width="30dp"
+            android:layout_height="29dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="19dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:background="@drawable/postoutline_accent"
             />
         <ImageButton
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_marginEnd="24dp"
-            android:layout_marginTop="24dp"
+            android:layout_width="17dp"
+            android:layout_height="17dp"
+            android:layout_marginEnd="22dp"
+            android:layout_marginTop="22dp"
             android:onClick="toggleMarkerVisibility"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:background="@drawable/visibility"
+            />
+
+        <ImageButton
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="55dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:onClick="refreshMapData"
+            android:background="@drawable/refresh"
             />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton

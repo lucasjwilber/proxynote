@@ -105,6 +105,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 TextView postUsername = l.findViewById(R.id.postRvUsername);
                 postUsername.setText(post.isAnonymous() ? "Anonymous" : post.getUsername());
                 //don't link to profile from anonymous posts
+                //don't link to profile from anonymous posts
                 if (post.isAnonymous()) {
                     postUsername.setTextColor(context.getResources().getColor(R.color.black));
                 } else {
@@ -279,14 +280,16 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
         voteMap.put(currentUserId, usersNewVote);
         int finalScoreChange = scoreChange;
-
-        // get the current score in firestore first
-        int finalScoreChange1 = scoreChange;
         db.collection("posts")
                 .document(post.getId())
                 .get()
                 .addOnCompleteListener(task -> {
                     Post post = task.getResult().toObject(Post.class);
+
+                    if (post == null) {
+                        Utils.showToast(context, "This post no longer exists.");
+                        return;
+                    }
 
                     db.collection("posts")
                             .document(post.getId())
@@ -421,6 +424,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e(TAG, "failed adding a comment because " + e.toString());
+                                    Utils.showToast(context, "This post no longer exists.");
                                     replyLoadingSpinner.setVisibility(View.GONE);
                                 });
                     }

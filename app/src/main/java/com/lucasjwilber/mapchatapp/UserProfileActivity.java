@@ -16,8 +16,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -209,8 +211,17 @@ public class UserProfileActivity extends AppCompatActivity {
                     .get()
                     .addOnSuccessListener(response -> {
                         Post post = response.toObject(Post.class);
-                        assert post != null;
-                        Log.i(TAG, "found post " + post.getId());
+
+                        if (post == null) {
+                            Utils.showToast(UserProfileActivity.this, "This post no longer exists.");
+                            hidePostRv(null);
+                            selectedDV.removeAllViews();
+                            selectedDV.setVisibility(View.GONE);
+                            binding.profileOnePostRv.setAdapter(null);
+                            binding.profileOnePostRv.setBackground(null);
+                            return;
+                        }
+
                         ArrayList list = (ArrayList) response.getData().get("comments");
                         post.setComments(Utils.turnMapsIntoListOfComments(list));
                         selectedPostLatLng = new LatLng(post.getLat(), post.getLng());
@@ -259,64 +270,77 @@ public class UserProfileActivity extends AppCompatActivity {
         v.setEnabled(false);
         binding.deletePostProgressBar.setVisibility(View.VISIBLE);
 
-        //delete the post from "posts", then delete the post descriptor from "users"
         db.collection("posts")
                 .document(selectedPostId)
-                .delete()
-                .addOnSuccessListener(result -> {
-                    Log.i(TAG, "post deleted!");
-                    hidePostRv(null);
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Post post = documentSnapshot.toObject(Post.class);
+                        if (post != null) db.collection("deletedPosts").add(post);
 
-                    //delete post descriptor
-                    db.collection("users")
-                            .document(thisProfileOwnerId)
-                            .get()
-                            .addOnSuccessListener(result2 -> {
-                                Log.i(TAG, "got user to delete their postdescriptor");
-                                User user = result2.toObject(User.class);
-                                List<PostDescriptor> usersNewPDs = new ArrayList<>();
-                                int postScore = 0;
-                                assert user != null;
-                                for (PostDescriptor pd : user.getPostDescriptors()) {
-                                    if (!pd.getId().equals(selectedPostId)) {
-                                        usersNewPDs.add(pd);
-                                    } else {
-                                        postScore = pd.getScore();
-                                    }
-                                }
+                        //delete the post from "posts", then delete the post descriptor from "users"
+                        db.collection("posts")
+                                .document(selectedPostId)
+                                .delete()
+                                .addOnSuccessListener(result -> {
+                                    Log.i(TAG, "post deleted!");
+                                    hidePostRv(null);
 
-                                selectedDV.removeAllViews();
-                                selectedDV.setVisibility(View.GONE);
-                                binding.profileOnePostRv.setAdapter(null);
-                                binding.profileOnePostRv.setBackground(null);
+                                    //delete post descriptor
+                                    db.collection("users")
+                                            .document(thisProfileOwnerId)
+                                            .get()
+                                            .addOnSuccessListener(result2 -> {
+                                                Log.i(TAG, "got user to delete their postdescriptor");
+                                                User user = result2.toObject(User.class);
+                                                List<PostDescriptor> usersNewPDs = new ArrayList<>();
+                                                int postScore = 0;
+                                                assert user != null;
+                                                for (PostDescriptor pd : user.getPostDescriptors()) {
+                                                    if (!pd.getId().equals(selectedPostId)) {
+                                                        usersNewPDs.add(pd);
+                                                    } else {
+                                                        postScore = pd.getScore();
+                                                    }
+                                                }
 
-                                db.collection("users")
-                                        .document(thisProfileOwnerId)
-                                        .update("postDescriptors", usersNewPDs,
-                                                "totalScore", user.getTotalScore() - postScore)
-                                        .addOnSuccessListener(result3 -> {
-                                            Log.i(TAG, "successfully removed the deleted post's PD");
-                                            binding.deletePostProgressBar.setVisibility(View.GONE);
-                                            Utils.showToast(UserProfileActivity.this, "Post deleted.");
-                                            v.setEnabled(true);
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            Log.i(TAG, "error removing the deleted post's PD: " + e.toString());
-                                            binding.deletePostProgressBar.setVisibility(View.GONE);
-                                            v.setEnabled(true);
-                                        });
+                                                selectedDV.removeAllViews();
+                                                selectedDV.setVisibility(View.GONE);
+                                                binding.profileOnePostRv.setAdapter(null);
+                                                binding.profileOnePostRv.setBackground(null);
 
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.i(TAG, "error getting user to delete this PD");
-                                binding.deletePostProgressBar.setVisibility(View.GONE);
-                                v.setEnabled(true);
-                            });
-                })
-                .addOnFailureListener(e -> {
-                    Log.i(TAG, "error deleting post: " + e.toString());
-                    binding.deletePostProgressBar.setVisibility(View.GONE);
-                    v.setEnabled(true);
+                                                db.collection("users")
+                                                        .document(thisProfileOwnerId)
+                                                        .update("postDescriptors", usersNewPDs,
+                                                                "totalScore", user.getTotalScore() - postScore)
+                                                        .addOnSuccessListener(result3 -> {
+                                                            Log.i(TAG, "successfully removed the deleted post's PD");
+                                                            binding.deletePostProgressBar.setVisibility(View.GONE);
+                                                            Utils.showToast(UserProfileActivity.this, "Post deleted.");
+                                                            v.setEnabled(true);
+                                                        })
+                                                        .addOnFailureListener(e -> {
+                                                            Log.i(TAG, "error removing the deleted post's PD: " + e.toString());
+                                                            binding.deletePostProgressBar.setVisibility(View.GONE);
+                                                            v.setEnabled(true);
+                                                        });
+
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Log.i(TAG, "error getting user to delete this PD");
+                                                binding.deletePostProgressBar.setVisibility(View.GONE);
+                                                v.setEnabled(true);
+                                            });
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.i(TAG, "error deleting post: " + e.toString());
+                                    binding.deletePostProgressBar.setVisibility(View.GONE);
+                                    v.setEnabled(true);
+                                });
+
+
+                    }
                 });
 
         //delete the post's image/video from storage. the storage id is the same as the post id

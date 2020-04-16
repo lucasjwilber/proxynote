@@ -64,15 +64,15 @@ public class HelpActivity extends AppCompatActivity {
 
         int[] helpStringIds = new int[]{
                 R.string.general_information,
-                R.string.gi1,
-                R.string.gi2,
-                R.string.gi3,
-                R.string.gi4,
-                R.string.gi5,
-                R.string.gi6,
-                R.string.gi7,
-                R.string.gi8,
-                R.string.gi9,
+                R.string.help1,
+                R.string.help2,
+                R.string.help3,
+                R.string.help4,
+                R.string.help5,
+                R.string.help6,
+                R.string.help7,
+                R.string.help8,
+                R.string.help9,
         };
 
         // this is going to be entirely hardcoded so there's no need to parameterize the adapter

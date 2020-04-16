@@ -12,6 +12,7 @@ Share what you've seen! Add and reply to posts on a Google map, pinned to the lo
 Lucas Wilber
 
 ##Acknowledgments
+* SnazzyMaps and contributors for map styles: snazzymaps.com
 * Wikimedia Commons for emoji SVGs: https://commons.wikimedia.org/wiki/Emoji
 * remove.bg for help making the logo
 * trello.com for project planning and management
