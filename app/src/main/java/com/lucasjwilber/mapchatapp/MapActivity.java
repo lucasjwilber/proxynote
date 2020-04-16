@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,6 +34,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -65,7 +67,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
     //todo:
-    private long postQueryLimit = 2; //how many posts are returned per zone
+    private long postQueryLimit = 500; //how many posts are returned per zone
     private FirebaseUser currentUser;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     private final int LOCATION_UPDATE_COOLDOWN = 30000;
@@ -194,7 +196,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         }
                     });
         }
-
     }
 
     @Override
@@ -230,7 +231,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         if (currentUser == null) {
             menu.getItem(0).setVisible(false);
         } else {
-            menu.getItem(3).setTitle("Log Out");
+            menu.getItem(4).setTitle("Log Out");
         }
         menu.getItem(0).setIcon(getDrawable(R.drawable.posticon_128064));
         popup.show();
@@ -263,26 +264,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     currentUser = null;
                 }
                 return true;
-            case R.id.mapTypeNormal:
-                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                editor = sharedPreferences.edit().putInt("mapType", GoogleMap.MAP_TYPE_NORMAL);
-                editor.apply();
-                return true;
-            case R.id.mapTypeSatellite:
-                mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                editor = sharedPreferences.edit().putInt("mapType", GoogleMap.MAP_TYPE_SATELLITE);
-                editor.apply();
-                return true;
-            case R.id.mapTypeHybrid:
-                mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-                editor = sharedPreferences.edit().putInt("mapType", GoogleMap.MAP_TYPE_HYBRID);
-                editor.apply();
-                return true;
-            case R.id.mapTypeTerrain:
-                mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-                editor = sharedPreferences.edit().putInt("mapType", GoogleMap.MAP_TYPE_TERRAIN);
-                editor.apply();
-                return true;
+
+            // map styles //
+            case R.id.mapStyleDay:
+            case R.id.mapStyleNight:
+            case R.id.mapStyleLightGray:
+            case R.id.mapStyleDarkGray:
+            case R.id.mapStyleCobalt:
+            case R.id.mapStyleGoldenBrown:
+            case R.id.mapStyleSatellite:
+                return setMapStyle(item.getItemId());
+
+            //distance types
             case R.id.distanceTypeImperial:
                 editor = sharedPreferences.edit().putString("distanceType", "imperial");
                 editor.apply();
@@ -291,25 +284,99 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 editor = sharedPreferences.edit().putString("distanceType", "metric");
                 editor.apply();
                 return true;
-            case R.id.filterAgeNone:
-                editor = sharedPreferences.edit().putLong("postMaxAge", 0L);
-                editor.apply();
-                //todo: refresh posts/clear cache vvv
-                return true;
-            case R.id.filterAgeOneDay:
-                editor = sharedPreferences.edit().putLong("postMaxAge", 86400000L);
-                editor.apply();
-                return true;
-            case R.id.filterAgeThreeDays:
-                editor = sharedPreferences.edit().putLong("postMaxAge", 259200000L);
-                editor.apply();
-                return true;
-            case R.id.filterAgeOneWeek:
-                editor = sharedPreferences.edit().putLong("postMaxAge", 604800000L);
-                editor.apply();
-                return true;
+
+            //filter options
+//            case R.id.filterAgeNone:
+//                editor = sharedPreferences.edit().putLong("postMaxAge", 0L);
+//                editor.apply();
+//                //todo: refresh posts/clear cache vvv
+//                return true;
+//            case R.id.filterAgeOneDay:
+//                editor = sharedPreferences.edit().putLong("postMaxAge", 86400000L);
+//                editor.apply();
+//                return true;
+//            case R.id.filterAgeThreeDays:
+//                editor = sharedPreferences.edit().putLong("postMaxAge", 259200000L);
+//                editor.apply();
+//                return true;
+//            case R.id.filterAgeOneWeek:
+//                editor = sharedPreferences.edit().putLong("postMaxAge", 604800000L);
+//                editor.apply();
+//                return true;
             default:
                 return false;
+        }
+    }
+
+    private boolean setMapStyle(int id) {
+        SharedPreferences.Editor editor;
+        switch (id) {
+            default:
+            case R.id.mapStyleDay:
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                try {
+                    mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.nature));
+                    editor = sharedPreferences.edit().putInt("mapStyle", R.id.mapStyleDay);
+                    editor.apply();
+                } catch (Resources.NotFoundException e) {
+                    Log.e(TAG, "Can't find style. Error: ", e);
+                }
+                return true;
+            case R.id.mapStyleNight:
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                try {
+                    mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.simple_night_vision));
+                    editor = sharedPreferences.edit().putInt("mapStyle", R.id.mapStyleNight);
+                    editor.apply();
+                } catch (Resources.NotFoundException e) {
+                    Log.e(TAG, "Can't find style. Error: ", e);
+                }
+                return true;
+            case R.id.mapStyleLightGray:
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                try {
+                    mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.grayscale));
+                    editor = sharedPreferences.edit().putInt("mapStyle", R.id.mapStyleLightGray);
+                    editor.apply();
+                } catch (Resources.NotFoundException e) {
+                    Log.e(TAG, "Can't find style. Error: ", e);
+                }
+                return true;
+            case R.id.mapStyleDarkGray:
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                try {
+                    mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.lunar_landscape));
+                    editor = sharedPreferences.edit().putInt("mapStyle", R.id.mapStyleDarkGray);
+                    editor.apply();
+                } catch (Resources.NotFoundException e) {
+                    Log.e(TAG, "Can't find style. Error: ", e);
+                }
+                return true;
+            case R.id.mapStyleCobalt:
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                try {
+                    mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.cobalt));
+                    editor = sharedPreferences.edit().putInt("mapStyle", R.id.mapStyleCobalt);
+                    editor.apply();
+                } catch (Resources.NotFoundException e) {
+                    Log.e(TAG, "Can't find style. Error: ", e);
+                }
+                return true;
+            case R.id.mapStyleGoldenBrown:
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                try {
+                    mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.vintage_old_golden_brown));
+                    editor = sharedPreferences.edit().putInt("mapStyle", R.id.mapStyleGoldenBrown);
+                    editor.apply();
+                } catch (Resources.NotFoundException e) {
+                    Log.e(TAG, "Can't find style. Error: ", e);
+                }
+                return true;
+            case R.id.mapStyleSatellite:
+                mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                editor = sharedPreferences.edit().putInt("mapStyle", R.id.mapStyleSatellite);
+                editor.apply();
+                return true;
         }
     }
 
@@ -401,7 +468,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     //center on that marker, else center on the user's location.
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(finalLat, finalLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-                    mMap.setMapType(sharedPreferences.getInt("mapType", GoogleMap.MAP_TYPE_HYBRID));
+
+                    setMapStyle(sharedPreferences.getInt("mapStyle", R.id.mapStyleDay));
+
                     mMap.setMinZoomPreference(5f);
 
                     if (userMarker != null) userMarker.remove();

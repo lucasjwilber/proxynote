@@ -71,6 +71,8 @@ public class HelpActivity extends AppCompatActivity {
                 R.string.gi5,
                 R.string.gi6,
                 R.string.gi7,
+                R.string.gi8,
+                R.string.gi9,
         };
 
         // this is going to be entirely hardcoded so there's no need to parameterize the adapter

@@ -11,77 +11,78 @@
         android:title="@string/my_profile" />
 
     <item
-        android:orderInCategory="1"
-        android:title="@string/map_settings" >
+        android:id="@+id/settingsMapStyle"
+        android:orderInCategory="0"
+        android:title="@string/map_style" >
         <menu>
             <item
-                android:id="@+id/settingsMapType"
-                android:orderInCategory="0"
-                android:title="@string/change_map_type" >
-                <menu>
-                    <item
-                        android:id="@+id/mapTypeNormal"
-                        android:title="@string/normal" >
-                    </item>
-                    <item
-                        android:id="@+id/mapTypeSatellite"
-                        android:title="@string/satellite" >
-                    </item>
-                    <item
-                        android:id="@+id/mapTypeHybrid"
-                        android:title="@string/hybrid" >
-                    </item>
-                    <item
-                        android:id="@+id/mapTypeTerrain"
-                        android:title="@string/terrain" >
-                    </item>
-                </menu>
+                android:id="@+id/mapStyleDay"
+                android:title="Day" >
             </item>
             <item
-                android:id="@+id/settingsDistanceType"
-                android:orderInCategory="1"
-                android:title="@string/change_distance_type" >
-                <menu>
-                    <item
-                        android:id="@+id/distanceTypeImperial"
-                        android:title="@string/imperial" >
-                    </item>
-                    <item
-                        android:id="@+id/distanceTypeMetric"
-                        android:title="@string/metric" >
-                    </item>
-                </menu>
+                android:id="@+id/mapStyleNight"
+                android:title="Night" >
             </item>
             <item
-                android:id="@+id/menuFilterAge"
-                android:orderInCategory="2"
-                android:title="@string/max_post_age" >
-                <menu>
-                    <item
-                        android:id="@+id/filterAgeNone"
-                        android:title="@string/none" >
-                    </item>
-                    <item
-                        android:id="@+id/filterAgeOneDay"
-                        android:title="@string/one_day" >
-                    </item>
-                    <item
-                        android:id="@+id/filterAgeThreeDays"
-                        android:title="@string/three_days" >
-                    </item>
-                    <item
-                        android:id="@+id/filterAgeOneWeek"
-                        android:title="@string/seven_days" >
-                    </item>
-                </menu>
+                android:id="@+id/mapStyleLightGray"
+                android:title="Light Gray" >
             </item>
-
-
+            <item
+                android:id="@+id/mapStyleDarkGray"
+                android:title="Dark Gray" >
+            </item>
+            <item
+                android:id="@+id/mapStyleCobalt"
+                android:title="Cobalt" >
+            </item>
+            <item
+                android:id="@+id/mapStyleGoldenBrown"
+                android:title="Golden Brown" >
+            </item>
+            <item
+                android:id="@+id/mapStyleSatellite"
+                android:title="@string/satellite" >
+            </item>
         </menu>
     </item>
-
-
-
+    <item
+        android:id="@+id/settingsDistanceType"
+        android:orderInCategory="1"
+        android:title="@string/change_distance_type" >
+        <menu>
+            <item
+                android:id="@+id/distanceTypeImperial"
+                android:title="@string/imperial" >
+            </item>
+            <item
+                android:id="@+id/distanceTypeMetric"
+                android:title="@string/metric" >
+            </item>
+        </menu>
+    </item>
+<!--            <item-->
+<!--                android:id="@+id/menuFilterAge"-->
+<!--                android:orderInCategory="2"-->
+<!--                android:title="@string/max_post_age" >-->
+<!--                <menu>-->
+<!--                    <item-->
+<!--                        android:id="@+id/filterAgeNone"-->
+<!--                        android:title="@string/none" >-->
+<!--                    </item>-->
+<!--                    <item-->
+<!--                        android:id="@+id/filterAgeOneDay"-->
+<!--                        android:title="@string/one_day" >-->
+<!--                    </item>-->
+<!--                    <item-->
+<!--                        android:id="@+id/filterAgeThreeDays"-->
+<!--                        android:title="@string/three_days" >-->
+<!--                    </item>-->
+<!--                    <item-->
+<!--                        android:id="@+id/filterAgeOneWeek"-->
+<!--                        android:title="@string/seven_days" >-->
+<!--                    </item>-->
+<!--                </menu>-->
+<!--            </item>-->
 
     <item android:id="@+id/menuHelp"
         android:title="@string/help"
