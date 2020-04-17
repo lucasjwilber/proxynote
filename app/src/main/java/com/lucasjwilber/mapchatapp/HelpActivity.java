@@ -66,7 +66,6 @@ public class HelpActivity extends AppCompatActivity {
                 R.string.general_information,
                 R.string.help1,
                 R.string.help2,
-                R.string.help3,
                 R.string.help4,
                 R.string.help5,
                 R.string.help6,

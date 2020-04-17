@@ -104,8 +104,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
                 TextView postUsername = l.findViewById(R.id.postRvUsername);
                 postUsername.setText(post.isAnonymous() ? "Anonymous" : post.getUsername());
-                //don't link to profile from anonymous posts
-                //don't link to profile from anonymous posts
+
                 if (post.isAnonymous()) {
                     postUsername.setTextColor(context.getResources().getColor(R.color.black));
                 } else {
@@ -345,9 +344,13 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     private void onUsernameClicked(String userId) {
-        Intent goToProfile = new Intent(context, UserProfileActivity.class);
-        goToProfile.putExtra("userId", userId);
-        context.startActivity(goToProfile);
+        if (post.getUserId().equals(profileOwnerId)) {
+            Utils.showToast(context, "You're already viewing this profile.");
+        } else {
+            Intent goToProfile = new Intent(context, UserProfileActivity.class);
+            goToProfile.putExtra("userId", userId);
+            context.startActivity(goToProfile);
+        }
     }
 
     private void onReportButtonClicked() {

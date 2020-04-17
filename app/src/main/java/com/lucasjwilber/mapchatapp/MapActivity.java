@@ -293,6 +293,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private boolean setMapStyle(int id) {
         SharedPreferences.Editor editor;
         switch (id) {
+            default:
             case R.id.mapStyleDay:
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 try {
@@ -333,7 +334,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     Log.e(TAG, "Can't find style. Error: ", e);
                 }
                 return true;
-            default:
             case R.id.mapStyleCobalt:
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 try {
@@ -441,7 +441,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(finalLat, finalLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 
-                    setMapStyle(sharedPreferences.getInt("mapStyle", R.id.mapStyleCobalt));
+                    setMapStyle(sharedPreferences.getInt("mapStyle", R.id.mapStyleDay));
 
                     mMap.setMinZoomPreference(5f);
 
@@ -626,7 +626,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        Log.i(TAG, "clicked on a marker");
+        if (marker.getTag() == null) return true;
 
         currentSelectedPostId = (String) marker.getTag();
         setPostRvAdapter(currentSelectedPostId);

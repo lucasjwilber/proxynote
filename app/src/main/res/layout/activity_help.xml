@@ -95,6 +95,7 @@
             android:inputType="textMultiLine"
             android:maxLength="300"
             android:padding="8dp"
+            android:textSize="14sp"
             app:layout_constraintBottom_toTopOf="@+id/submitQuestionOrCommentButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
