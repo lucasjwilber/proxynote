@@ -15,8 +15,9 @@
 /functions/
 **/google_geocode_api.xml
 **/google_maps_api.xml
-**/google-services.json
+/app/src/debug/res/values/google_maps_api.xml
+/app/google-services.json
 **/function_formatted_address_url.xml
-**/firebase.json
-**/firebaserc
-**/proguard-rules.pro
+/firebase.json
+/.firebaserc
+/app/proguard-rules.pro
