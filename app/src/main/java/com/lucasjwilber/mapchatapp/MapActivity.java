@@ -62,11 +62,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnCameraIdleListener {
 
     private final String TAG = "ljw";
-    private ActivityMapBinding mapBinding;
+    private ActivityMapBinding binding;
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
-    private long POSTS_PER_ZONE_LIMIT = 20; //update the Help string when changing this
+    private long POSTS_PER_ZONE_LIMIT = 20; //this * 1.5 is roughly how many posts are queried per square mile. update the Help string when changing this
     private FirebaseUser currentUser;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     private final int LOCATION_UPDATE_COOLDOWN = 30000;
@@ -104,10 +104,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mapBinding = ActivityMapBinding.inflate(getLayoutInflater());
-        setContentView(mapBinding.getRoot());
+        binding = ActivityMapBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        postRv = mapBinding.postRecyclerView;
+        postRv = binding.postRecyclerView;
         postRv.setHasFixedSize(true);
         postRv.setLayoutManager(new LinearLayoutManager(this));
 
@@ -475,8 +475,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         if (currentUser == null) {
             String text = "You must be logged in to post.";
-            mapBinding.mapLoginSuggestion.setText(text);
-            mapBinding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
+            binding.mapLoginSuggestion.setText(text);
+            binding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
         } else if (!currentUser.isEmailVerified()) {
             //reload and check again first
             currentUser.reload()
@@ -518,8 +518,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         Log.i(TAG, "the " + zonesOnScreen.toString() + " zones are on screen");
         Log.i(TAG, "zoneType is " + Utils.getZoneType(cameraBounds));
 
-
-        List<String> zonesToQuery = new ArrayList<>();
+        binding.postQueryRefreshButton.setVisibility(View.GONE);
+        binding.postQueryPB.setVisibility(View.VISIBLE);
 
         //check the zones on screen against the cache
         for (String zone : zonesOnScreen) {
@@ -540,11 +540,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                         post.setComments(Utils.turnMapsIntoListOfComments(list));
                                         createMarkerWithPost(post);
                                     }
+
                                     if (Objects.requireNonNull(task.getResult()).size() >= POSTS_PER_ZONE_LIMIT) {
                                         currentQueryCache.add(zone);
                                     }
+
+                                    binding.postQueryPB.setVisibility(View.GONE);
+                                    binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
                                 } else {
                                     Log.i(TAG, "Error getting documents.", task.getException());
+                                    binding.postQueryPB.setVisibility(View.GONE);
+                                    binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
                                 }
                             }
                         });
@@ -553,55 +559,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 Log.i(TAG, "cached and queried zone " + zone);
             }
         }
-//
-//        //if there are more than 10 zones on screen we can only query 10 at a time:
-//        if (zonesToQuery.size() > 10) {
-//            String[] zones = zonesToQuery.toArray(new String[0]);
-//            //query 10 at a time:
-//            while (zones.length > 10) {
-//                String[] nextTenZones = Arrays.copyOfRange(zones, 0, 9);
-//                List<String> ntzAsList = Arrays.asList(nextTenZones);
-//                //query this batch of 10 zones
-//                queryAListOfZones(ntzAsList);
-//                //remove those 10 from the array
-//                zones = Arrays.copyOfRange(zones, 10, zones.length - 1);
-//            }
-//            //convert the remainder back to a list:
-//            zonesToQuery = Arrays.asList(zones);
-//        }
-//        //query the (remaining) zones:
-//        if (zonesToQuery.size() > 0) queryAListOfZones(zonesToQuery);
     }
-
-//    private void queryAListOfZones(List<String> zones) {
-//        long maxAge = sharedPreferences.getLong("postMaxAge", 0L);
-//        long maxTime = 0;
-//        if (maxAge != 0) {
-//            maxTime = new Date().getTime() - maxAge;
-//        }
-
-//        db.collection("posts")
-//                .whereIn(Utils.getZoneType(cameraBounds), zones)
-////                .whereGreaterThan("timestamp", maxTime)
-//                .orderBy("timestamp", Query.Direction.DESCENDING)
-//                .limit(POSTS_PER_ZONE_LIMIT)
-//                .get()
-//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                        if (task.isSuccessful()) {
-//                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-//                                Post post = Objects.requireNonNull(document.toObject(Post.class));
-//                                ArrayList list = (ArrayList) document.getData().get("comments");
-//                                post.setComments(Utils.turnMapsIntoListOfComments(list));
-//                                createMarkerWithPost(post);
-//                            }
-//                        } else {
-//                            Log.i(TAG, "Error getting documents.", task.getException());
-//                        }
-//                    }
-//                });
-//    }
 
     public void createMarkerWithPost(Post post) {
         float zIndex = (float) post.getTimestamp();
@@ -647,9 +605,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private void hideAllModals() {
         postRv.setVisibility(View.GONE);
         postRv.setAdapter(null);
-        mapBinding.mapLoginSuggestionModal.setVisibility(View.GONE);
-        mapBinding.verifyEmailReminder.setVisibility(View.GONE);
-        mapBinding.mapPostRvProgressBar.setVisibility(View.GONE);
+        binding.mapLoginSuggestionModal.setVisibility(View.GONE);
+        binding.verifyEmailReminder.setVisibility(View.GONE);
+        binding.mapPostRvProgressBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -665,7 +623,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     private void setPostRvAdapter(String postId) {
-        mapBinding.mapPostRvProgressBar.setVisibility(View.VISIBLE);
+        binding.mapPostRvProgressBar.setVisibility(View.VISIBLE);
 
         if (postId != null) {
             db.collection("posts")
@@ -705,7 +663,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         } else {
                             postRv.setBackground(getDrawable(R.drawable.rounded_square_yellow));
                         }
-                        mapBinding.mapPostRvProgressBar.setVisibility(View.GONE);
+                        binding.mapPostRvProgressBar.setVisibility(View.GONE);
                     })
                     .addOnFailureListener(e -> Log.i(TAG, "error getting post: " + e.toString()));
         }
@@ -726,32 +684,33 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
-    private void createTestPosts() {
-
-        //50/50
-        //start at lat - 25(x), lng -25(x)
-        // lat/lng += x in a for(for
-        //x is random
-        //every 0.005 * (random + 1)
-
-        for (double i = userLng - 0.25; i < userLng + 0.25; i+= 0.01 * (Math.random() + 1)) {
-            for (double j = userLat - 0.25; j < userLat + 0.25; j+= 0.01 * (Math.random() + 1)) {
-                Post post = new Post(
-                        UUID.randomUUID().toString(),
-                        "KfMLnuMWyxbAsKAJt812LLWwXEu2",
-                        "tester",
-                        "test",
-                        "testststsetest",
-                        "somewhere",
-                        j,
-                        i);
-                db.collection("posts").add(post);
-            }
-        }
-    }
+//    private void createTestPosts() {
+//
+//        //50/50
+//        //start at lat - 25(x), lng -25(x)
+//        // lat/lng += x in a for(for
+//        //x is random
+//        //every 0.005 * (random + 1)
+//
+//        for (double i = userLng - 0.25; i < userLng + 0.25; i+= 0.01 * (Math.random() + 1)) {
+//            for (double j = userLat - 0.25; j < userLat + 0.25; j+= 0.01 * (Math.random() + 1)) {
+//                Post post = new Post(
+//                        UUID.randomUUID().toString(),
+//                        "KfMLnuMWyxbAsKAJt812LLWwXEu2",
+//                        "tester",
+//                        "test",
+//                        "testststsetest",
+//                        "somewhere",
+//                        j,
+//                        i);
+//                db.collection("posts").add(post);
+//            }
+//        }
+//    }
 
     public void toggleMarkerVisibility(View v) {
         for (Marker marker : markersListSmall) marker.setVisible(areMarkersShown);
+        for (Marker marker : markersListTiny) marker.setVisible(areMarkersShown);
         for (Marker marker : markersListMedium) marker.setVisible(areMarkersShown);
         for (Marker marker : markersListLarge) marker.setVisible(areMarkersShown);
         v.setBackground(areMarkersShown ? getDrawable(R.drawable.visibility) : getDrawable(R.drawable.visibility_off));

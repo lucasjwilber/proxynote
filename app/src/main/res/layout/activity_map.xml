@@ -47,6 +47,7 @@
             />
 
         <ImageButton
+            android:id="@+id/postQueryRefreshButton"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginEnd="14dp"
@@ -55,6 +56,17 @@
             app:layout_constraintTop_toTopOf="parent"
             android:onClick="refreshMapData"
             android:background="@drawable/refresh"
+            />
+
+        <ProgressBar
+            android:id="@+id/postQueryPB"
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:layout_marginEnd="14dp"
+            android:layout_marginTop="17dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
