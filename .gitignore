@@ -12,9 +12,10 @@
 /captures
 .externalNativeBuild
 .cxx
-google_geocode_api.xml
-google_maps_api.xml
-google-services.json
-function_formatted_address_url.xml
 /functions/
-firebase.json
+**google_geocode_api.xml
+**google_maps_api.xml
+**google-services.json
+**function_formatted_address_url.xml
+**firebase.json
+**firebaserc
