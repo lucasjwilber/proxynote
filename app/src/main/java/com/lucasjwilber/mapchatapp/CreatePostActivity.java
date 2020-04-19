@@ -132,11 +132,9 @@ public class CreatePostActivity extends AppCompatActivity {
                         Log.i(TAG, "lat: " + userLat + ", long: " + userLng);
 
                         AsyncTask.execute(() -> {
-
                             try {
                                 URL url = new URL(getResources().getString(R.string.formatted_address_url) +
                                         userLat + "," + userLng);
-
                                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
                                 con.setRequestMethod("GET");
                                 BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
@@ -148,10 +146,8 @@ public class CreatePostActivity extends AppCompatActivity {
                                 new Thread(new Runnable() {
                                     @Override
                                     public void run() {
-
                                         postAndImageId = UUID.randomUUID().toString();
                                         String username = binding.anonymousCheckbox.isChecked() ? "Anonymous" : user.getDisplayName();
-
                                         Post post = new Post(
                                                 postAndImageId,
                                                 user.getUid(),
