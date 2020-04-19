@@ -260,6 +260,9 @@ public class Utils {
     }
 
 
+    static String getTinyZone(double lat, double lng) {
+        return (Math.floor(lat * 100) / 100.0) + "/" + (Math.floor(lng * 100) / 100.0);
+    }
     static String getSmallZone(double lat, double lng) {
         return (Math.floor(lat * 10) / 10.0) + "/" + (Math.floor(lng * 10) / 10.0);
     }
@@ -282,7 +285,9 @@ public class Utils {
         //get the longer side of the screen's distance:
         double longSideDistance = Math.max(Math.abs(left - right), Math.abs(top - bottom));
 
-        if (longSideDistance < 1) {
+        if (longSideDistance < 0.1) {
+            return "tinyZone";
+        } else if (longSideDistance < 1) {
             return "smallZone";
         } else if (longSideDistance < 10) {
             return "mediumZone";
@@ -307,7 +312,9 @@ public class Utils {
 
         String zoneType = getZoneType(cameraBounds);
         double increment;
-        if (zoneType.equals("smallZone")) {
+        if (zoneType.equals("tinyZone")) {
+            increment = 0.01;
+        } else if (zoneType.equals("smallZone")) {
             increment = 0.1;
         } else if (zoneType.equals("mediumZone")) {
             increment = 1;
@@ -317,7 +324,9 @@ public class Utils {
 
         while (leftCounter <= rightCounter) {
             while (bottomCounter <= top) {
-                if (zoneType.equals("smallZone")) {
+                if (zoneType.equals("tinyZone")) {
+                    zonesOnScreen.add(getTinyZone(bottomCounter, left));
+                } else if (zoneType.equals("smallZone")) {
                     zonesOnScreen.add(getSmallZone(bottomCounter, left));
                 } else if (zoneType.equals("mediumZone")) {
                     zonesOnScreen.add(getMediumZone(bottomCounter, left));

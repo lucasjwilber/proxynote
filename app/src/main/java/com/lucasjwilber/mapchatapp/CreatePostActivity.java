@@ -17,6 +17,7 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -44,9 +45,15 @@ import com.lucasjwilber.mapchatapp.databinding.ActivityCreatePostBinding;
 import com.otaliastudios.transcoder.Transcoder;
 import com.otaliastudios.transcoder.TranscoderListener;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -117,44 +124,68 @@ public class CreatePostActivity extends AppCompatActivity {
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(CreatePostActivity.this, location -> {
                     // Got last known location. In some rare situations this can be null.
-
                     double userLat;
                     double userLng;
                     if (location != null) {
                         userLat = location.getLatitude();
                         userLng = location.getLongitude();
-                        Log.i(TAG, "lat: " + userLat + "\nlong: " + userLng);
+                        Log.i(TAG, "lat: " + userLat + ", long: " + userLng);
 
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
+                        AsyncTask.execute(() -> {
 
-                                postAndImageId = UUID.randomUUID().toString();
-                                String username = binding.anonymousCheckbox.isChecked() ? "Anonymous" : user.getDisplayName();
+                            try {
+                                URL url = new URL(getResources().getString(R.string.formatted_address_url) +
+                                        userLat + "," + userLng);
 
-                                Post post = new Post(
-                                        postAndImageId,
-                                        user.getUid(),
-                                        username,
-                                        postTitle,
-                                        postBody,
-                                        "somewhere",
-                                        userLat,
-                                        userLng);
-                                post.setIcon(selectedIcon);
-                                if (binding.anonymousCheckbox.isChecked()) post.setAnonymous(true);
+                                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                                con.setRequestMethod("GET");
+                                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                                String formattedAddress = in.readLine();
+                                Log.i(TAG, "posting from " + formattedAddress);
+                                in.close();
+                                con.disconnect();
 
-                                if (currentImage != null || currentVideo != null) {
-                                    try {
-                                        uploadMediaThenPost(post);
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        postAndImageId = UUID.randomUUID().toString();
+                                        String username = binding.anonymousCheckbox.isChecked() ? "Anonymous" : user.getDisplayName();
+
+                                        Post post = new Post(
+                                                postAndImageId,
+                                                user.getUid(),
+                                                username,
+                                                postTitle,
+                                                postBody,
+                                                formattedAddress,
+                                                userLat,
+                                                userLng);
+                                        post.setIcon(selectedIcon);
+                                        if (binding.anonymousCheckbox.isChecked())
+                                            post.setAnonymous(true);
+
+                                        if (currentImage != null || currentVideo != null) {
+                                            try {
+                                                uploadMediaThenPost(post);
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+                                        } else {
+                                            uploadPost(post);
+                                        }
                                     }
-                                } else {
-                                    uploadPost(post);
-                                }
+                                }).start();
+
+                            } catch (MalformedURLException e) {
+                                Log.i("ljw", "malformedURLexception:\n" + e.toString());
+                            } catch (ProtocolException e) {
+                                Log.i("ljw", "protocol exception:\n" + e.toString());
+                            } catch (IOException e) {
+                                Log.i("ljw", "IO exception:\n" + e.toString());
                             }
-                        }).start();
+
+                        });
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -269,6 +300,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                             post.isAnonymous(),
                                             post.getTitle(),
                                             post.getTimestamp(),
+                                            post.getLocation(),
                                             post.getScore(),
                                             post.getIcon()
                                     ));

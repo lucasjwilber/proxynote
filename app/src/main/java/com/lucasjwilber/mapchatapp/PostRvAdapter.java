@@ -111,8 +111,12 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                     postUsername.setOnClickListener(v -> onUsernameClicked(post.getUserId()));
                 }
 
+                String place = post.getLocation();
+                String timeAndPlace = place == null ?
+                        Utils.getHowLongAgo(post.getTimestamp()) :
+                        Utils.getHowLongAgo(post.getTimestamp()) + " @ " + place;
                 TextView postTimeAndPlace = l.findViewById(R.id.postRvTimeAndPlace);
-                postTimeAndPlace.setText(Utils.getHowLongAgo(post.getTimestamp()));
+                postTimeAndPlace.setText(timeAndPlace);
 
                 TextView postTitle = l.findViewById(R.id.postRvHeaderTitle);
                 postTitle.setText(post.getTitle());

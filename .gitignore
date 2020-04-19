@@ -15,4 +15,7 @@
 google_geocode_api.xml
 google_maps_api.xml
 google-services.json
-/values/values.xml
+function_formatted_address_url.xml
+/functions/
+firebaseFuncs/
+firebase.json

@@ -66,7 +66,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
-    private long postQueryLimit = 500; //how many posts are returned per zone
+    private long POSTS_PER_ZONE_LIMIT = 20; //update the Help string when changing this
     private FirebaseUser currentUser;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     private final int LOCATION_UPDATE_COOLDOWN = 30000;
@@ -89,9 +89,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private boolean areMarkersShown;
     private Handler periodicLocationUpdateHandler;
     private List<Marker> markersListSmall;
+    private List<Marker> markersListTiny;
     private List<Marker> markersListMedium;
     private List<Marker> markersListLarge;
     private List<Marker> currentMarkersList;
+    private HashSet<String> zoneQueryCacheTiny;
     private HashSet<String> zoneQueryCacheSmall;
     private HashSet<String> zoneQueryCacheMedium;
     private HashSet<String> zoneQueryCacheLarge;
@@ -113,11 +115,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
         periodicLocationUpdateHandler = new Handler();
 
+        markersListTiny = new LinkedList<>();
         markersListSmall = new LinkedList<>();
         markersListMedium = new LinkedList<>();
         markersListLarge = new LinkedList<>();
-        currentQueryCache = zoneQueryCacheSmall;
-        currentMarkersList = markersListSmall;
+        currentQueryCache = zoneQueryCacheTiny;
+        currentMarkersList = markersListTiny;
 
         userLocationIcon = Utils.getBitmapDescriptorFromSvg(R.drawable.user_location_pin, MapActivity.this);
         postOutlineYellow = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yellow, MapActivity.this);
@@ -494,7 +497,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         //set cache and marker list based on zoom
         currentZoom = mMap.getCameraPosition().zoom;
-        if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
+        if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
+            currentQueryCache = zoneQueryCacheTiny;
+            currentMarkersList = markersListTiny;
+        } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
             currentQueryCache = zoneQueryCacheSmall;
             currentMarkersList = markersListSmall;
         } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
@@ -504,8 +510,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             currentQueryCache = zoneQueryCacheLarge;
             currentMarkersList = markersListLarge;
         }
-
-        Log.i(TAG, "getting posts from onCameraIdle");
         getPosts();
     }
 
@@ -520,60 +524,84 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         //check the zones on screen against the cache
         for (String zone : zonesOnScreen) {
             if (!currentQueryCache.contains(zone)) {
-                zonesToQuery.add(zone);
-                currentQueryCache.add(zone);
-                Log.i(TAG, "cached zone " + zone);
-            }
-        }
 
-        //if there are more than 10 zones on screen we can only query 10 at a time:
-        if (zonesToQuery.size() > 10) {
-            String[] zones = zonesToQuery.toArray(new String[0]);
-            //query 10 at a time:
-            while (zones.length > 10) {
-                String[] nextTenZones = Arrays.copyOfRange(zones, 0, 9);
-                List<String> ntzAsList = Arrays.asList(nextTenZones);
-                //query this batch of 10 zones
-                queryAListOfZones(ntzAsList);
-                //remove those 10 from the array
-                zones = Arrays.copyOfRange(zones, 10, zones.length - 1);
+                db.collection("posts")
+                        .whereEqualTo(Utils.getZoneType(cameraBounds), zone)
+                        .orderBy("timestamp", Query.Direction.DESCENDING)
+                        .limit(POSTS_PER_ZONE_LIMIT)
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                                        Post post = Objects.requireNonNull(document.toObject(Post.class));
+                                        ArrayList list = (ArrayList) document.getData().get("comments");
+                                        post.setComments(Utils.turnMapsIntoListOfComments(list));
+                                        createMarkerWithPost(post);
+                                    }
+                                    if (Objects.requireNonNull(task.getResult()).size() >= POSTS_PER_ZONE_LIMIT) {
+                                        currentQueryCache.add(zone);
+                                    }
+                                } else {
+                                    Log.i(TAG, "Error getting documents.", task.getException());
+                                }
+                            }
+                        });
+
+
+                Log.i(TAG, "cached and queried zone " + zone);
             }
-            //convert the remainder back to a list:
-            zonesToQuery = Arrays.asList(zones);
         }
-        //query the (remaining) zones:
-        if (zonesToQuery.size() > 0) queryAListOfZones(zonesToQuery);
+//
+//        //if there are more than 10 zones on screen we can only query 10 at a time:
+//        if (zonesToQuery.size() > 10) {
+//            String[] zones = zonesToQuery.toArray(new String[0]);
+//            //query 10 at a time:
+//            while (zones.length > 10) {
+//                String[] nextTenZones = Arrays.copyOfRange(zones, 0, 9);
+//                List<String> ntzAsList = Arrays.asList(nextTenZones);
+//                //query this batch of 10 zones
+//                queryAListOfZones(ntzAsList);
+//                //remove those 10 from the array
+//                zones = Arrays.copyOfRange(zones, 10, zones.length - 1);
+//            }
+//            //convert the remainder back to a list:
+//            zonesToQuery = Arrays.asList(zones);
+//        }
+//        //query the (remaining) zones:
+//        if (zonesToQuery.size() > 0) queryAListOfZones(zonesToQuery);
     }
 
-    private void queryAListOfZones(List<String> zones) {
+//    private void queryAListOfZones(List<String> zones) {
 //        long maxAge = sharedPreferences.getLong("postMaxAge", 0L);
 //        long maxTime = 0;
 //        if (maxAge != 0) {
 //            maxTime = new Date().getTime() - maxAge;
 //        }
 
-        db.collection("posts")
-                .whereIn(Utils.getZoneType(cameraBounds), zones)
-//                .whereGreaterThan("timestamp", maxTime)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .limit(postQueryLimit)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                                Post post = Objects.requireNonNull(document.toObject(Post.class));
-                                ArrayList list = (ArrayList) document.getData().get("comments");
-                                post.setComments(Utils.turnMapsIntoListOfComments(list));
-                                createMarkerWithPost(post);
-                            }
-                        } else {
-                            Log.i(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
-    }
+//        db.collection("posts")
+//                .whereIn(Utils.getZoneType(cameraBounds), zones)
+////                .whereGreaterThan("timestamp", maxTime)
+//                .orderBy("timestamp", Query.Direction.DESCENDING)
+//                .limit(POSTS_PER_ZONE_LIMIT)
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+//                                Post post = Objects.requireNonNull(document.toObject(Post.class));
+//                                ArrayList list = (ArrayList) document.getData().get("comments");
+//                                post.setComments(Utils.turnMapsIntoListOfComments(list));
+//                                createMarkerWithPost(post);
+//                            }
+//                        } else {
+//                            Log.i(TAG, "Error getting documents.", task.getException());
+//                        }
+//                    }
+//                });
+//    }
 
     public void createMarkerWithPost(Post post) {
         float zIndex = (float) post.getTimestamp();
@@ -699,31 +727,26 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     private void createTestPosts() {
-        //47.6264893
-        //long: -122.3582504
-        double lat = 47.6264893;
-        double lng = -122.3582504;
 
-        for (int i = 0; i < 15; i++) {
-            for (int j = 0; j < 15; j++) {
+        //50/50
+        //start at lat - 25(x), lng -25(x)
+        // lat/lng += x in a for(for
+        //x is random
+        //every 0.005 * (random + 1)
+
+        for (double i = userLng - 0.25; i < userLng + 0.25; i+= 0.01 * (Math.random() + 1)) {
+            for (double j = userLat - 0.25; j < userLat + 0.25; j+= 0.01 * (Math.random() + 1)) {
                 Post post = new Post(
                         UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(),
-                        UUID.randomUUID().toString(),
-                        lat,
-                        lng
-                );
-
-                lng -= 0.005;
-
-                db.collection("posts")
-                        .add(post);
+                        "KfMLnuMWyxbAsKAJt812LLWwXEu2",
+                        "tester",
+                        "test",
+                        "testststsetest",
+                        "somewhere",
+                        j,
+                        i);
+                db.collection("posts").add(post);
             }
-            lat += 0.05;
-            lng = -122.3582504;
         }
     }
 
@@ -736,14 +759,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     public void refreshMapData(View v) {
+        for (Marker marker : markersListTiny) marker.remove();
         for (Marker marker : markersListSmall) marker.remove();
         for (Marker marker : markersListMedium) marker.remove();
         for (Marker marker : markersListLarge) marker.remove();
+        zoneQueryCacheTiny = new HashSet<>();
         zoneQueryCacheSmall = new HashSet<>();
         zoneQueryCacheMedium = new HashSet<>();
         zoneQueryCacheLarge = new HashSet<>();
         if (mMap != null) {
-            if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
+            if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
+                currentQueryCache = zoneQueryCacheTiny;
+                currentMarkersList = markersListTiny;
+            } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
                 currentQueryCache = zoneQueryCacheSmall;
                 currentMarkersList = markersListSmall;
             } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {

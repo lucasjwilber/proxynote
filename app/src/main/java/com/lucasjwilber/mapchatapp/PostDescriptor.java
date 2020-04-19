@@ -8,18 +8,28 @@ public class PostDescriptor {
     private boolean isAnonymous;
     private String title;
     private long timestamp;
+    private String location;
     private int score;
     private int icon;
 
     public PostDescriptor() {};
 
-    public PostDescriptor(String id, boolean isAnonymous, String title, long timestamp, int score, int icon) {
+    public PostDescriptor(String id, boolean isAnonymous, String title, long timestamp, String location, int score, int icon) {
         this.id = id;
         this.isAnonymous = isAnonymous;
         this.title = title;
         this.timestamp = timestamp;
+        this.location = location;
         this.score = score;
         this.icon = icon;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public boolean isAnonymous() {

@@ -146,10 +146,11 @@ public class UserProfileActivity extends AppCompatActivity {
             String title = pd.getTitle();
             int icon = pd.getIcon();
             long time = pd.getTimestamp();
+            String place = pd.getLocation() == null ? "" : " @ " + pd.getLocation();
 
             ImageView iconView = holder.constraintLayout.findViewById(R.id.postdescriptorIcon);
             TextView scoreView = holder.constraintLayout.findViewById(R.id.postdescriptorScore);
-            TextView timeView = holder.constraintLayout.findViewById(R.id.postdescriptorTimeAndLocation);
+            TextView timeAndPlaceView = holder.constraintLayout.findViewById(R.id.postdescriptorTimeAndLocation);
             TextView titleView = holder.constraintLayout.findViewById(R.id.postdescriptorTitle);
             ConstraintLayout cl = holder.constraintLayout;
             holder.constraintLayout.setOnClickListener(v -> onPostDescriptorClicked(cl));
@@ -171,8 +172,8 @@ public class UserProfileActivity extends AppCompatActivity {
 
             scoreView.setText(Integer.toString(score));
             SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d, h:mm a", Locale.US);
-            String timeText = sdf.format(new Date(time));
-            timeView.setText(timeText);
+            String timeAndPlace = sdf.format(new Date(time)) + place;
+            timeAndPlaceView.setText(timeAndPlace);
             titleView.setText(title);
 
             holder.constraintLayout.setTag(pd.getId());

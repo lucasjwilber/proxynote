@@ -16,6 +16,7 @@ public class Post {
     private double lat;
     private double lng;
     private String smallZone;
+    private String tinyZone;
     private String mediumZone;
     private String largeZone;
     private int icon = -1;
@@ -39,6 +40,7 @@ public class Post {
         this.location = location;
         this.lat = lat;
         this.lng = lng;
+        this.tinyZone = Utils.getTinyZone(lat, lng); //eg 46.82
         this.smallZone = Utils.getSmallZone(lat, lng); //eg 46.8
         this.mediumZone = Utils.getMediumZone(lat, lng); //eg 47
         this.largeZone = Utils.getLargeZone(lat, lng); //eg 50
@@ -47,6 +49,14 @@ public class Post {
         this.comments = new ArrayList<>();
         this.votes = new HashMap<>();
         votes.put(userId, 1);
+    }
+
+    public String getTinyZone() {
+        return tinyZone;
+    }
+
+    public void setTinyZone(String tinyZone) {
+        this.tinyZone = tinyZone;
     }
 
     public String getMediumZone() {
