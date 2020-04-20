@@ -88,18 +88,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     SharedPreferences sharedPreferences;
     private boolean areMarkersShown;
     private Handler periodicLocationUpdateHandler;
-    private List<Marker> markersListSmall;
-    private List<Marker> markersListTiny;
-    private List<Marker> markersListMedium;
-    private List<Marker> markersListLarge;
-    private List<Marker> currentMarkersList;
-    private HashSet<String> zoneQueryCacheTiny;
-    private HashSet<String> zoneQueryCacheSmall;
-    private HashSet<String> zoneQueryCacheMedium;
-    private HashSet<String> zoneQueryCacheLarge;
-    private HashSet<String> currentQueryCache;
-    private float currentZoom;
-
+    private List<Marker> markerList;
+    private HashSet<String> zoneCacheTiny;
+    private HashSet<String> zoneCacheSmall;
+    private HashSet<String> zoneCacheMedium;
+    private HashSet<String> zoneCacheLarge;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,12 +108,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
         periodicLocationUpdateHandler = new Handler();
 
-        markersListTiny = new LinkedList<>();
-        markersListSmall = new LinkedList<>();
-        markersListMedium = new LinkedList<>();
-        markersListLarge = new LinkedList<>();
-        currentQueryCache = zoneQueryCacheTiny;
-        currentMarkersList = markersListTiny;
+//        markerListTiny = new LinkedList<>();
+//        markerListSmall = new LinkedList<>();
+//        markerListMedium = new LinkedList<>();
+//        markerListLarge = new LinkedList<>();
+        markerList = new LinkedList<>();
 
         userLocationIcon = Utils.getBitmapDescriptorFromSvg(R.drawable.user_location_pin, MapActivity.this);
         postOutlineYellow = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yellow, MapActivity.this);
@@ -495,25 +487,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onCameraIdle() {
         cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 
-        //set cache and marker list based on zoom
-        currentZoom = mMap.getCameraPosition().zoom;
         if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
-            currentQueryCache = zoneQueryCacheTiny;
-            currentMarkersList = markersListTiny;
+            getPosts(zoneCacheTiny);
         } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
-            currentQueryCache = zoneQueryCacheSmall;
-            currentMarkersList = markersListSmall;
+            getPosts(zoneCacheSmall);
         } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
-            currentQueryCache = zoneQueryCacheMedium;
-            currentMarkersList = markersListMedium;
+            getPosts(zoneCacheMedium);
         } else {
-            currentQueryCache = zoneQueryCacheLarge;
-            currentMarkersList = markersListLarge;
+            getPosts(zoneCacheLarge);
         }
-        getPosts();
     }
 
-    private void getPosts() {
+    private void getPosts(HashSet<String> cache) {
         List<String> zonesOnScreen = Utils.getZonesOnScreen(cameraBounds);
         Log.i(TAG, "the " + zonesOnScreen.toString() + " zones are on screen");
         Log.i(TAG, "zoneType is " + Utils.getZoneType(cameraBounds));
@@ -523,7 +508,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         //check the zones on screen against the cache
         for (String zone : zonesOnScreen) {
-            if (!currentQueryCache.contains(zone)) {
+            if (!cache.contains(zone)) {
 
                 db.collection("posts")
                         .whereEqualTo(Utils.getZoneType(cameraBounds), zone)
@@ -540,10 +525,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                         post.setComments(Utils.turnMapsIntoListOfComments(list));
                                         createMarkerWithPost(post);
                                     }
+                                    Log.i(TAG, "got " + task.getResult().size() + " posts from zone " + zone);
 
-                                    if (Objects.requireNonNull(task.getResult()).size() >= POSTS_PER_ZONE_LIMIT) {
-                                        currentQueryCache.add(zone);
-                                    }
+                                    cache.add(zone);
 
                                     binding.postQueryPB.setVisibility(View.GONE);
                                     binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
@@ -568,6 +552,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .position(new LatLng(post.getLat(), post.getLng()))
                 .anchor(0, 1)
                 .zIndex(zIndex)
+                .visible(areMarkersShown)
         );
         borderMarker.setTag(post.getId());
 
@@ -591,11 +576,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 .anchor(-0.4f, 1.575f)
                 .zIndex(zIndex + 1f)
                 .icon(BitmapDescriptorFactory.fromBitmap(Utils.getPostIconBitmap(post.getIcon(), this)))
+                .visible(areMarkersShown)
         );
         iconMarker.setTag(post.getId());
 
-        currentMarkersList.add(borderMarker);
-        currentMarkersList.add(iconMarker);
+        markerList.add(borderMarker);
+        markerList.add(iconMarker);
     }
 
     public void onMapClick(LatLng latlng) {
@@ -709,38 +695,28 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 //    }
 
     public void toggleMarkerVisibility(View v) {
-        for (Marker marker : markersListSmall) marker.setVisible(areMarkersShown);
-        for (Marker marker : markersListTiny) marker.setVisible(areMarkersShown);
-        for (Marker marker : markersListMedium) marker.setVisible(areMarkersShown);
-        for (Marker marker : markersListLarge) marker.setVisible(areMarkersShown);
+        for (Marker marker : markerList) marker.setVisible(areMarkersShown);
         v.setBackground(areMarkersShown ? getDrawable(R.drawable.visibility) : getDrawable(R.drawable.visibility_off));
         areMarkersShown = !areMarkersShown;
     }
 
     public void refreshMapData(View v) {
-        for (Marker marker : markersListTiny) marker.remove();
-        for (Marker marker : markersListSmall) marker.remove();
-        for (Marker marker : markersListMedium) marker.remove();
-        for (Marker marker : markersListLarge) marker.remove();
-        zoneQueryCacheTiny = new HashSet<>();
-        zoneQueryCacheSmall = new HashSet<>();
-        zoneQueryCacheMedium = new HashSet<>();
-        zoneQueryCacheLarge = new HashSet<>();
-        if (mMap != null) {
+        for (Marker marker : markerList) marker.remove();
+        zoneCacheTiny = new HashSet<>();
+        zoneCacheSmall = new HashSet<>();
+        zoneCacheMedium = new HashSet<>();
+        zoneCacheLarge = new HashSet<>();
+
+        if (mMap != null && cameraBounds != null) {
             if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
-                currentQueryCache = zoneQueryCacheTiny;
-                currentMarkersList = markersListTiny;
+                getPosts(zoneCacheTiny);
             } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
-                currentQueryCache = zoneQueryCacheSmall;
-                currentMarkersList = markersListSmall;
+                getPosts(zoneCacheSmall);
             } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
-                currentQueryCache = zoneQueryCacheMedium;
-                currentMarkersList = markersListMedium;
+                getPosts(zoneCacheMedium);
             } else {
-                currentQueryCache = zoneQueryCacheLarge;
-                currentMarkersList = markersListLarge;
+                getPosts(zoneCacheLarge);
             }
-            getPosts();
         }
     }
 
