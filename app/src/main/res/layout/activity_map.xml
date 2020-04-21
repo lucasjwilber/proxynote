@@ -26,6 +26,17 @@
             android:background="@drawable/hamburger_menu_icon"
             />
 
+<!--        <SeekBar-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="100dp"-->
+<!--            android:layout_marginEnd="100dp"-->
+<!--            android:layout_marginTop="24dp"-->
+<!--            android:progressBackgroundTint="@color/colorAccent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent" />-->
+
         <ImageView
             android:layout_width="30dp"
             android:layout_height="29dp"

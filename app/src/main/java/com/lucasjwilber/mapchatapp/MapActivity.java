@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -106,7 +107,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         db = FirebaseFirestore.getInstance();
         sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
         periodicLocationUpdateHandler = new Handler();
-        markerList = new LinkedList<>();
+        markerList = new ArrayList<>();
 
         userLocationIcon = Utils.getBitmapDescriptorFromSvg(R.drawable.user_location_pin, MapActivity.this);
         postOutlineYellow = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yellow, MapActivity.this);
@@ -481,15 +482,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onCameraIdle() {
         cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 
-//        if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
-//            getPosts(zoneCacheTiny);
-//        } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
-//            getPosts(zoneCacheSmall);
-//        } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
-//            getPosts(zoneCacheMedium);
-//        } else {
-//            getPosts(zoneCacheLarge);
-//        }
         if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
             queryAllZonesOnScreen(zoneCacheTiny);
         } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
@@ -499,8 +491,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         } else {
             queryAllZonesOnScreen(zoneCacheLarge);
         }
-
-        Log.i(TAG, "current zoom is " + mMap.getCameraPosition().zoom);
     }
 
     private void queryAllZonesOnScreen(HashSet<String> cache) {
@@ -569,56 +559,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                             }
                         });
     }
-
-//    private void getPosts(HashSet<String> cache) {
-//        binding.postQueryRefreshButton.setVisibility(View.GONE);
-//        binding.postQueryPB.setVisibility(View.VISIBLE);
-//
-//        List<String> zonesOnScreen = Utils.getZonesOnScreen(cameraBounds);
-//        Log.i(TAG, "the " + zonesOnScreen.toString() + " zones are on screen");
-//        Log.i(TAG, "zoneType is " + Utils.getZoneType(cameraBounds));
-//
-//        String zoneType = Utils.getZoneType(cameraBounds);
-//        float zoom = mMap.getCameraPosition().zoom;
-//        int postQueryLimit = 15;
-////        if (zoneType.equals("smallZone") && zoom < 12.0) {
-////            Log.i(TAG, "reducing query limit");
-////            postQueryLimit = 10;
-////        }
-//
-//        //check the zones on screen against the cache
-//        for (String zone : zonesOnScreen) {
-//            if (!cache.contains(zone)) {
-//                db.collection("posts")
-//                        .whereEqualTo(zoneType, zone)
-//                        .orderBy("timestamp", Query.Direction.DESCENDING)
-//                        .limit(postQueryLimit)
-//                        .get()
-//                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//                            @Override
-//                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-//                                if (task.isSuccessful()) {
-//                                    for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-//                                        Post post = Objects.requireNonNull(document.toObject(Post.class));
-//                                        ArrayList list = (ArrayList) document.getData().get("comments");
-//                                        post.setComments(Utils.turnMapsIntoListOfComments(list));
-//                                        createMarkerWithPost(post);
-//                                    }
-//
-//                                    cache.add(zone);
-//
-//                                    binding.postQueryPB.setVisibility(View.GONE);
-//                                    binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
-//                                } else {
-//                                    Log.i(TAG, "Error getting documents.", task.getException());
-//                                    binding.postQueryPB.setVisibility(View.GONE);
-//                                    binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
-//                                }
-//                            }
-//                        });
-//            }
-//        }
-//    }
 
     public void createMarkerWithPost(Post post) {
         float zIndex = (float) post.getTimestamp();

@@ -210,7 +210,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         } else {
                             Log.i(TAG, "createUserWithEmail:failure", task.getException());
-                            Utils.showToast(LoginActivity.this, "This email is already in use.");
+                            Utils.showToast(LoginActivity.this, "This email address is invalid or already in use.");
                             binding.loginProgressBar.setVisibility(View.GONE);
                         }
                     }
