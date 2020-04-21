@@ -1,5 +1,5 @@
-# mapChat
-Share what you've seen! Add and reply to posts on a Google map, pinned to the location where they were created.
+# ProxyNote
+Share what you see! Leave notes, images, and videos on a map for others to see and vote on.
 
 ## Built With
 * Firebase Auth

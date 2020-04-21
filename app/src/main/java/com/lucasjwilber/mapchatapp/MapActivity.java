@@ -49,10 +49,7 @@ import com.lucasjwilber.mapchatapp.databinding.ActivityMapBinding;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -105,7 +102,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postRv.setLayoutManager(new LinearLayoutManager(this));
 
         db = FirebaseFirestore.getInstance();
-        sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
+        sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         periodicLocationUpdateHandler = new Handler();
         markerList = new ArrayList<>();
 
@@ -142,8 +139,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onResume() {
         super.onResume();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-//        createTestPosts();
 
         //post data may have changed. delete all stored markers, clear the caches, and get posts
         refreshMapData(null);
@@ -189,7 +184,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        //location permission
         if (requestCode == FINE_LOCATION_PERMISSION_REQUEST_CODE) {
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
@@ -199,7 +193,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
-                    Log.i(TAG, "location permission granted, getting location...");
                     getUserLatLng(true);
                 }
             } else {
@@ -212,8 +205,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         Intent intent = getIntent();
         double lat = intent.getDoubleExtra("lat", 0d);
         double lng = intent.getDoubleExtra("lng", 0d);
-        Log.i(TAG, "from intent: " + lat + "/" + lng);
-        Log.i(TAG, "user: " + userLat + "/" + userLng);
 
         //if lat/lng is 0/0, either by the db field being null or an error with the intent,
         //just center on the user instead of an incorrect location
@@ -224,7 +215,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         double finalLat = lat;
         double finalLng = lng;
-        Log.i(TAG, "going to " + finalLat + "/" + finalLng);
         AsyncTask.execute(() -> {
             //update map on main thread
             Handler handler = new Handler(Looper.getMainLooper()) {
@@ -243,7 +233,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     if (userMarker != null) userMarker.remove();
                     userMarker = mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(userLat, userLng))
-                            .title("My Location")
                             .icon(userLocationIcon));
 
                     //sleep for a moment because zooming and centering the camera at the same time
@@ -265,12 +254,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void getUserLatLng(boolean centerOnUser) {
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, location -> {
-                    Log.i(TAG, "successfully got location");
                     // Got last known location. In some rare situations this can be null.
                     if (location != null) {
                         userLat = location.getLatitude();
                         userLng = location.getLongitude();
-                        Log.i(TAG, "lat: " + userLat + "\nlong: " + userLng);
 
                         if (!mapHasBeenSetUp) mapViewSetup();
                         if (centerOnUser) mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
@@ -278,14 +265,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         if (userMarker != null) userMarker.remove();
                         userMarker = mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(userLat, userLng))
-                                .title("My Location")
                                 .icon(userLocationIcon));
 
                         startGetLocationLooper();
                     }
                 })
                 .addOnFailureListener(this, error -> {
-                    Log.i(TAG, "error getting location:\n" + error.toString());
+                    Log.e(TAG, "error getting location:\n" + error.toString());
                 });
     }
 
@@ -297,7 +283,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             periodicLocationUpdateHandler.postDelayed(new Runnable() {
                 public void run() {
                     getUserLatLng(false);
-                    Log.i(TAG, "updated location from the runnable: " + userLat + "/" + userLng);
                     //this is nulled on activity pause, in which case we don't want to start another one
                     if (periodicLocationUpdateHandler != null) {
                         periodicLocationUpdateHandler.postDelayed(this, LOCATION_UPDATE_COOLDOWN);
@@ -344,7 +329,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     startActivity(i);
                 } else { //log out
                     FirebaseAuth.getInstance().signOut();
-                    Log.i(TAG, "user logged out");
                     Utils.showToast(MapActivity.this, "You are now logged out.");
                     currentUser = null;
                 }
@@ -498,10 +482,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         List<String> allZonesOnScreen = Utils.getZonesOnScreen(cameraBounds, cache);
 
         if (allZonesOnScreen.size() == 0) {
-            Log.i(TAG, "no uncached zones to query.");
             return;
         } else {
-            Log.i(TAG, "querying " + allZonesOnScreen.size() + " uncached zones");
             binding.postQueryRefreshButton.setVisibility(View.GONE);
             binding.postQueryPB.setVisibility(View.VISIBLE);
         }
@@ -509,16 +491,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         int postsPerZoneLimit = 1 + ( (int) Math.ceil(totalQueryLimit / allZonesOnScreen.size()));
         String zoneType = Utils.getZoneType(cameraBounds);
-        Log.i(TAG, "total query limit is " + totalQueryLimit + ", per zone limit is " + postsPerZoneLimit);
 
         if (allZonesOnScreen.size() > 10) {
             String[] zones = allZonesOnScreen.toArray(new String[0]);
             while (zones.length > 10) {
-                Log.i(TAG, "there are more than 10 zones, querying 10 at a time...");
                 String[] nextTenZones = Arrays.copyOfRange(zones, 0, 9);
                 List<String> ntzAsList = Arrays.asList(nextTenZones);
 
-                Log.i(TAG, "query limit is " + ((int) Math.ceil(postsPerZoneLimit * 10)) + " for this batch of 10");
                 queryAListOfZones(zoneType, cache, ntzAsList, (int) Math.ceil((postsPerZoneLimit * 10)));
 
                 zones = Arrays.copyOfRange(zones, 10, zones.length - 1);
@@ -526,8 +505,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             //convert the remainder back to a list in order to query it:
             allZonesOnScreen = Arrays.asList(zones);
         }
-
-        Log.i(TAG, "query limit is " + ((int) Math.ceil(postsPerZoneLimit * allZonesOnScreen.size())) + " for the remaining " + allZonesOnScreen.size());
 
         if (allZonesOnScreen.size() > 0) queryAListOfZones(zoneType, cache, allZonesOnScreen, (int) Math.ceil(postsPerZoneLimit * allZonesOnScreen.size()));
     }
@@ -552,7 +529,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                     binding.postQueryPB.setVisibility(View.GONE);
                                     binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
                                 } else {
-                                    Log.i(TAG, "Error getting documents.", task.getException());
+                                    Log.e(TAG, "Error getting documents.", task.getException());
                                     binding.postQueryPB.setVisibility(View.GONE);
                                     binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
                                 }
@@ -666,7 +643,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         }
                         binding.mapPostRvProgressBar.setVisibility(View.GONE);
                     })
-                    .addOnFailureListener(e -> Log.i(TAG, "error getting post: " + e.toString()));
+                    .addOnFailureListener(e -> Log.e(TAG, "error getting post: " + e.toString()));
         }
     }
 
@@ -685,31 +662,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
-    private void createTestPosts() {
-        //lat 40.7 - 41.7
-        //lng -118.5 - -116
-        //random * difference + min
-        for (int i = 0; i < 20; i++) {
-            Post post = new Post(UUID.randomUUID().toString(), "userId", "an alien", "test", "test", "somewhere",
-                    (47.5 + (Math.random() * .15)),
-                    (-122.44 + (Math.random() * .25)) );
-
-            post.setIcon((int) (Math.random() * 80));
-//            Log.i(TAG, "post is at " + (Math.random() + 40.7) + ", " + (Math.random()*2.5 + -118.5));
-
-            db.collection("posts").add(post);
-        }
-    }
-
     public void toggleMarkerVisibility(View v) {
-        Log.i(TAG, "click");
         areMarkersShown = !areMarkersShown;
         for (Marker marker : markerList) marker.setVisible(areMarkersShown);
         v.setBackground(areMarkersShown ? getDrawable(R.drawable.visibility) : getDrawable(R.drawable.visibility_off));
     }
 
     public void refreshMapData(View v) {
-        Log.i(TAG, "click");
         for (Marker marker : markerList) marker.remove();
         zoneCacheTiny = new HashSet<>();
         zoneCacheSmall = new HashSet<>();
@@ -717,15 +676,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         zoneCacheLarge = new HashSet<>();
 
         if (mMap != null && cameraBounds != null) {
-//            if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
-//                getPosts(zoneCacheTiny);
-//            } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
-//                getPosts(zoneCacheSmall);
-//            } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
-//                getPosts(zoneCacheMedium);
-//            } else {
-//                getPosts(zoneCacheLarge);
-//            }
             if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
                 queryAllZonesOnScreen(zoneCacheTiny);
             } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {

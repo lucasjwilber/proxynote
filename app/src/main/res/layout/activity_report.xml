@@ -28,8 +28,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.43">
+        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        app:layout_constraintVertical_bias="0.35000002">
 
         <RadioGroup
             android:id="@+id/reportTypeRG"
@@ -109,7 +109,9 @@
             android:layout_height="60dp"
             android:background="@drawable/rounded_square_black"
             android:ems="10"
-            android:maxLength="100"
+            android:gravity="top|start"
+            android:maxLength="200"
+            android:paddingBottom="12dp"
             app:layout_constraintStart_toStartOf="@+id/reportAIlabel"
             app:layout_constraintTop_toBottomOf="@+id/reportAIlabel" />
 

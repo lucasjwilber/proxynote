@@ -27,7 +27,6 @@ public class HelpActivity extends AppCompatActivity {
     private FirebaseUser user;
     private FirebaseFirestore db;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +52,6 @@ public class HelpActivity extends AppCompatActivity {
                 .add(qoc)
                 .addOnSuccessListener(s -> {
                     binding.helpCommentBox.setText("");
-                    Log.i(TAG, "question/comment submitted");
                     Utils.showToast(this, "Submitted! Thank you.");
                 })
                 .addOnFailureListener(e -> Log.e(TAG, "error submitting question/comment: " + e.toString()));
@@ -159,7 +157,7 @@ public class HelpActivity extends AppCompatActivity {
                     .addOnSuccessListener(r -> {
                         Utils.showToast(HelpActivity.this, "Verification email sent.");
                     })
-                    .addOnFailureListener(e -> Log.i(TAG, "error sending ver email: " + e.toString()));
+                    .addOnFailureListener(e -> Log.e(TAG, "error sending ver email: " + e.toString()));
         } else if (user == null) {
             Utils.showToast(HelpActivity.this, "Please sign up or log in first.");
         } else {

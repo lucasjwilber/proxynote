@@ -32,13 +32,11 @@ public class ReportActivity extends AppCompatActivity {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         Intent intent = getIntent();
         postId = intent.getStringExtra("postId");
-        Log.i(TAG, "on report page for post " + postId);
     }
 
     public void onReportSubmit(View v) {
         RadioGroup reportTypeRG = findViewById(R.id.reportTypeRG);
         String reason;
-        Log.i(TAG, "checked rb is " + reportTypeRG.getCheckedRadioButtonId());
         switch (reportTypeRG.getCheckedRadioButtonId()) {
             case R.id.reportRBspam:
                 reason = "spam";
@@ -72,7 +70,6 @@ public class ReportActivity extends AppCompatActivity {
                 .document(reportId)
                 .set(report)
                 .addOnSuccessListener(success -> {
-                    Log.i(TAG, "successfully added report to db");
                     Utils.showToast(ReportActivity.this, "Report submitted. Thank you!");
                     loadingSpinner.setVisibility(View.GONE);
                     finish();

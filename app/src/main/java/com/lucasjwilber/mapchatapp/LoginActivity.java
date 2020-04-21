@@ -44,7 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         //autofill email ET if it was saved
-        sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
+        sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         String savedEmail = sharedPreferences.getString("email", "");
         binding.loginActEmailEditText.setText(savedEmail);
 
@@ -125,12 +125,11 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.i(TAG, "signInWithEmail:success");
                             user = mAuth.getCurrentUser();
                             binding.loginProgressBar.setVisibility(View.GONE);
                             finish();
                         } else {
-                            Log.i(TAG, "signInWithEmail:failure", task.getException());
+                            Log.e(TAG, "signInWithEmail:failure", task.getException());
                             Utils.showToast(LoginActivity.this, "Username or password incorrect.");
                             binding.loginProgressBar.setVisibility(View.GONE);
                         }
@@ -156,7 +155,6 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.i(TAG, "createUserWithEmail:success");
                             user  = mAuth.getCurrentUser();
 
                             //save email for autofill next time
@@ -168,7 +166,7 @@ public class LoginActivity extends AppCompatActivity {
                             user.updateProfile(userProfileChangeRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-                                    Log.i(TAG, "updated user profile with username");
+                                    Log.i(TAG, "updated user's displayName with their chosen username");
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -186,16 +184,13 @@ public class LoginActivity extends AppCompatActivity {
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void aVoid) {
-                                            Log.i(TAG, "added new user to firestore");
-
                                             user.sendEmailVerification()
                                                     .addOnSuccessListener(r -> {
-                                                        Log.i(TAG, "is user verified yet: " + user.isEmailVerified());
                                                         waitForEmailVerification();
                                                         binding.loginProgressBar.setVisibility(View.GONE);
                                                     })
                                                     .addOnFailureListener(e -> {
-                                                        Log.e(TAG, "error checking for email verification: " + e.toString());
+                                                        Log.e(TAG, "error sending email verification: " + e.toString());
                                                         binding.loginProgressBar.setVisibility(View.GONE);
                                                     });
                                         }
@@ -203,13 +198,13 @@ public class LoginActivity extends AppCompatActivity {
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
-                                            Log.i(TAG, "failed adding new user to firestore!\nnew user: "+newUser.toString());
+                                            Log.e(TAG, "failed adding new user to firestore: " + e.toString());
                                             binding.loginProgressBar.setVisibility(View.GONE);
                                         }
                                     });
 
                         } else {
-                            Log.i(TAG, "createUserWithEmail:failure", task.getException());
+                            Log.e(TAG, "createUserWithEmail:failure", task.getException());
                             Utils.showToast(LoginActivity.this, "This email address is invalid or already in use.");
                             binding.loginProgressBar.setVisibility(View.GONE);
                         }
@@ -227,7 +222,7 @@ public class LoginActivity extends AppCompatActivity {
             .addOnSuccessListener(r -> {
                 Utils.showToast(LoginActivity.this, "Verification email sent.");
             })
-            .addOnFailureListener(e -> Log.i(TAG, "error sending ver email: " + e.toString()));
+            .addOnFailureListener(e -> Log.e(TAG, "error sending ver email: " + e.toString()));
         }
     }
 
@@ -248,7 +243,6 @@ public class LoginActivity extends AppCompatActivity {
                     waitingForEmailVerification = false;
                     finish();
                 } else {
-                    Log.i(TAG, "user still not verified");
                     emailVerificationCheckRunnable.postDelayed(this, EMAIL_VERIFICATION_CHECK_COOLDOWN);
                 }
             }

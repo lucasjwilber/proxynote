@@ -120,6 +120,8 @@ public class CreatePostActivity extends AppCompatActivity {
 
         loadingSpinner.setVisibility(View.VISIBLE);
 
+        Utils.showToast(CreatePostActivity.this, "Creating post...");
+
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(CreatePostActivity.this);
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(CreatePostActivity.this, location -> {
@@ -129,7 +131,6 @@ public class CreatePostActivity extends AppCompatActivity {
                     if (location != null) {
                         userLat = location.getLatitude();
                         userLng = location.getLongitude();
-                        Log.i(TAG, "lat: " + userLat + ", long: " + userLng);
 
                         AsyncTask.execute(() -> {
                             try {
@@ -139,7 +140,6 @@ public class CreatePostActivity extends AppCompatActivity {
                                 con.setRequestMethod("GET");
                                 BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                                 String formattedAddress = in.readLine();
-                                Log.i(TAG, "posting from " + formattedAddress);
                                 in.close();
                                 con.disconnect();
 
@@ -174,11 +174,11 @@ public class CreatePostActivity extends AppCompatActivity {
                                 }).start();
 
                             } catch (MalformedURLException e) {
-                                Log.i("ljw", "malformedURLexception:\n" + e.toString());
+                                Log.e(TAG, "malformedURLexception:\n" + e.toString());
                             } catch (ProtocolException e) {
-                                Log.i("ljw", "protocol exception:\n" + e.toString());
+                                Log.e(TAG, "protocol exception:\n" + e.toString());
                             } catch (IOException e) {
-                                Log.i("ljw", "IO exception:\n" + e.toString());
+                                Log.e(TAG, "IO exception:\n" + e.toString());
                             }
 
                         });
@@ -194,7 +194,8 @@ public class CreatePostActivity extends AppCompatActivity {
         Handler handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
-                Utils.showToast(CreatePostActivity.this, "Uploading...");
+                String message = currentImage != null ? "Uploading image..." : "Uploading video...";
+                Utils.showToast(CreatePostActivity.this, message);
             }
         };
         handler.obtainMessage().sendToTarget();
@@ -271,7 +272,6 @@ public class CreatePostActivity extends AppCompatActivity {
                         public void onTranscodeFailed(@NonNull Throwable exception) {}
                     }).transcode();
         }
-
     }
 
     public void uploadPost(Post post) {
@@ -279,8 +279,6 @@ public class CreatePostActivity extends AppCompatActivity {
                 .document(post.getId())
                 .set(post)
                 .addOnSuccessListener(result -> {
-                    Log.i(TAG, "successfully added new post to DB");
-
                     //add post to user's list and +1 their total score
                     db.collection("users")
                             .document(user.getUid())
@@ -288,7 +286,7 @@ public class CreatePostActivity extends AppCompatActivity {
                             .addOnSuccessListener(userData -> {
                                 User user = userData.toObject(User.class);
                                 if (user.getPostDescriptors() == null) {
-                                    Log.i(TAG, "user doesn't have a postDescriptors field!");
+                                    Log.w(TAG, "user doesn't have a postDescriptors field!");
                                 } else {
                                     List<PostDescriptor> postDescriptors = user.getPostDescriptors();
                                     postDescriptors.add(new PostDescriptor(
@@ -306,7 +304,6 @@ public class CreatePostActivity extends AppCompatActivity {
                                             .update("postDescriptors", postDescriptors,
                                                     "totalScore", user.getTotalScore() + 1)
                                             .addOnSuccessListener(result2 -> {
-                                                Log.i(TAG, "successfully updated user's post descriptors list");
                                                 loadingSpinner.setVisibility(View.VISIBLE);
                                             })
                                             .addOnFailureListener(e -> {
@@ -333,7 +330,6 @@ public class CreatePostActivity extends AppCompatActivity {
     public void onMediaButtonClicked(View v) {
         PackageManager pm = getPackageManager();
         if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-            Log.i(TAG, "package manager says this device has a camera. going to try to use it...");
             if (v.getId() == R.id.cameraButton) {
                 checkVersionBeforeLaunchingCamera(REQUEST_IMAGE_CAPTURE);
             } else if (v.getId() == R.id.videoButton) {
@@ -341,7 +337,6 @@ public class CreatePostActivity extends AppCompatActivity {
             }
         } else {
             Utils.showToast(CreatePostActivity.this, "This device doesn't have a compatible camera.");
-            Log.i(TAG, "this device doesn't have a camera to use.");
         }
 
     }
@@ -377,13 +372,10 @@ public class CreatePostActivity extends AppCompatActivity {
                 if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.CAMERA)
                         == PackageManager.PERMISSION_GRANTED) {
-                    Log.i(TAG, "camera permission granted");
 
                     //launch camera
                     dispatchRecordMediaIntent(requestCode);
                 }
-            } else {
-                Log.i(TAG, "camera permission denied");
             }
         }
     }
@@ -492,7 +484,6 @@ public class CreatePostActivity extends AppCompatActivity {
         }
     }
 
-
     private File createMediaFile(int requestCode) throws IOException {
         String timestamp = Long.toString(new Date().getTime());
         String fileName = user.getDisplayName() + timestamp;
@@ -518,7 +509,6 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     public void onIconClick(View v, int position) {
-        Log.i(TAG, "selected icon code is " + v.getTag().toString());
         if (selectedIconView != null) selectedIconView.setBackground(null);
         selectedIconView = (ImageView) v;
         selectedIcon = (int) v.getTag();

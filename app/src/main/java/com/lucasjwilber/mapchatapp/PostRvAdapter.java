@@ -64,7 +64,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
-        SharedPreferences prefs = context.getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
+        SharedPreferences prefs = context.getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");
         upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
         downArrowColored = context.getDrawable(R.drawable.arrow_down_colored);
@@ -131,7 +131,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 addCommentButton.setOnClickListener(v -> addCommentToPost(addCommentBox.getText().toString()));
 
                 TextView commentCount = l.findViewById(R.id.postCommentCount);
-                Log.i(TAG, "comments: " + post.getComments());
                 int numComments = post.getComments().size();
                 String commentCountText = "";
                 if (numComments == 1) {
@@ -171,7 +170,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 upvoteButton.setOnClickListener(v -> onVoteButtonClick(upvoteButton));
                 downvoteButton = l.findViewById(R.id.postRvHeaderVoteDownBtn);
                 downvoteButton.setOnClickListener(v -> onVoteButtonClick(downvoteButton));
-                Log.i(TAG, "post votes: " + post.getVotes().size());
                 if (post.getVotes().containsKey(currentUserId)) {
                     if (post.getVotes().get(currentUserId) > 0) {
                         upvoteButton.setBackground(upArrowColored);
@@ -220,14 +218,12 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     public void onVoteButtonClick(Button b) {
         if (user == null) {
             Utils.showToast(context, "You must be logged in to vote.");
-            return;
         } else {
             //reload and check again first in case user logged out or verified their email while this RV is open
             user.reload()
                     .addOnSuccessListener(r -> {
                         if (user == null) {
                             Utils.showToast(context, "You must be logged in to vote.");
-                            return;
                         } else if (!user.isEmailVerified()) {
                             Utils.showToast(context, "Please verify your email first.");
                         } else {
@@ -306,14 +302,11 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                             .update("score", post.getScore() + finalScoreChange,
                                     "votes", voteMap)
                             .addOnCompleteListener(task1 -> {
-                                Log.i(TAG, "successfully updated score");
-
                                 //update the post creator's total score field:
                                 db.collection("users")
                                         .document(post.getUserId())
                                         .get()
                                         .addOnCompleteListener(task2 -> {
-                                            Log.i(TAG, "got post creator for score update");
                                             User user = task2.getResult().toObject(User.class);
                                             int userScore = user.getTotalScore();
 
@@ -329,27 +322,24 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                                                     .document(post.getUserId())
                                                     .update("totalScore", userScore + finalScoreChange,
                                                             "postDescriptors", postDescriptors)
-                                                    .addOnCompleteListener(task3 -> {
-                                                        Log.i(TAG, "updated post user's score and the postDescriptor successfully");
-                                                    })
                                                     .addOnFailureListener(e -> {
-                                                        Log.i(TAG, "couldn't update user's score: " + e.toString());
+                                                        Log.e(TAG, "couldn't update user's score: " + e.toString());
                                                     });
 
                                         })
                                         .addOnFailureListener(e -> {
-                                            Log.i(TAG, "failed getting user: " + e.toString());
+                                            Log.e(TAG, "failed getting user: " + e.toString());
                                         });
 
                                 b.setEnabled(true);
                             })
                             .addOnFailureListener(e -> {
-                                Log.i(TAG, "failed updating score: " + e.toString());
+                                Log.e(TAG, "failed updating score: " + e.toString());
                                 b.setEnabled(true);
                             });
                 })
                 .addOnFailureListener(e -> {
-                    Log.i(TAG, "error getting post to update its score: " + e.toString());
+                    Log.e(TAG, "error getting post to update its score: " + e.toString());
                     b.setEnabled(true);
                 });
     }
@@ -406,14 +396,11 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(location -> {
-                    Log.i(TAG, "successfully got location");
-                    // Got last known location. In some rare situations this can be null.
                     double userLat;
                     double userLng;
                     if (location != null) {
                         userLat = location.getLatitude();
                         userLng = location.getLongitude();
-                        Log.i(TAG, "lat: " + userLat + "\nlong: " + userLng);
 
                         double distanceFromPost = Utils.getDistance(userLat, userLng, post.getLat(), post.getLng());
 
@@ -437,7 +424,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                                     replyLoadingSpinner.setVisibility(View.GONE);
                                 })
                                 .addOnFailureListener(e -> {
-                                    Log.e(TAG, "failed adding a comment because " + e.toString());
+                                    Log.e(TAG, "failed adding a comment: " + e.toString());
                                     Utils.showToast(context, "This post no longer exists.");
                                     replyLoadingSpinner.setVisibility(View.GONE);
                                 });

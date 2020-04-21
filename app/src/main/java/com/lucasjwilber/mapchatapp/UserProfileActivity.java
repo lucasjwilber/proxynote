@@ -60,7 +60,6 @@ public class UserProfileActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         thisProfileOwnerId = intent.getStringExtra("userId");
-        Log.i(TAG, "userId is " + thisProfileOwnerId);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null && thisProfileOwnerId.equals(currentUser.getUid())) {
@@ -74,7 +73,6 @@ public class UserProfileActivity extends AppCompatActivity {
                     .document(thisProfileOwnerId)
                     .get()
                     .addOnSuccessListener(result -> {
-                        Log.i(TAG, "successfully got user:\n" + result.toString());
                         User user = result.toObject(User.class);
                         assert user != null;
                         binding.profileUsername.setText(user.getUsername());
@@ -94,7 +92,6 @@ public class UserProfileActivity extends AppCompatActivity {
                         }
 
                         if (userPostDescriptors == null || userPostDescriptors.size() == 0) {
-                            Log.i(TAG, "user hasn't made any posts, or possibly doesn't have a postDescriptors list");
                             String noPostsText = user.getUsername() + " hasn't made any posts yet.";
                             binding.profileNoCommentsYet.setText(noPostsText);
                             binding.profileNoCommentsYet.setVisibility(View.VISIBLE);
@@ -107,7 +104,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         binding.postDescRvProgressBar.setVisibility(View.GONE);
                     })
                     .addOnFailureListener(e -> {
-                        Log.i(TAG, "error getting user: " + e.toString());
+                        Log.e(TAG, "error getting user: " + e.toString());
                         binding.postDescRvProgressBar.setVisibility(View.GONE);
                     });
         }
@@ -185,8 +182,6 @@ public class UserProfileActivity extends AppCompatActivity {
         }
 
         public void onPostDescriptorClicked(ConstraintLayout cl) {
-
-            Log.i(TAG, "clicked on post " + cl.getTag());
             selectedPostId = cl.getTag().toString();
             binding.profileOnePostRv.setAdapter(null);
             binding.profPostRvContainer.setVisibility(View.VISIBLE);
@@ -255,7 +250,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
                     })
                     .addOnFailureListener(e -> {
-                        Log.i(TAG, "error getting post: " + e.toString());
+                        Log.e(TAG, "error getting post: " + e.toString());
                         binding.postRvProgressBar.setVisibility(View.GONE);
                     });
         }
@@ -285,7 +280,6 @@ public class UserProfileActivity extends AppCompatActivity {
                                 .document(selectedPostId)
                                 .delete()
                                 .addOnSuccessListener(result -> {
-                                    Log.i(TAG, "post deleted!");
                                     hidePostRv(null);
 
                                     //delete post descriptor
@@ -293,7 +287,6 @@ public class UserProfileActivity extends AppCompatActivity {
                                             .document(thisProfileOwnerId)
                                             .get()
                                             .addOnSuccessListener(result2 -> {
-                                                Log.i(TAG, "got user to delete their postdescriptor");
                                                 User user = result2.toObject(User.class);
                                                 List<PostDescriptor> usersNewPDs = new ArrayList<>();
                                                 int postScore = 0;
@@ -316,26 +309,25 @@ public class UserProfileActivity extends AppCompatActivity {
                                                         .update("postDescriptors", usersNewPDs,
                                                                 "totalScore", user.getTotalScore() - postScore)
                                                         .addOnSuccessListener(result3 -> {
-                                                            Log.i(TAG, "successfully removed the deleted post's PD");
                                                             binding.deletePostProgressBar.setVisibility(View.GONE);
                                                             Utils.showToast(UserProfileActivity.this, "Post deleted.");
                                                             v.setEnabled(true);
                                                         })
                                                         .addOnFailureListener(e -> {
-                                                            Log.i(TAG, "error removing the deleted post's PD: " + e.toString());
+                                                            Log.e(TAG, "error removing the deleted post's PD: " + e.toString());
                                                             binding.deletePostProgressBar.setVisibility(View.GONE);
                                                             v.setEnabled(true);
                                                         });
 
                                             })
                                             .addOnFailureListener(e -> {
-                                                Log.i(TAG, "error getting user to delete this PD");
+                                                Log.e(TAG, "error getting user to delete this PD");
                                                 binding.deletePostProgressBar.setVisibility(View.GONE);
                                                 v.setEnabled(true);
                                             });
                                 })
                                 .addOnFailureListener(e -> {
-                                    Log.i(TAG, "error deleting post: " + e.toString());
+                                    Log.e(TAG, "error deleting post: " + e.toString());
                                     binding.deletePostProgressBar.setVisibility(View.GONE);
                                     v.setEnabled(true);
                                 });
@@ -347,9 +339,6 @@ public class UserProfileActivity extends AppCompatActivity {
         //delete the post's image/video from storage. the storage id is the same as the post id
         StorageReference mediaRef = storage.getReference().child(selectedPostId);
         mediaRef.delete()
-                .addOnSuccessListener(r -> {
-                    Log.i(TAG, "deleted the post's media successfully.");
-                })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "failed deleting the media: " + e.toString());
                 });
@@ -357,9 +346,6 @@ public class UserProfileActivity extends AppCompatActivity {
         //delete the post's video thumbnail from storage. its id is "thumbnail[postid]"
         StorageReference thumbnailRef = storage.getReference().child("thumbnail" + selectedPostId);
         thumbnailRef.delete()
-                .addOnSuccessListener(r -> {
-                    Log.i(TAG, "deleted the post's video thumbnail successfully.");
-                })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "failed deleting the video thumbnail: " + e.toString());
                 });
@@ -393,11 +379,8 @@ public class UserProfileActivity extends AppCompatActivity {
             db.collection("users")
                     .document(currentUser.getUid())
                     .update("aboutme", newAboutmeText)
-                    .addOnSuccessListener(success -> {
-                        Log.i(TAG, "successfully updated aboutme");
-                    })
                     .addOnFailureListener(e -> {
-                        Log.i(TAG, "failed updating aboutme: " + e.toString());
+                        Log.e(TAG, "failed updating aboutme: " + e.toString());
                     });
         }
     }

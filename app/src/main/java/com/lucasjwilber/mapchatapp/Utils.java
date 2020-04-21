@@ -283,15 +283,6 @@ public class Utils {
         //get the longer side of the screen's distance:
         double longSideDistance = Math.max(Math.abs(left - right), Math.abs(top - bottom));
 
-//        if (longSideDistance < 0.1) {
-//            return "tinyZone";
-//        } else if (longSideDistance < 1) {
-//            return "smallZone";
-//        } else if (longSideDistance < 10) {
-//            return "mediumZone";
-//        } else {
-//            return "largeZone";
-//        }
         if (longSideDistance < 0.1) {
             return "tinyZone";
         } else if (longSideDistance < 1) {
@@ -314,6 +305,7 @@ public class Utils {
         double leftCounter = left;
         double rightCounter = right;
         double bottomCounter = bottom;
+
         //account for antimeridian:
         if (leftCounter > rightCounter) rightCounter += 360;
 
@@ -350,7 +342,6 @@ public class Utils {
             //account for antimeridian:
             if (left >= 180.0) left = -180.0;
         }
-        Log.i(TAG, "there are " + zonesOnScreen.size() + zoneType + "s on screen");
         return zonesOnScreen;
     }
 
