@@ -343,7 +343,7 @@
 
         <Button
             android:id="@+id/goToMap"
-            android:layout_width="200dp"
+            android:layout_width="170dp"
             android:layout_height="50dp"
             android:background="@drawable/rounded_square_filled_accentcolor"
             android:onClick="onGoToMapClick"

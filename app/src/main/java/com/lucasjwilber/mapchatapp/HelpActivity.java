@@ -2,14 +2,17 @@ package com.lucasjwilber.mapchatapp;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -60,49 +63,107 @@ public class HelpActivity extends AppCompatActivity {
         finish();
     }
 
+
+
     public class HelpRvAdapter extends RecyclerView.Adapter<HelpRvAdapter.HelpViewHolder> {
 
         int[] helpStringIds = new int[]{
                 R.string.general_information,
-                R.string.help1,
-                R.string.help2,
-                R.string.help4,
-                R.string.help5,
-                R.string.help6,
-                R.string.help7,
-                R.string.help8,
-                R.string.help9,
+                R.string.gi1,
+                R.string.gi2,
+                R.string.gi4,
+                R.string.gi5,
+                R.string.gi6,
+                R.string.gi7,
+                R.string.faq,
+                R.string.q1,
+                R.string.a1,
+                R.string.q3,
+                R.string.a3, //email verification cl
+                R.string.q2,
+                R.string.a2,
         };
+
+        int positionOfResendEmailCL = 11;
 
         // this is going to be entirely hardcoded so there's no need to parameterize the adapter
         HelpRvAdapter() {}
 
         class HelpViewHolder extends RecyclerView.ViewHolder {
             TextView textView;
+            ConstraintLayout constraintLayout;
             HelpViewHolder(TextView tv) {
                 super(tv);
                 textView = tv;
             }
+            HelpViewHolder(ConstraintLayout cl) {
+                super(cl);
+                constraintLayout = cl;
+            }
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position != positionOfResendEmailCL)
+                return 0;
+            else
+                return 1;
         }
 
         @NonNull
         @Override
         public HelpRvAdapter.HelpViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            TextView tv = (TextView) LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.help_textview, parent, false);
+            if (viewType == 0) {
+                TextView tv = (TextView) LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.help_textview, parent, false);
 
-            return new HelpViewHolder(tv);
+                return new HelpViewHolder(tv);
+            } else {
+                ConstraintLayout cl = (ConstraintLayout) LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.help_textview_with_button, parent, false);
+                return new HelpViewHolder(cl);
+            }
         }
 
         @Override
         public void onBindViewHolder(@NonNull HelpViewHolder holder, int position) {
-            holder.textView.setText(getString(helpStringIds[position]));
-            if (position == 0) holder.textView.setTextSize(20);
+            if (position != positionOfResendEmailCL) holder.textView.setText(getString(helpStringIds[position]));
+
+            if (position == 0 || position == 7) {
+                holder.textView.setTextSize(20);
+            //bold FAQ questions:
+            } else if (position != positionOfResendEmailCL && position > 7 && position % 2 == 0) {
+                holder.textView.setTypeface(holder.textView.getTypeface(), Typeface.BOLD_ITALIC);
+            }
+
+            //the resend email textview/button:
+            if (position == positionOfResendEmailCL) {
+                TextView tv = holder.constraintLayout.findViewById(R.id.helpResendEmailTv);
+                tv.setText(getString(helpStringIds[position]));
+                Button b = holder.constraintLayout.findViewById(R.id.helpResendEmailButton);
+                b.setOnClickListener(x -> resendVerificationEmail());
+            }
         }
 
         @Override
         public int getItemCount() {
             return helpStringIds.length;
+        }
+    }
+
+    private void resendVerificationEmail() {
+        if (user != null) user.reload();
+
+        if (user != null && !user.isEmailVerified()) {
+            user.sendEmailVerification()
+                    .addOnSuccessListener(r -> {
+                        Utils.showToast(HelpActivity.this, "Verification email sent.");
+                    })
+                    .addOnFailureListener(e -> Log.i(TAG, "error sending ver email: " + e.toString()));
+        } else if (user == null) {
+            Utils.showToast(HelpActivity.this, "Please sign up or log in first.");
+        } else {
+            Utils.showToast(HelpActivity.this, "Your account is already verified.");
         }
     }
 }

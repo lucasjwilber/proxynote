@@ -221,16 +221,23 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         if (user == null) {
             Utils.showToast(context, "You must be logged in to vote.");
             return;
-        } else if (!user.isEmailVerified()) {
-            //reload and check again first
+        } else {
+            //reload and check again first in case user logged out or verified their email while this RV is open
             user.reload()
                     .addOnSuccessListener(r -> {
-                        if (!user.isEmailVerified()) {
-                            Utils.showToast(context, "Please verify your email first.");
+                        if (user == null) {
+                            Utils.showToast(context, "You must be logged in to vote.");
                             return;
+                        } else if (!user.isEmailVerified()) {
+                            Utils.showToast(context, "Please verify your email first.");
+                        } else {
+                            castVote(b);
                         }
                     });
         }
+    }
+
+    private void castVote(Button b) {
         // need to disable the button until the firestore transaction is complete, otherwise users
         // could cast multiple votes by spamming the button
         b.setEnabled(false);
