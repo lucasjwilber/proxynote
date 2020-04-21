@@ -15,6 +15,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class Utils {
@@ -282,6 +283,15 @@ public class Utils {
         //get the longer side of the screen's distance:
         double longSideDistance = Math.max(Math.abs(left - right), Math.abs(top - bottom));
 
+//        if (longSideDistance < 0.1) {
+//            return "tinyZone";
+//        } else if (longSideDistance < 1) {
+//            return "smallZone";
+//        } else if (longSideDistance < 10) {
+//            return "mediumZone";
+//        } else {
+//            return "largeZone";
+//        }
         if (longSideDistance < 0.1) {
             return "tinyZone";
         } else if (longSideDistance < 1) {
@@ -293,7 +303,7 @@ public class Utils {
         }
     }
 
-    static List<String> getZonesOnScreen(LatLngBounds cameraBounds) {
+    static List<String> getZonesOnScreen(LatLngBounds cameraBounds, HashSet<String> cache) {
         double left = cameraBounds.southwest.longitude;
         double right = cameraBounds.northeast.longitude;
         double top = cameraBounds.northeast.latitude;
@@ -321,15 +331,16 @@ public class Utils {
 
         while (leftCounter <= rightCounter) {
             while (bottomCounter <= top) {
-                if (zoneType.equals("tinyZone")) {
-                    zonesOnScreen.add(getTinyZone(bottomCounter, left));
-                } else if (zoneType.equals("smallZone")) {
-                    zonesOnScreen.add(getSmallZone(bottomCounter, left));
+                //tinyZone by default
+                String zone = getTinyZone(bottomCounter, left);
+                if (zoneType.equals("smallZone")) {
+                    zone = getSmallZone(bottomCounter, left);
                 } else if (zoneType.equals("mediumZone")) {
-                    zonesOnScreen.add(getMediumZone(bottomCounter, left));
-                } else {
-                    zonesOnScreen.add(getLargeZone(bottomCounter, left));
+                    zone = getMediumZone(bottomCounter, left);
+                } else if (zoneType.equals("largeZone")){
+                    zone = getLargeZone(bottomCounter, left);
                 }
+                if (!cache.contains(zone)) zonesOnScreen.add(zone);
                 bottomCounter += increment;
             }
             bottomCounter = bottom;
@@ -339,6 +350,7 @@ public class Utils {
             //account for antimeridian:
             if (left >= 180.0) left = -180.0;
         }
+        Log.i(TAG, "there are " + zonesOnScreen.size() + zoneType + "s on screen");
         return zonesOnScreen;
     }
 

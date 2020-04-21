@@ -66,7 +66,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
-    private long POSTS_PER_ZONE_LIMIT = 20; //this * 1.5 is roughly how many posts are queried per square mile. update the Help string when changing this
     private FirebaseUser currentUser;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     private final int LOCATION_UPDATE_COOLDOWN = 30000;
@@ -86,7 +85,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private RecyclerView.Adapter postRvAdapter;
     private boolean mapHasBeenSetUp;
     SharedPreferences sharedPreferences;
-    private boolean areMarkersShown;
+    private boolean areMarkersShown = true;
     private Handler periodicLocationUpdateHandler;
     private List<Marker> markerList;
     private HashSet<String> zoneCacheTiny;
@@ -107,11 +106,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         db = FirebaseFirestore.getInstance();
         sharedPreferences = getApplicationContext().getSharedPreferences("mapchatPrefs", Context.MODE_PRIVATE);
         periodicLocationUpdateHandler = new Handler();
-
-//        markerListTiny = new LinkedList<>();
-//        markerListSmall = new LinkedList<>();
-//        markerListMedium = new LinkedList<>();
-//        markerListLarge = new LinkedList<>();
         markerList = new LinkedList<>();
 
         userLocationIcon = Utils.getBitmapDescriptorFromSvg(R.drawable.user_location_pin, MapActivity.this);
@@ -177,6 +171,121 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onPause() {
         super.onPause();
         periodicLocationUpdateHandler.removeCallbacksAndMessages(null);   //aka stopGetLocationLooper
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        //remove the directions/gps/compass buttons
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.getUiSettings().setCompassEnabled(false);
+
+        mMap.setOnMarkerClickListener(this::onMarkerClick);
+        mMap.setOnMapClickListener(this::onMapClick);
+        mMap.setOnCameraIdleListener(this::onCameraIdle);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        //location permission
+        if (requestCode == FINE_LOCATION_PERMISSION_REQUEST_CODE) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                // permission granted:
+                if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    Log.i(TAG, "location permission granted, getting location...");
+                    getUserLatLng(true);
+                }
+            } else {
+                Log.i(TAG, "location permission denied");
+            }
+        }
+    }
+
+    public void mapViewSetup() {
+        Intent intent = getIntent();
+        double lat = intent.getDoubleExtra("lat", 0d);
+        double lng = intent.getDoubleExtra("lng", 0d);
+        Log.i(TAG, "from intent: " + lat + "/" + lng);
+        Log.i(TAG, "user: " + userLat + "/" + userLng);
+
+        //if lat/lng is 0/0, either by the db field being null or an error with the intent,
+        //just center on the user instead of an incorrect location
+        if (lat == 0d && lng == 0d) {
+            lat = userLat;
+            lng = userLng;
+        }
+
+        double finalLat = lat;
+        double finalLng = lng;
+        Log.i(TAG, "going to " + finalLat + "/" + finalLng);
+        AsyncTask.execute(() -> {
+            //update map on main thread
+            Handler handler = new Handler(Looper.getMainLooper()) {
+                @Override
+                public void handleMessage(Message input) {
+
+                    //if we got here from a click on the "show on map" button in a user profile,
+                    //center on that marker, else center on the user's location.
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(finalLat, finalLng)));
+                    cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+
+                    setMapStyle(sharedPreferences.getInt("mapStyle", R.id.mapStyleCobalt));
+
+                    mMap.setMinZoomPreference(5f);
+
+                    if (userMarker != null) userMarker.remove();
+                    userMarker = mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(userLat, userLng))
+                            .title("My Location")
+                            .icon(userLocationIcon));
+
+                    //sleep for a moment because zooming and centering the camera at the same time
+                    // causes an issue where the camera ends up zoomed on the wrong location.
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
+                }
+            };
+            handler.obtainMessage().sendToTarget();
+
+            mapHasBeenSetUp = true;
+        });
+    }
+
+    public void getUserLatLng(boolean centerOnUser) {
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, location -> {
+                    Log.i(TAG, "successfully got location");
+                    // Got last known location. In some rare situations this can be null.
+                    if (location != null) {
+                        userLat = location.getLatitude();
+                        userLng = location.getLongitude();
+                        Log.i(TAG, "lat: " + userLat + "\nlong: " + userLng);
+
+                        if (!mapHasBeenSetUp) mapViewSetup();
+                        if (centerOnUser) mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
+
+                        if (userMarker != null) userMarker.remove();
+                        userMarker = mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(userLat, userLng))
+                                .title("My Location")
+                                .icon(userLocationIcon));
+
+                        startGetLocationLooper();
+                    }
+                })
+                .addOnFailureListener(this, error -> {
+                    Log.i(TAG, "error getting location:\n" + error.toString());
+                });
     }
 
     private void startGetLocationLooper() {
@@ -288,7 +397,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private boolean setMapStyle(int id) {
         SharedPreferences.Editor editor;
         switch (id) {
-            default:
             case R.id.mapStyleDay:
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 try {
@@ -329,6 +437,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     Log.e(TAG, "Can't find style. Error: ", e);
                 }
                 return true;
+            default:
             case R.id.mapStyleCobalt:
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 try {
@@ -345,121 +454,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 editor.apply();
                 return true;
         }
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        //remove the directions/gps/compass buttons
-        mMap.getUiSettings().setMapToolbarEnabled(false);
-        mMap.getUiSettings().setCompassEnabled(false);
-
-        mMap.setOnMarkerClickListener(this::onMarkerClick);
-        mMap.setOnMapClickListener(this::onMapClick);
-        mMap.setOnCameraIdleListener(this::onCameraIdle);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        //location permission
-        if (requestCode == FINE_LOCATION_PERMISSION_REQUEST_CODE) {
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                // permission granted:
-                if (ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    Log.i(TAG, "location permission granted, getting location...");
-                    getUserLatLng(true);
-                }
-            } else {
-                Log.i(TAG, "location permission denied");
-            }
-        }
-    }
-
-    public void getUserLatLng(boolean centerOnUser) {
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, location -> {
-                    Log.i(TAG, "successfully got location");
-                    // Got last known location. In some rare situations this can be null.
-                    if (location != null) {
-                        userLat = location.getLatitude();
-                        userLng = location.getLongitude();
-                        Log.i(TAG, "lat: " + userLat + "\nlong: " + userLng);
-
-                        if (!mapHasBeenSetUp) mapViewSetup();
-                        if (centerOnUser) mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(userLat, userLng)));
-
-                        if (userMarker != null) userMarker.remove();
-                        userMarker = mMap.addMarker(new MarkerOptions()
-                                .position(new LatLng(userLat, userLng))
-                                .title("My Location")
-                                .icon(userLocationIcon));
-
-                        startGetLocationLooper();
-                    }
-                })
-                .addOnFailureListener(this, error -> {
-                    Log.i(TAG, "error getting location:\n" + error.toString());
-                });
-    }
-
-    public void mapViewSetup() {
-        Intent intent = getIntent();
-        double lat = intent.getDoubleExtra("lat", 0d);
-        double lng = intent.getDoubleExtra("lng", 0d);
-        Log.i(TAG, "from intent: " + lat + "/" + lng);
-        Log.i(TAG, "user: " + userLat + "/" + userLng);
-
-        //if lat/lng is 0/0, either by the db field being null or an error with the intent,
-        //just center on the user instead of an incorrect location
-        if (lat == 0d && lng == 0d) {
-            lat = userLat;
-            lng = userLng;
-        }
-
-        double finalLat = lat;
-        double finalLng = lng;
-        Log.i(TAG, "going to " + finalLat + "/" + finalLng);
-        AsyncTask.execute(() -> {
-            //update map on main thread
-            Handler handler = new Handler(Looper.getMainLooper()) {
-                @Override
-                public void handleMessage(Message input) {
-
-                    //if we got here from a click on the "show on map" button in a user profile,
-                    //center on that marker, else center on the user's location.
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(finalLat, finalLng)));
-                    cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-
-                    setMapStyle(sharedPreferences.getInt("mapStyle", R.id.mapStyleDay));
-
-                    mMap.setMinZoomPreference(5f);
-
-                    if (userMarker != null) userMarker.remove();
-                    userMarker = mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(userLat, userLng))
-                            .title("My Location")
-                            .icon(userLocationIcon));
-
-                    //sleep for a moment because zooming and centering the camera at the same time
-                    // causes an issue where the camera ends up zoomed on the wrong location.
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15f));
-                }
-            };
-            handler.obtainMessage().sendToTarget();
-
-            mapHasBeenSetUp = true;
-        });
     }
 
     public void onCreatePostButtonClick(View v) {
@@ -487,33 +481,72 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onCameraIdle() {
         cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 
+//        if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
+//            getPosts(zoneCacheTiny);
+//        } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
+//            getPosts(zoneCacheSmall);
+//        } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
+//            getPosts(zoneCacheMedium);
+//        } else {
+//            getPosts(zoneCacheLarge);
+//        }
         if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
-            getPosts(zoneCacheTiny);
+            queryAllZonesOnScreen(zoneCacheTiny);
         } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
-            getPosts(zoneCacheSmall);
+            queryAllZonesOnScreen(zoneCacheSmall);
         } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
-            getPosts(zoneCacheMedium);
+            queryAllZonesOnScreen(zoneCacheMedium);
         } else {
-            getPosts(zoneCacheLarge);
+            queryAllZonesOnScreen(zoneCacheLarge);
         }
+
+        Log.i(TAG, "current zoom is " + mMap.getCameraPosition().zoom);
     }
 
-    private void getPosts(HashSet<String> cache) {
-        List<String> zonesOnScreen = Utils.getZonesOnScreen(cameraBounds);
-        Log.i(TAG, "the " + zonesOnScreen.toString() + " zones are on screen");
-        Log.i(TAG, "zoneType is " + Utils.getZoneType(cameraBounds));
+    private void queryAllZonesOnScreen(HashSet<String> cache) {
 
-        binding.postQueryRefreshButton.setVisibility(View.GONE);
-        binding.postQueryPB.setVisibility(View.VISIBLE);
+        List<String> allZonesOnScreen = Utils.getZonesOnScreen(cameraBounds, cache);
 
-        //check the zones on screen against the cache
-        for (String zone : zonesOnScreen) {
-            if (!cache.contains(zone)) {
+        if (allZonesOnScreen.size() == 0) {
+            Log.i(TAG, "no uncached zones to query.");
+            return;
+        } else {
+            Log.i(TAG, "querying " + allZonesOnScreen.size() + " uncached zones");
+            binding.postQueryRefreshButton.setVisibility(View.GONE);
+            binding.postQueryPB.setVisibility(View.VISIBLE);
+        }
+        int totalQueryLimit = 50;
 
+        int postsPerZoneLimit = 1 + ( (int) Math.ceil(totalQueryLimit / allZonesOnScreen.size()));
+        String zoneType = Utils.getZoneType(cameraBounds);
+        Log.i(TAG, "total query limit is " + totalQueryLimit + ", per zone limit is " + postsPerZoneLimit);
+
+        if (allZonesOnScreen.size() > 10) {
+            String[] zones = allZonesOnScreen.toArray(new String[0]);
+            while (zones.length > 10) {
+                Log.i(TAG, "there are more than 10 zones, querying 10 at a time...");
+                String[] nextTenZones = Arrays.copyOfRange(zones, 0, 9);
+                List<String> ntzAsList = Arrays.asList(nextTenZones);
+
+                Log.i(TAG, "query limit is " + ((int) Math.ceil(postsPerZoneLimit * 10)) + " for this batch of 10");
+                queryAListOfZones(zoneType, cache, ntzAsList, (int) Math.ceil((postsPerZoneLimit * 10)));
+
+                zones = Arrays.copyOfRange(zones, 10, zones.length - 1);
+            }
+            //convert the remainder back to a list in order to query it:
+            allZonesOnScreen = Arrays.asList(zones);
+        }
+
+        Log.i(TAG, "query limit is " + ((int) Math.ceil(postsPerZoneLimit * allZonesOnScreen.size())) + " for the remaining " + allZonesOnScreen.size());
+
+        if (allZonesOnScreen.size() > 0) queryAListOfZones(zoneType, cache, allZonesOnScreen, (int) Math.ceil(postsPerZoneLimit * allZonesOnScreen.size()));
+    }
+
+    private void queryAListOfZones(String zoneType, HashSet<String> cache, List<String> zones, int queryLimit) {
                 db.collection("posts")
-                        .whereEqualTo(Utils.getZoneType(cameraBounds), zone)
+                        .whereIn(zoneType, zones)
                         .orderBy("timestamp", Query.Direction.DESCENDING)
-                        .limit(POSTS_PER_ZONE_LIMIT)
+                        .limit(queryLimit)
                         .get()
                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                             @Override
@@ -525,10 +558,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                         post.setComments(Utils.turnMapsIntoListOfComments(list));
                                         createMarkerWithPost(post);
                                     }
-                                    Log.i(TAG, "got " + task.getResult().size() + " posts from zone " + zone);
-
-                                    cache.add(zone);
-
+                                    cache.addAll(zones);
                                     binding.postQueryPB.setVisibility(View.GONE);
                                     binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
                                 } else {
@@ -538,12 +568,57 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                                 }
                             }
                         });
-
-
-                Log.i(TAG, "cached and queried zone " + zone);
-            }
-        }
     }
+
+//    private void getPosts(HashSet<String> cache) {
+//        binding.postQueryRefreshButton.setVisibility(View.GONE);
+//        binding.postQueryPB.setVisibility(View.VISIBLE);
+//
+//        List<String> zonesOnScreen = Utils.getZonesOnScreen(cameraBounds);
+//        Log.i(TAG, "the " + zonesOnScreen.toString() + " zones are on screen");
+//        Log.i(TAG, "zoneType is " + Utils.getZoneType(cameraBounds));
+//
+//        String zoneType = Utils.getZoneType(cameraBounds);
+//        float zoom = mMap.getCameraPosition().zoom;
+//        int postQueryLimit = 15;
+////        if (zoneType.equals("smallZone") && zoom < 12.0) {
+////            Log.i(TAG, "reducing query limit");
+////            postQueryLimit = 10;
+////        }
+//
+//        //check the zones on screen against the cache
+//        for (String zone : zonesOnScreen) {
+//            if (!cache.contains(zone)) {
+//                db.collection("posts")
+//                        .whereEqualTo(zoneType, zone)
+//                        .orderBy("timestamp", Query.Direction.DESCENDING)
+//                        .limit(postQueryLimit)
+//                        .get()
+//                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                            @Override
+//                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                                if (task.isSuccessful()) {
+//                                    for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+//                                        Post post = Objects.requireNonNull(document.toObject(Post.class));
+//                                        ArrayList list = (ArrayList) document.getData().get("comments");
+//                                        post.setComments(Utils.turnMapsIntoListOfComments(list));
+//                                        createMarkerWithPost(post);
+//                                    }
+//
+//                                    cache.add(zone);
+//
+//                                    binding.postQueryPB.setVisibility(View.GONE);
+//                                    binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
+//                                } else {
+//                                    Log.i(TAG, "Error getting documents.", task.getException());
+//                                    binding.postQueryPB.setVisibility(View.GONE);
+//                                    binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
+//                                }
+//                            }
+//                        });
+//            }
+//        }
+//    }
 
     public void createMarkerWithPost(Post post) {
         float zIndex = (float) post.getTimestamp();
@@ -670,37 +745,31 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
-//    private void createTestPosts() {
-//
-//        //50/50
-//        //start at lat - 25(x), lng -25(x)
-//        // lat/lng += x in a for(for
-//        //x is random
-//        //every 0.005 * (random + 1)
-//
-//        for (double i = userLng - 0.25; i < userLng + 0.25; i+= 0.01 * (Math.random() + 1)) {
-//            for (double j = userLat - 0.25; j < userLat + 0.25; j+= 0.01 * (Math.random() + 1)) {
-//                Post post = new Post(
-//                        UUID.randomUUID().toString(),
-//                        "KfMLnuMWyxbAsKAJt812LLWwXEu2",
-//                        "tester",
-//                        "test",
-//                        "testststsetest",
-//                        "somewhere",
-//                        j,
-//                        i);
-//                db.collection("posts").add(post);
-//            }
-//        }
-//    }
+    private void createTestPosts() {
+        //lat 40.7 - 41.7
+        //lng -118.5 - -116
+        //random * difference + min
+        for (int i = 0; i < 20; i++) {
+            Post post = new Post(UUID.randomUUID().toString(), "userId", "an alien", "test", "test", "somewhere",
+                    (47.5 + (Math.random() * .15)),
+                    (-122.44 + (Math.random() * .25)) );
+
+            post.setIcon((int) (Math.random() * 80));
+//            Log.i(TAG, "post is at " + (Math.random() + 40.7) + ", " + (Math.random()*2.5 + -118.5));
+
+            db.collection("posts").add(post);
+        }
+    }
 
     public void toggleMarkerVisibility(View v) {
+        Log.i(TAG, "click");
+        areMarkersShown = !areMarkersShown;
         for (Marker marker : markerList) marker.setVisible(areMarkersShown);
         v.setBackground(areMarkersShown ? getDrawable(R.drawable.visibility) : getDrawable(R.drawable.visibility_off));
-        areMarkersShown = !areMarkersShown;
     }
 
     public void refreshMapData(View v) {
+        Log.i(TAG, "click");
         for (Marker marker : markerList) marker.remove();
         zoneCacheTiny = new HashSet<>();
         zoneCacheSmall = new HashSet<>();
@@ -708,14 +777,23 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         zoneCacheLarge = new HashSet<>();
 
         if (mMap != null && cameraBounds != null) {
+//            if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
+//                getPosts(zoneCacheTiny);
+//            } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
+//                getPosts(zoneCacheSmall);
+//            } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
+//                getPosts(zoneCacheMedium);
+//            } else {
+//                getPosts(zoneCacheLarge);
+//            }
             if (Utils.getZoneType(cameraBounds).equals("tinyZone")) {
-                getPosts(zoneCacheTiny);
+                queryAllZonesOnScreen(zoneCacheTiny);
             } else if (Utils.getZoneType(cameraBounds).equals("smallZone")) {
-                getPosts(zoneCacheSmall);
+                queryAllZonesOnScreen(zoneCacheSmall);
             } else if (Utils.getZoneType(cameraBounds).equals("mediumZone")) {
-                getPosts(zoneCacheMedium);
+                queryAllZonesOnScreen(zoneCacheMedium);
             } else {
-                getPosts(zoneCacheLarge);
+                queryAllZonesOnScreen(zoneCacheLarge);
             }
         }
     }
