@@ -273,7 +273,6 @@ public class UserProfileActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         Post post = documentSnapshot.toObject(Post.class);
-                        if (post != null) db.collection("deletedPosts").add(post);
 
                         //delete the post from "posts", then delete the post descriptor from "users"
                         db.collection("posts")

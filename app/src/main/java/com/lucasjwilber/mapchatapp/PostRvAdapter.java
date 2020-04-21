@@ -370,6 +370,12 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         }
         Intent goToReportActivity = new Intent(context, ReportActivity.class);
         goToReportActivity.putExtra("postId", post.getId());
+        goToReportActivity.putExtra("postUserId", post.getUserId());
+        goToReportActivity.putExtra("postTitle", post.getTitle());
+        goToReportActivity.putExtra("postText", post.getText());
+        goToReportActivity.putExtra("postLat", post.getLat());
+        goToReportActivity.putExtra("postLng", post.getLng());
+        goToReportActivity.putExtra("postMediaStorageId", post.getMediaStorageId());
         context.startActivity(goToReportActivity);
     }
 

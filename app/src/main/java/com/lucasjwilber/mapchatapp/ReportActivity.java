@@ -18,6 +18,12 @@ public class ReportActivity extends AppCompatActivity {
 
     private final String TAG = "ljw";
     private String postId;
+    private String postUserId;
+    private String postTitle;
+    private String postText;
+    private String postMediaStorageId;
+    private double postLat;
+    private double postLng;
     private FirebaseUser currentUser;
     private FirebaseFirestore db;
     private ProgressBar loadingSpinner;
@@ -32,6 +38,12 @@ public class ReportActivity extends AppCompatActivity {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         Intent intent = getIntent();
         postId = intent.getStringExtra("postId");
+        postUserId = intent.getStringExtra("postUserId");
+        postTitle = intent.getStringExtra("postTitle");
+        postText = intent.getStringExtra("postText");
+        postMediaStorageId = intent.getStringExtra("postMediaStorageId");
+        postLat = intent.getDoubleExtra("postLat", postLat);
+        postLng = intent.getDoubleExtra("postLng", postLng);
     }
 
     public void onReportSubmit(View v) {
@@ -64,7 +76,7 @@ public class ReportActivity extends AppCompatActivity {
         EditText additionalInfoTV = findViewById(R.id.reportAdditionalText);
         String additionalInfo = additionalInfoTV.getText().toString();
         String reportId = postId + "|" + currentUser.getUid();
-        Report report = new Report(reportId, reason, additionalInfo, postId);
+        Report report = new Report(reportId, reason, additionalInfo, postId, postUserId, postTitle, postText, postMediaStorageId, postLat, postLng);
 
         db.collection("reports")
                 .document(reportId)
