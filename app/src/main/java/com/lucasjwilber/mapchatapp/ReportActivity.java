@@ -2,7 +2,9 @@ package com.lucasjwilber.mapchatapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -24,7 +26,6 @@ public class ReportActivity extends AppCompatActivity {
     private String postMediaStorageId;
     private double postLat;
     private double postLng;
-    private FirebaseUser currentUser;
     private FirebaseFirestore db;
     private ProgressBar loadingSpinner;
 
@@ -35,7 +36,7 @@ public class ReportActivity extends AppCompatActivity {
         loadingSpinner = findViewById(R.id.reportProgressBar);
 
         db = FirebaseFirestore.getInstance();
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
         Intent intent = getIntent();
         postId = intent.getStringExtra("postId");
         postUserId = intent.getStringExtra("postUserId");
@@ -47,6 +48,11 @@ public class ReportActivity extends AppCompatActivity {
     }
 
     public void onReportSubmit(View v) {
+        if (!Utils.checkUserAuthorization()) {
+            Utils.showToast(ReportActivity.this, "Please log in or verify your email first.");
+            return;
+        }
+
         RadioGroup reportTypeRG = findViewById(R.id.reportTypeRG);
         String reason;
         switch (reportTypeRG.getCheckedRadioButtonId()) {
@@ -73,9 +79,10 @@ public class ReportActivity extends AppCompatActivity {
 
         loadingSpinner.setVisibility(View.VISIBLE);
 
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         EditText additionalInfoTV = findViewById(R.id.reportAdditionalText);
         String additionalInfo = additionalInfoTV.getText().toString();
-        String reportId = postId + "|" + currentUser.getUid();
+        String reportId = postId + "|" + sharedPreferences.getString("userId", "user id unknown");
         Report report = new Report(reportId, reason, additionalInfo, postId, postUserId, postTitle, postText, postMediaStorageId, postLat, postLng);
 
         db.collection("reports")

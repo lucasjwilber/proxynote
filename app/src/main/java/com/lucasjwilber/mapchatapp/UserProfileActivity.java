@@ -5,7 +5,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.SharedElementCallback;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,7 +38,8 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private final String TAG = "ljw";
     private String thisProfileOwnerId;
-    private FirebaseUser currentUser;
+    private String userId;
+    private String username;
     private FirebaseFirestore db;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private ActivityUserProfileBinding binding;
@@ -47,6 +51,7 @@ public class UserProfileActivity extends AppCompatActivity {
     private LatLng selectedPostLatLng;
     private boolean userIsOnTheirOwnProfile;
     private boolean aboutMeBeingEdited;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,17 +60,13 @@ public class UserProfileActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.profileOnePostRv.setLayoutManager(new LinearLayoutManager(this));
-
         db = FirebaseFirestore.getInstance();
+        sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
+        userId = sharedPreferences.getString("userId", null);
+        username = sharedPreferences.getString("username", null);
 
         Intent intent = getIntent();
         thisProfileOwnerId = intent.getStringExtra("userId");
-
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null && thisProfileOwnerId.equals(currentUser.getUid())) {
-            userIsOnTheirOwnProfile = true;
-            binding.aboutMeEditBtn.setVisibility(View.VISIBLE);
-        }
 
         if (thisProfileOwnerId != null) {
             binding.postDescRvProgressBar.setVisibility(View.VISIBLE);
@@ -73,38 +74,44 @@ public class UserProfileActivity extends AppCompatActivity {
                     .document(thisProfileOwnerId)
                     .get()
                     .addOnSuccessListener(result -> {
-                        User user = result.toObject(User.class);
-                        assert user != null;
-                        binding.profileUsername.setText(user.getUsername());
+                        User thisProfileOwner = result.toObject(User.class);
+
+                        if (thisProfileOwner == null) {
+                            Utils.showToast(UserProfileActivity.this, "This user account has been deleted.");
+                            finish();
+                            return;
+                        }
+
+                        binding.profileUsername.setText(thisProfileOwner.getUsername());
                         String userScoreText = "(" +
-                                user.getTotalScore() +
-                                (user.getTotalScore() == 1 || user.getTotalScore() == -1 ? " point)" : " points)");
+                                thisProfileOwner.getTotalScore() +
+                                (thisProfileOwner.getTotalScore() == 1 || thisProfileOwner.getTotalScore() == -1 ? " point)" : " points)");
                         binding.profileScore.setText(userScoreText);
-                        binding.aboutMeTV.setText(user.getAboutme());
+                        binding.aboutMeTV.setText(thisProfileOwner.getAboutme());
 
-                        List<PostDescriptor> userPostDescriptors = user.getPostDescriptors();
-
-                        //don't show anonymous posts unless the owner is the one viewing
-                        if (!userIsOnTheirOwnProfile) {
-                            for (PostDescriptor pd : userPostDescriptors) {
-                                if (pd.isAnonymous()) userPostDescriptors.remove(pd);
+                        List<PostDescriptor> visiblePostDescriptors = new ArrayList<>();
+                        if (userIsOnTheirOwnProfile) {
+                            visiblePostDescriptors = thisProfileOwner.getPostDescriptors();
+                        } else { //remove anonymous posts from users that aren't on their own profile
+                            for (PostDescriptor pd : thisProfileOwner.getPostDescriptors()) {
+                                if (!pd.isAnonymous()) visiblePostDescriptors.add(pd);
                             }
                         }
 
-                        if (userPostDescriptors == null || userPostDescriptors.size() == 0) {
-                            String noPostsText = user.getUsername() + " hasn't made any posts yet.";
+                        if (visiblePostDescriptors == null || visiblePostDescriptors.size() == 0) {
+                            String noPostsText = thisProfileOwner.getUsername() + " hasn't made any posts yet.";
                             binding.profileNoCommentsYet.setText(noPostsText);
                             binding.profileNoCommentsYet.setVisibility(View.VISIBLE);
                         } else {
                             postDescriptorsRvLayoutManager = new LinearLayoutManager(this);
                             binding.profileAllPostsRv.setLayoutManager(postDescriptorsRvLayoutManager);
-                            postDescriptorsRvAdapter = new PostSelectAdapter(userPostDescriptors);
+                            postDescriptorsRvAdapter = new PostSelectAdapter(visiblePostDescriptors);
                             binding.profileAllPostsRv.setAdapter(postDescriptorsRvAdapter);
                         }
                         binding.postDescRvProgressBar.setVisibility(View.GONE);
                     })
                     .addOnFailureListener(e -> {
-                        Log.e(TAG, "error getting user: " + e.toString());
+                        Log.e(TAG, "error getting the profile owner's user object: " + e.toString());
                         binding.postDescRvProgressBar.setVisibility(View.GONE);
                     });
         }
@@ -225,8 +232,8 @@ public class UserProfileActivity extends AppCompatActivity {
                         postRvAdapter = new PostRvAdapter(
                                 post,
                                 UserProfileActivity.this,
-                                currentUser != null ? currentUser.getUid() : null,
-                                currentUser != null ? currentUser.getDisplayName() : null,
+                                userId,
+                                username,
                                 thisProfileOwnerId,
                                 db);
 
@@ -376,7 +383,7 @@ public class UserProfileActivity extends AppCompatActivity {
             String newAboutmeText = aboutMeET.getText().toString();
             aboutMeTV.setText(newAboutmeText);
             db.collection("users")
-                    .document(currentUser.getUid())
+                    .document(userId)
                     .update("aboutme", newAboutmeText)
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "failed updating aboutme: " + e.toString());

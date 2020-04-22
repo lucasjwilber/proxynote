@@ -11,8 +11,6 @@ public class User {
     private long timeOfLastPost;
     private boolean isPaid;
     private int totalScore;
-    private double lastLat;
-    private double lastLng;
     private int reports;
     private String aboutme;
 
@@ -83,22 +81,6 @@ public class User {
 
     public void setTotalScore(int totalScore) {
         this.totalScore = totalScore;
-    }
-
-    public double getLastLat() {
-        return lastLat;
-    }
-
-    public void setLastLat(double lastLat) {
-        this.lastLat = lastLat;
-    }
-
-    public double getLastLng() {
-        return lastLng;
-    }
-
-    public void setLastLng(double lastLng) {
-        this.lastLng = lastLng;
     }
 
     public List<PostDescriptor> getPostDescriptors() {

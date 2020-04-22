@@ -6,6 +6,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,8 +26,10 @@ public class HelpActivity extends AppCompatActivity {
 
     private final String TAG = "ljw";
     private ActivityHelpBinding binding;
-    private FirebaseUser user;
     private FirebaseFirestore db;
+    private SharedPreferences sharedPreferences;
+    private static final int TEXT_VIEW = 0;
+    private static final int CONSTRAINT_LAYOUT = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,18 +38,25 @@ public class HelpActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
 
-        user = FirebaseAuth.getInstance().getCurrentUser();
         db = FirebaseFirestore.getInstance();
-        if (user != null) binding.questionCommentModal.setVisibility(View.VISIBLE);
+        sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
+
+        if (Utils.checkUserAuthorization()) {
+            binding.questionCommentModal.setVisibility(View.VISIBLE);
+        }
 
         binding.helpRv.setLayoutManager(new LinearLayoutManager(this));
         binding.helpRv.setAdapter(new HelpRvAdapter());
     }
 
     public void onSubmitQuestionOrCommentButtonClicked(View v) {
+        if (!Utils.checkUserAuthorization()) {
+            Utils.showToast(HelpActivity.this, "Please log in or verify your email first.");
+        }
+
         String text = binding.helpCommentBox.getText().toString();
-        String userId = user != null ? user.getUid() : "unknown";
-        String userEmail = user != null ? user.getEmail() : "unknown";
+        String userId = sharedPreferences.getString("userId", "user id unknown");
+        String userEmail = sharedPreferences.getString("userEmail", "user email unknown");
         QuestionOrComment qoc = new QuestionOrComment(text, userId, userEmail);
 
         db.collection("questionsAndComments")
@@ -65,27 +76,52 @@ public class HelpActivity extends AppCompatActivity {
 
     public class HelpRvAdapter extends RecyclerView.Adapter<HelpRvAdapter.HelpViewHolder> {
 
-        int[] helpStringIds = new int[]{
-                R.string.general_information,
-                R.string.gi1,
-                R.string.gi2,
-                R.string.gi4,
-                R.string.gi5,
-                R.string.gi6,
-                R.string.gi7,
-                R.string.faq,
-                R.string.q1,
-                R.string.a1,
-                R.string.q3,
-                R.string.a3, //email verification cl
-                R.string.q2,
-                R.string.a2,
-        };
-
+        int[] helpStringIds;
+        boolean showResendEmailTip;
         int positionOfResendEmailCL = 11;
 
         // this is going to be entirely hardcoded so there's no need to parameterize the adapter
-        HelpRvAdapter() {}
+        HelpRvAdapter() {
+            //firebase user that hasn't verified their email:
+            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (sharedPreferences.getString("loginType", "").equals("firebase") &&
+                    firebaseUser != null &&
+                    !firebaseUser.isEmailVerified()
+            ) {
+                showResendEmailTip = true;
+                helpStringIds = new int[]{
+                        R.string.general_information,
+                        R.string.gi1,
+                        R.string.gi2,
+                        R.string.gi4,
+                        R.string.gi5,
+                        R.string.gi6,
+                        R.string.gi7,
+                        R.string.faq,
+                        R.string.q1,
+                        R.string.a1,
+                        R.string.q3, //email verification question textview
+                        R.string.a3, //email verification answer constraintLayout
+                        R.string.q2,
+                        R.string.a2,
+                };
+            } else {
+                helpStringIds = new int[]{
+                        R.string.general_information,
+                        R.string.gi1,
+                        R.string.gi2,
+                        R.string.gi4,
+                        R.string.gi5,
+                        R.string.gi6,
+                        R.string.gi7,
+                        R.string.faq,
+                        R.string.q1,
+                        R.string.a1,
+                        R.string.q2,
+                        R.string.a2,
+                };
+            }
+        }
 
         class HelpViewHolder extends RecyclerView.ViewHolder {
             TextView textView;
@@ -102,19 +138,18 @@ public class HelpActivity extends AppCompatActivity {
 
         @Override
         public int getItemViewType(int position) {
-            if (position != positionOfResendEmailCL)
-                return 0;
+            if (position == positionOfResendEmailCL && showResendEmailTip)
+                return CONSTRAINT_LAYOUT;
             else
-                return 1;
+                return TEXT_VIEW;
         }
 
         @NonNull
         @Override
         public HelpRvAdapter.HelpViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            if (viewType == 0) {
+            if (viewType == TEXT_VIEW) {
                 TextView tv = (TextView) LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.help_textview, parent, false);
-
                 return new HelpViewHolder(tv);
             } else {
                 ConstraintLayout cl = (ConstraintLayout) LayoutInflater.from(parent.getContext())
@@ -125,21 +160,25 @@ public class HelpActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull HelpViewHolder holder, int position) {
-            if (position != positionOfResendEmailCL) holder.textView.setText(getString(helpStringIds[position]));
-
-            if (position == 0 || position == 7) {
-                holder.textView.setTextSize(20);
-            //bold FAQ questions:
-            } else if (position != positionOfResendEmailCL && position > 7 && position % 2 == 0) {
-                holder.textView.setTypeface(holder.textView.getTypeface(), Typeface.BOLD_ITALIC);
+            if (showResendEmailTip) {
+                if (position != positionOfResendEmailCL) {
+                    holder.textView.setText(getString(helpStringIds[position]));
+                } else {
+                    TextView tv = holder.constraintLayout.findViewById(R.id.helpResendEmailTv);
+                    tv.setText(getString(helpStringIds[position]));
+                    Button b = holder.constraintLayout.findViewById(R.id.helpResendEmailButton);
+                    b.setOnClickListener(x -> resendVerificationEmail());
+                }
+            } else {
+                holder.textView.setText(getString(helpStringIds[position]));
             }
 
-            //the resend email textview/button:
-            if (position == positionOfResendEmailCL) {
-                TextView tv = holder.constraintLayout.findViewById(R.id.helpResendEmailTv);
-                tv.setText(getString(helpStringIds[position]));
-                Button b = holder.constraintLayout.findViewById(R.id.helpResendEmailButton);
-                b.setOnClickListener(x -> resendVerificationEmail());
+            //"General Information" and "FAQ" headers:
+            if (position == 0 || position == 7) {
+                holder.textView.setTextSize(20);
+            //bold the questions in the FAQ section:
+            } else if (position != positionOfResendEmailCL && position > 7 && position % 2 == 0) {
+                holder.textView.setTypeface(holder.textView.getTypeface(), Typeface.BOLD_ITALIC);
             }
         }
 
@@ -150,18 +189,19 @@ public class HelpActivity extends AppCompatActivity {
     }
 
     private void resendVerificationEmail() {
-        if (user != null) user.reload();
-
-        if (user != null && !user.isEmailVerified()) {
-            user.sendEmailVerification()
-                    .addOnSuccessListener(r -> {
-                        Utils.showToast(HelpActivity.this, "Verification email sent.");
-                    })
-                    .addOnFailureListener(e -> Log.e(TAG, "error sending ver email: " + e.toString()));
-        } else if (user == null) {
-            Utils.showToast(HelpActivity.this, "Please sign up or log in first.");
-        } else {
+        if (Utils.checkUserAuthorization()) {
             Utils.showToast(HelpActivity.this, "Your account is already verified.");
+        } else {
+            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (firebaseUser == null) {
+                Log.e(TAG, "user's firebase auth instance is null, but the 'resend verification email' button was shown");
+            } else {
+                firebaseUser.sendEmailVerification()
+                        .addOnSuccessListener(r -> {
+                            Utils.showToast(HelpActivity.this, "Verification email sent.");
+                        })
+                        .addOnFailureListener(e -> Log.e(TAG, "error sending ver email: " + e.toString()));
+            }
         }
     }
 }

@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -35,8 +37,6 @@ import android.widget.VideoView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -67,7 +67,9 @@ public class CreatePostActivity extends AppCompatActivity {
     private String currentFilePath;
     private ActivityCreatePostBinding binding;
     private FirebaseFirestore db;
-    private FirebaseUser user;
+    private String username;
+    private String userId;
+    private SharedPreferences sharedPreferences;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private StorageReference storageRef;
     private Bitmap currentImage;
@@ -90,7 +92,11 @@ public class CreatePostActivity extends AppCompatActivity {
         setContentView(view);
 
         db = FirebaseFirestore.getInstance();
-        user = FirebaseAuth.getInstance().getCurrentUser();
+
+        sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
+        username = sharedPreferences.getString("username", null);
+        userId = sharedPreferences.getString("userId", null);
+
         storageRef = storage.getReference();
         loadingSpinner = findViewById(R.id.createPostProgressBar);
 
@@ -147,11 +153,10 @@ public class CreatePostActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         postAndImageId = UUID.randomUUID().toString();
-                                        String username = binding.anonymousCheckbox.isChecked() ? "Anonymous" : user.getDisplayName();
                                         Post post = new Post(
                                                 postAndImageId,
-                                                user.getUid(),
-                                                username,
+                                                userId,
+                                                binding.anonymousCheckbox.isChecked() ? "Anonymous" : username,
                                                 postTitle,
                                                 postBody,
                                                 formattedAddress,
@@ -217,9 +222,13 @@ public class CreatePostActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "error: " + e.toString());
-                });
+                    Utils.showToast(CreatePostActivity.this, "Error uploading image.");
+                    binding.createPostProgressBar.setVisibility(View.GONE);
+            });
             }).addOnFailureListener(failure -> {
                 Log.e(TAG, "failure! :" + failure.toString());
+                Utils.showToast(CreatePostActivity.this, "Error uploading image.");
+                binding.createPostProgressBar.setVisibility(View.GONE);
             });
 
         // UPLOAD VIDEO //
@@ -227,7 +236,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
             //temp file to transcode the video into, then upload
             File transcodedVideoFile = File.createTempFile(
-                    "t" + user.getDisplayName(),  /* prefix */
+                    "t" + username,  /* prefix */
                     ".mp4",         /* suffix */
                     getExternalFilesDir(Environment.DIRECTORY_MOVIES)      /* directory */
             );
@@ -258,14 +267,20 @@ public class CreatePostActivity extends AppCompatActivity {
                                                 })
                                                 .addOnFailureListener(e -> {
                                                     Log.e(TAG, "error getting video thumbnail: " + e.toString());
+                                                    Utils.showToast(CreatePostActivity.this, "Error uploading video.");
+                                                    binding.createPostProgressBar.setVisibility(View.GONE);
                                                 });
                                     });
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e(TAG, "error: " + e.toString());
+                                    Utils.showToast(CreatePostActivity.this, "Error uploading video.");
+                                    binding.createPostProgressBar.setVisibility(View.GONE);
                                 });
                             }).addOnFailureListener(failure -> {
                                 Log.e(TAG, "failure! :" + failure.toString());
+                                Utils.showToast(CreatePostActivity.this, "Error uploading video.");
+                                binding.createPostProgressBar.setVisibility(View.GONE);
                             });
                         }
                         public void onTranscodeCanceled() {}
@@ -281,13 +296,11 @@ public class CreatePostActivity extends AppCompatActivity {
                 .addOnSuccessListener(result -> {
                     //add post to user's list and +1 their total score
                     db.collection("users")
-                            .document(user.getUid())
+                            .document(userId)
                             .get()
                             .addOnSuccessListener(userData -> {
                                 User user = userData.toObject(User.class);
-                                if (user.getPostDescriptors() == null) {
-                                    Log.w(TAG, "user doesn't have a postDescriptors field!");
-                                } else {
+                                if (user.getPostDescriptors() != null) {
                                     List<PostDescriptor> postDescriptors = user.getPostDescriptors();
                                     postDescriptors.add(new PostDescriptor(
                                             post.getId(),
@@ -300,22 +313,24 @@ public class CreatePostActivity extends AppCompatActivity {
                                     ));
 
                                     db.collection("users")
-                                            .document(user.getUid())
+                                            .document(userId)
                                             .update("postDescriptors", postDescriptors,
                                                     "totalScore", user.getTotalScore() + 1)
                                             .addOnSuccessListener(result2 -> {
-                                                loadingSpinner.setVisibility(View.VISIBLE);
+                                                loadingSpinner.setVisibility(View.GONE);
                                             })
                                             .addOnFailureListener(e -> {
                                                 Log.e(TAG, "Error updating user's post descriptors list " + e);
-                                                loadingSpinner.setVisibility(View.VISIBLE);
+                                                loadingSpinner.setVisibility(View.GONE);
+                                                Utils.showToast(CreatePostActivity.this, "Error uploading post.");
                                             });
                                 }
 
                             })
                             .addOnFailureListener(e -> {
                                 Log.e(TAG, "Error getting user: " + e);
-                                loadingSpinner.setVisibility(View.VISIBLE);
+                                loadingSpinner.setVisibility(View.GONE);
+                                Utils.showToast(CreatePostActivity.this, "Error uploading post.");
                             });
 
                     finish();
@@ -323,7 +338,8 @@ public class CreatePostActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error adding post to db: " + e);
-                    loadingSpinner.setVisibility(View.VISIBLE);
+                    loadingSpinner.setVisibility(View.GONE);
+                    Utils.showToast(CreatePostActivity.this, "Error uploading post.");
                 });
     }
 
@@ -486,7 +502,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
     private File createMediaFile(int requestCode) throws IOException {
         String timestamp = Long.toString(new Date().getTime());
-        String fileName = user.getDisplayName() + timestamp;
+        String fileName = username + timestamp;
         if (requestCode == REQUEST_IMAGE_CAPTURE) {
             File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
             File image = File.createTempFile(

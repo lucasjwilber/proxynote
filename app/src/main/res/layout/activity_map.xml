@@ -138,7 +138,7 @@
                 android:id="@+id/mapLoginSuggestion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/you_must_be_logged_in"
+                android:text="@string/you_must_be_logged_in_to_post"
                 android:textAlignment="textStart"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"

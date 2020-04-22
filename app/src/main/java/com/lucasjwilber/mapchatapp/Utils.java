@@ -1,6 +1,7 @@
 package com.lucasjwilber.mapchatapp;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -8,15 +9,21 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class Utils {
 
@@ -143,6 +150,7 @@ public class Utils {
     }
 
     static ArrayList<Comment> turnMapsIntoListOfComments(ArrayList<HashMap> mapList) {
+
         ArrayList<Comment> comments = new ArrayList<>();
 
         for (HashMap map : mapList) {
@@ -344,5 +352,51 @@ public class Utils {
         }
         return zonesOnScreen;
     }
+
+
+    static boolean checkUserAuthorization() {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
+        String loginType = sharedPreferences.getString("loginType", "firebase");
+        switch (loginType) {
+            case "firebase":
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                if (user == null) {
+                    return false;
+                } else {
+                    user.reload();
+                    return user.isEmailVerified();
+                }
+            case "facebook":
+                AccessToken facebookAccessToken = AccessToken.getCurrentAccessToken();
+                return facebookAccessToken != null && !facebookAccessToken.isExpired();
+            case "google":
+                //google oauth
+                return false;
+            default:
+                return false;
+        }
+    }
+
+//    static String getUserId() {
+//        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
+//        String loginType = sharedPreferences.getString("loginType", "firebase");
+//
+//        switch (loginType) {
+//            case "firebase":
+//                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+//                    return FirebaseAuth.getInstance().getCurrentUser().getUid();
+//                } else {
+//                    return null;
+//                }
+//            case "facebook":
+//                AccessToken accessToken = AccessToken.getCurrentAccessToken();
+//                return accessToken.getUserId();
+//            case "google":
+//                //google oauth
+//                return null;
+//            default:
+//                return null;
+//        }
+//    }
 
 }

@@ -1,6 +1,5 @@
 package com.lucasjwilber.mapchatapp;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -24,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 
+import com.facebook.login.LoginManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -37,22 +37,16 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.lucasjwilber.mapchatapp.databinding.ActivityMapBinding;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         PopupMenu.OnMenuItemClickListener,
@@ -64,7 +58,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
-    private FirebaseUser currentUser;
+    private String userId;
+    private String username;
+    private String loginType;
+    private boolean userIsAuthorized;
     private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
     private final int LOCATION_UPDATE_COOLDOWN = 30000;
     private double userLat;
@@ -91,6 +88,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private HashSet<String> zoneCacheMedium;
     private HashSet<String> zoneCacheLarge;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,6 +101,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         db = FirebaseFirestore.getInstance();
         sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
+
+        Log.i(TAG, "userid is " + userId + ", username is " + username);
+
         periodicLocationUpdateHandler = new Handler();
         markerList = new ArrayList<>();
 
@@ -138,7 +139,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onResume() {
         super.onResume();
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        userIsAuthorized = Utils.checkUserAuthorization();
+
+        userId = sharedPreferences.getString("userId", null);
+        username = sharedPreferences.getString("username", null);
+        loginType = sharedPreferences.getString("loginType", null);
 
         //post data may have changed. delete all stored markers, clear the caches, and get posts
         refreshMapData(null);
@@ -298,10 +304,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         popup.inflate(R.menu.hamburger_menu);
 
         Menu menu = popup.getMenu();
-        if (currentUser == null) {
-            menu.getItem(0).setVisible(false);
-        } else {
+        if (userIsAuthorized) {
             menu.getItem(4).setTitle("Log Out");
+        } else {
+            menu.getItem(0).setVisible(false);
         }
         menu.getItem(0).setIcon(getDrawable(R.drawable.posticon_128064));
         popup.show();
@@ -315,7 +321,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             case R.id.menuProfile:
                 hideAllModals();
                 Intent goToProfile = new Intent(this, UserProfileActivity.class);
-                goToProfile.putExtra("userId", currentUser.getUid());
+                goToProfile.putExtra("userId", userId);
                 startActivity(goToProfile);
                 return true;
             case R.id.menuHelp:
@@ -323,14 +329,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 startActivity(goToHelp);
                 return true;
             case R.id.menuLoginLogout:
-                if (currentUser == null) { //go to login/signup page
+                if (!userIsAuthorized) { //go to login/signup page
                     postRv.setVisibility(View.GONE);
                     Intent i = new Intent(this, LoginActivity.class);
                     startActivity(i);
                 } else { //log out
-                    FirebaseAuth.getInstance().signOut();
+                    String loginType = sharedPreferences.getString("loginType", "firebase");
+                    if (loginType.equals("firebase")) {
+                        FirebaseAuth.getInstance().signOut();
+                    } else if (loginType.equals("facebook")) {
+                        LoginManager.getInstance().logOut();
+                    } else if (loginType.equals("google")) {
+                        //todo: google logout
+                    }
                     Utils.showToast(MapActivity.this, "You are now logged out.");
-                    currentUser = null;
+                    userIsAuthorized = false;
                 }
                 return true;
 
@@ -444,18 +457,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onCreatePostButtonClick(View v) {
         hideAllModals();
 
-        if (currentUser == null) {
-            String text = "You must be logged in to post.";
-            binding.mapLoginSuggestion.setText(text);
-            binding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
-        } else if (!currentUser.isEmailVerified()) {
-            //reload and check again first
-            currentUser.reload()
-                .addOnSuccessListener(r -> {
-                    if (!currentUser.isEmailVerified()) {
-                        Utils.showToast(MapActivity.this, "Please verify your email first.");
-                    }
-                });
+        if (!Utils.checkUserAuthorization()) {
+            if (loginType != null && loginType.equals("firebase")) {
+                FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                if (firebaseUser != null && !firebaseUser.isEmailVerified()) {
+                    Utils.showToast(MapActivity.this, "Please verifiy your email address first.");
+                } else {
+                    binding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
+                }
+            } else {
+                binding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
+            }
         } else {
             Intent goToCreatePostAct = new Intent(this, CreatePostActivity.class);
             startActivity(goToCreatePostAct);
@@ -515,25 +527,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         .orderBy("timestamp", Query.Direction.DESCENDING)
                         .limit(queryLimit)
                         .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                                        Post post = Objects.requireNonNull(document.toObject(Post.class));
-                                        ArrayList list = (ArrayList) document.getData().get("comments");
-                                        post.setComments(Utils.turnMapsIntoListOfComments(list));
-                                        createMarkerWithPost(post);
-                                    }
-                                    cache.addAll(zones);
-                                    binding.postQueryPB.setVisibility(View.GONE);
-                                    binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
-                                } else {
-                                    Log.e(TAG, "Error getting documents.", task.getException());
-                                    binding.postQueryPB.setVisibility(View.GONE);
-                                    binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
-                                }
+                        .addOnSuccessListener(result -> {
+                            List<Post> posts = result.toObjects(Post.class);
+
+                            for (Post post : posts) {
+                                createMarkerWithPost(post);
                             }
+
+                            cache.addAll(zones);
+                            binding.postQueryPB.setVisibility(View.GONE);
+                            binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Error getting posts: " + e.toString());
+                            binding.postQueryPB.setVisibility(View.GONE);
+                            binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
                         });
     }
 
@@ -621,8 +629,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         postRvAdapter = new PostRvAdapter(
                                 post,
                                 MapActivity.this,
-                                currentUser != null ? currentUser.getUid() : null,
-                                currentUser != null ? currentUser.getDisplayName() : null,
+                                userId,
+                                username,
                                 null,
                                 db
                         );
@@ -651,15 +659,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         Intent goToLogin = new Intent(MapActivity.this, LoginActivity.class);
         hideAllModals();
         startActivity(goToLogin);
-    }
-
-    public void onResendEmailVerificationClick(View v) {
-        if (currentUser != null) {
-            currentUser.sendEmailVerification()
-                    .addOnSuccessListener(r -> {
-                        Utils.showToast(MapActivity.this, "Verification email sent.");
-                    });
-        }
     }
 
     public void toggleMarkerVisibility(View v) {

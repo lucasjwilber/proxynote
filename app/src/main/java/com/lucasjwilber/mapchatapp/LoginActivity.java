@@ -4,12 +4,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -21,11 +29,15 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lucasjwilber.mapchatapp.databinding.ActivityLoginBinding;
 
+import org.json.JSONException;
+
+import java.util.Arrays;
+
 public class LoginActivity extends AppCompatActivity {
 
     private final String TAG = "ljw";
     private FirebaseAuth mAuth;
-    private FirebaseUser user;
+    private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
     private boolean loginShown = true;
     private ActivityLoginBinding binding;
@@ -33,6 +45,9 @@ public class LoginActivity extends AppCompatActivity {
     private final int EMAIL_VERIFICATION_CHECK_COOLDOWN = 2000;
     private Handler emailVerificationCheckRunnable;
     boolean waitingForEmailVerification;
+    private LoginButton facebookLoginButton;
+    private static final String EMAIL = "email";
+    private CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,15 +63,21 @@ public class LoginActivity extends AppCompatActivity {
         String savedEmail = sharedPreferences.getString("email", "");
         binding.loginActEmailEditText.setText(savedEmail);
 
-        if (mAuth.getCurrentUser() != null) {
-            user = mAuth.getCurrentUser();
-            if (user != null && !user.isEmailVerified()) {
-                binding.emailVerificationModal.setVisibility(View.VISIBLE);
-                binding.loginBaseLayout.setVisibility(View.GONE);
-            }
-        }
+//        if (mAuth.getCurrentUser() != null) {
+//            firebaseUser = mAuth.getCurrentUser();
+//            if (firebaseUser != null && !firebaseUser.isEmailVerified()) {
+//                binding.emailVerificationModal.setVisibility(View.VISIBLE);
+//                binding.loginBaseLayout.setVisibility(View.GONE);
+//            }
+//        }
 
         emailVerificationCheckRunnable = new Handler();
+
+        //facebook oath
+        facebookLoginButton = binding.facebookLoginButton;
+        facebookLoginButton.setReadPermissions(Arrays.asList(EMAIL));
+        callbackManager = CallbackManager.Factory.create();
+        setupFacebookButtonCallback();
     }
 
     @Override
@@ -88,6 +109,7 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginActConfirmPasswordCLabel.setVisibility(View.GONE);
         binding.loginActConfirmPasswordPLabel.setVisibility(View.GONE);
         binding.loginActConfirmPasswordEditText.setVisibility(View.GONE);
+        binding.facebookLoginButton.setVisibility(View.VISIBLE);
     }
     public void signupButtonClicked(View v) {
         loginShown = false;
@@ -100,6 +122,7 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginActConfirmPasswordCLabel.setVisibility(View.VISIBLE);
         binding.loginActConfirmPasswordPLabel.setVisibility(View.VISIBLE);
         binding.loginActConfirmPasswordEditText.setVisibility(View.VISIBLE);
+        binding.facebookLoginButton.setVisibility(View.GONE);
     }
 
     public void onSubmitButtonClicked(View v) {
@@ -125,8 +148,14 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            user = mAuth.getCurrentUser();
+                            firebaseUser = mAuth.getCurrentUser();
                             binding.loginProgressBar.setVisibility(View.GONE);
+                            updateStoredUserInfo(
+                                    "firebase",
+                                    firebaseUser.getUid(),
+                                    firebaseUser.getDisplayName(),
+                                    firebaseUser.getEmail()
+                            );
                             finish();
                         } else {
                             Log.e(TAG, "signInWithEmail:failure", task.getException());
@@ -155,18 +184,19 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            user  = mAuth.getCurrentUser();
+                            firebaseUser = mAuth.getCurrentUser();
 
-                            //save email for autofill next time
-                            SharedPreferences.Editor editor = sharedPreferences.edit().putString("email", email);
-                            editor.apply();
-
-                            // set the user's displayname/username. this can't be done when adding the user unfortunately.
+                            // set the user's display name (username). this can't be done while creating the user unfortunately.
                             UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
-                            user.updateProfile(userProfileChangeRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            firebaseUser.updateProfile(userProfileChangeRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-                                    Log.i(TAG, "updated user's displayName with their chosen username");
+                                    updateStoredUserInfo(
+                                            "firebase",
+                                            firebaseUser.getUid(),
+                                            username,
+                                            firebaseUser.getEmail()
+                                    );
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -177,14 +207,14 @@ public class LoginActivity extends AppCompatActivity {
                             });
 
                             //add new user to firestore "users" collection
-                            User newUser = new User(username, email, user.getUid());
+                            User newUser = new User(username, email, firebaseUser.getUid());
                             db.collection("users")
-                                    .document(user.getUid())
+                                    .document(firebaseUser.getUid())
                                     .set(newUser)
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void aVoid) {
-                                            user.sendEmailVerification()
+                                            firebaseUser.sendEmailVerification()
                                                     .addOnSuccessListener(r -> {
                                                         waitForEmailVerification();
                                                         binding.loginProgressBar.setVisibility(View.GONE);
@@ -217,8 +247,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onResendEmailVerificationClick(View v) {
-        if (user != null) {
-            user.sendEmailVerification()
+        if (firebaseUser != null) {
+            firebaseUser.sendEmailVerification()
             .addOnSuccessListener(r -> {
                 Utils.showToast(LoginActivity.this, "Verification email sent.");
             })
@@ -250,4 +280,105 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onBackButtonClicked(View v) { finish(); }
+
+    public void facebookLoginClicked(View v) {
+        Log.i(TAG, "facebook button clicked");
+    }
+
+    private void setupFacebookButtonCallback() {
+        LoginManager.getInstance().registerCallback(callbackManager,
+                new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+
+                        db.collection("users")
+                                .document(loginResult.getAccessToken().getUserId())
+                                .get()
+                                .addOnSuccessListener(res -> {
+                                    User user = res.toObject(User.class);
+
+                                    if (user != null) {
+                                        Log.i(TAG, "existing user authenticated. userid is " + user.getUid() + ", username is " + user.getUsername());
+                                        updateStoredUserInfo(
+                                                "facebook",
+                                                user.getUid(),
+                                                user.getUsername(),
+                                                user.getEmail()
+                                        );
+                                        finish();
+                                    } else {
+                                        Log.i(TAG, "creating a new user...");
+                                        GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), (object, response) -> {
+                                            String name;
+                                            String email;
+                                            String id;
+                                            try {
+                                                name = object.getString("name");
+                                                email = object.getString("email");
+                                                id = object.getString("id");
+                                                User newUser = new User(name, email, id);
+
+                                                db.collection("users")
+                                                        .document(id)
+                                                        .set(newUser)
+                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                            @Override
+                                                            public void onSuccess(Void aVoid) {
+                                                                Log.i(TAG, "made new user object in firestore");
+                                                                updateStoredUserInfo(
+                                                                        "facebook",
+                                                                        id,
+                                                                        name,
+                                                                        email
+                                                                );
+                                                                finish();
+                                                            }
+                                                        })
+                                                        .addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                Log.e(TAG, "failed adding new user to firestore: " + e.toString());
+                                                            }
+                                                        });
+
+                                            } catch (JSONException e) {
+                                                Log.e(TAG, "error calling graph: " + e.toString());
+                                            }
+                                        });
+
+                                        Bundle parameters = new Bundle();
+                                        parameters.putString("fields", "id, name, email");
+                                        request.setParameters(parameters);
+                                        request.executeAsync();
+                                    }
+
+
+                                });
+                    }
+                    @Override
+                    public void onCancel() {
+                        // App code
+                    }
+                    @Override
+                    public void onError(FacebookException exception) {
+                        Log.e(TAG, "error registering facebook callback: " + exception.toString());
+                    }
+                });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void updateStoredUserInfo(String loginType, String userId, String username, String userEmail) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("loginType", loginType);
+        editor.putString("userId", userId);
+        editor.putString("username", username);
+        editor.putString("userEmail", userEmail);
+        editor.apply();
+        Log.i(TAG, "updated shared prefs");
+    }
 }

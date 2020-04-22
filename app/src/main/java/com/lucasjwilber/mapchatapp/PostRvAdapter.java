@@ -31,7 +31,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
     private final String TAG = "ljw";
     private FirebaseFirestore db;
-    private FirebaseUser user;
+    private boolean userIsAuthorized;
     private Context context;
     private Post post;
     private String currentUserId;
@@ -62,8 +62,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         this.profileOwnerId = profileOwnerId;
         this.db = db;
 
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        user = mAuth.getCurrentUser();
+        userIsAuthorized = Utils.checkUserAuthorization();
         SharedPreferences prefs = context.getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");
         upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
@@ -216,20 +215,27 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     public void onVoteButtonClick(Button b) {
-        if (user == null) {
-            Utils.showToast(context, "You must be logged in to vote.");
+//        if (user == null) {
+//            Utils.showToast(context, "You must be logged in to vote.");
+//        } else {
+//            //reload and check again first in case user logged out or verified their email while this RV is open
+//            user.reload()
+//                    .addOnSuccessListener(r -> {
+//                        if (user == null) {
+//                            Utils.showToast(context, "You must be logged in to vote.");
+//                        } else if (!user.isEmailVerified()) {
+//                            Utils.showToast(context, "Please verify your email first.");
+//                        } else {
+//                            castVote(b);
+//                        }
+//                    });
+//        }
+        if (!userIsAuthorized) {
+            Utils.showToast(context, "Please log in or verify your email address.");
+            //refresh in case they verify their email in the background
+            userIsAuthorized = Utils.checkUserAuthorization();
         } else {
-            //reload and check again first in case user logged out or verified their email while this RV is open
-            user.reload()
-                    .addOnSuccessListener(r -> {
-                        if (user == null) {
-                            Utils.showToast(context, "You must be logged in to vote.");
-                        } else if (!user.isEmailVerified()) {
-                            Utils.showToast(context, "Please verify your email first.");
-                        } else {
-                            castVote(b);
-                        }
-                    });
+            castVote(b);
         }
     }
 
@@ -289,8 +295,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         db.collection("posts")
                 .document(post.getId())
                 .get()
-                .addOnCompleteListener(task -> {
-                    Post post = task.getResult().toObject(Post.class);
+                .addOnSuccessListener(result -> {
+                    Post post = result.toObject(Post.class);
 
                     if (post == null) {
                         Utils.showToast(context, "This post no longer exists.");
@@ -301,30 +307,32 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                             .document(post.getId())
                             .update("score", post.getScore() + finalScoreChange,
                                     "votes", voteMap)
-                            .addOnCompleteListener(task1 -> {
+                            .addOnSuccessListener(task1 -> {
                                 //update the post creator's total score field:
                                 db.collection("users")
                                         .document(post.getUserId())
                                         .get()
-                                        .addOnCompleteListener(task2 -> {
-                                            User user = task2.getResult().toObject(User.class);
-                                            int userScore = user.getTotalScore();
+                                        .addOnSuccessListener(task2 -> {
+                                            User user = task2.toObject(User.class);
+                                            if (user != null) {
+                                                int userScore = user.getTotalScore();
 
-                                            //update the postDescriptor for this post:
-                                            List<PostDescriptor> postDescriptors = user.getPostDescriptors();
-                                            for (PostDescriptor pd : postDescriptors) {
-                                                if (pd.id.equals(post.getId())) {
-                                                    pd.setScore(pd.getScore() + finalScoreChange);
+                                                //update the postDescriptor for this post:
+                                                List<PostDescriptor> postDescriptors = user.getPostDescriptors();
+                                                for (PostDescriptor pd : postDescriptors) {
+                                                    if (pd.id.equals(post.getId())) {
+                                                        pd.setScore(pd.getScore() + finalScoreChange);
+                                                    }
                                                 }
-                                            }
 
-                                            db.collection("users")
-                                                    .document(post.getUserId())
-                                                    .update("totalScore", userScore + finalScoreChange,
-                                                            "postDescriptors", postDescriptors)
-                                                    .addOnFailureListener(e -> {
-                                                        Log.e(TAG, "couldn't update user's score: " + e.toString());
-                                                    });
+                                                db.collection("users")
+                                                        .document(post.getUserId())
+                                                        .update("totalScore", userScore + finalScoreChange,
+                                                                "postDescriptors", postDescriptors)
+                                                        .addOnFailureListener(e -> {
+                                                            Log.e(TAG, "couldn't update user's score: " + e.toString());
+                                                        });
+                                            }
 
                                         })
                                         .addOnFailureListener(e -> {
@@ -355,18 +363,24 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     private void onReportButtonClicked() {
-        if (user == null) {
-            Utils.showToast(context, "You must be signed in to report a post.");
+//        if (user == null) {
+//            Utils.showToast(context, "You must be signed in to report a post.");
+//            return;
+//        } else if (!user.isEmailVerified()) {
+//            //reload and check again first
+//            user.reload()
+//                    .addOnSuccessListener(r -> {
+//                        if (!user.isEmailVerified()) {
+//                            Utils.showToast(context, "Please verify your email first.");
+//                            return;
+//                        }
+//                    });
+//        }
+        if (!userIsAuthorized) {
+            Utils.showToast(context, "Please log in or verify your email first.");
+            //refresh in case they verify their email in the background
+            userIsAuthorized = Utils.checkUserAuthorization();
             return;
-        } else if (!user.isEmailVerified()) {
-            //reload and check again first
-            user.reload()
-                .addOnSuccessListener(r -> {
-                    if (!user.isEmailVerified()) {
-                        Utils.showToast(context, "Please verify your email first.");
-                        return;
-                    }
-                });
         }
         Intent goToReportActivity = new Intent(context, ReportActivity.class);
         goToReportActivity.putExtra("postId", post.getId());
@@ -381,18 +395,28 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
     public void addCommentToPost(String commentText) {
         Log.i(TAG, commentText);
-        if (user == null) {
-            Utils.showToast(context, "You must be logged in to comment.");
+//        if (user == null) {
+//            Utils.showToast(context, "You must be logged in to comment.");
+//            return;
+//        } else if (!user.isEmailVerified()) {
+//            //reload and check again first
+//            user.reload()
+//                    .addOnSuccessListener(r -> {
+//                        if (!user.isEmailVerified()) {
+//                            Utils.showToast(context, "Please verify your email first.");
+//                            return;
+//                        }
+//                    });
+//        } else if (commentText.equals("") || commentText.length() == 0) {
+//            Utils.showToast(context, "Please write a comment first.");
+//            return;
+//        }
+
+        if (!userIsAuthorized) {
+            Utils.showToast(context, "Please log in or verify your email first.");
+            //refresh in case they verify their email in the background
+            userIsAuthorized = Utils.checkUserAuthorization();
             return;
-        } else if (!user.isEmailVerified()) {
-            //reload and check again first
-            user.reload()
-                    .addOnSuccessListener(r -> {
-                        if (!user.isEmailVerified()) {
-                            Utils.showToast(context, "Please verify your email first.");
-                            return;
-                        }
-                    });
         } else if (commentText.equals("") || commentText.length() == 0) {
             Utils.showToast(context, "Please write a comment first.");
             return;
@@ -425,7 +449,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                         db.collection("posts")
                                 .document(post.getId())
                                 .update("comments", comments)
-                                .addOnCompleteListener(task -> {
+                                .addOnSuccessListener(task -> {
                                     addCommentBox.setText("");
                                     replyLoadingSpinner.setVisibility(View.GONE);
                                 })

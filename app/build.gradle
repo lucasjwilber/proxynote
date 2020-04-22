@@ -70,4 +70,6 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     //transcorder
     implementation 'com.otaliastudios:transcoder:0.9.0'
+    //facebook oath
+    implementation 'com.facebook.android:facebook-login:[5,6)'
 }
