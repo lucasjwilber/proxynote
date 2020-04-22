@@ -1,6 +1,7 @@
 package com.lucasjwilber.mapchatapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -354,26 +355,37 @@ public class Utils {
     }
 
 
-    static boolean checkUserAuthorization() {
+//    static boolean checkUserAuthorization() {
+//        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
+//        String loginType = sharedPreferences.getString("loginType", null);
+//        switch (loginType) {
+//            case "firebase":
+//                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//                if (user == null) {
+//                    return false;
+//                } else {
+//                    user.reload();
+//                    return user.isEmailVerified();
+//                }
+//            case "facebook":
+//                AccessToken facebookAccessToken = AccessToken.getCurrentAccessToken();
+//                return facebookAccessToken != null && !facebookAccessToken.isExpired();
+//            case "google":
+//                //google oauth
+//                return false;
+//            default:
+//                return false;
+//        }
+//    }
+    static boolean isUserAuthorized() {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         String loginType = sharedPreferences.getString("loginType", null);
-        switch (loginType) {
-            case "firebase":
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if (user == null) {
-                    return false;
-                } else {
-                    user.reload();
-                    return user.isEmailVerified();
-                }
-            case "facebook":
-                AccessToken facebookAccessToken = AccessToken.getCurrentAccessToken();
-                return facebookAccessToken != null && !facebookAccessToken.isExpired();
-            case "google":
-                //google oauth
-                return false;
-            default:
-                return false;
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            return loginType == null || !loginType.equals("firebase") || user.isEmailVerified();
+        } else {
+            return false;
         }
     }
 

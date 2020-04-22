@@ -38,9 +38,10 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private final String TAG = "ljw";
     private String thisProfileOwnerId;
-    private String userId;
-    private String username;
+//    private String userId;
+//    private String username;
     private FirebaseFirestore db;
+    private FirebaseUser user;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private ActivityUserProfileBinding binding;
     private RecyclerView.Adapter postDescriptorsRvAdapter;
@@ -61,15 +62,15 @@ public class UserProfileActivity extends AppCompatActivity {
 
         binding.profileOnePostRv.setLayoutManager(new LinearLayoutManager(this));
         db = FirebaseFirestore.getInstance();
+        user = FirebaseAuth.getInstance().getCurrentUser();
         sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
-        userId = sharedPreferences.getString("userId", null);
-        username = sharedPreferences.getString("username", null);
 
         Intent intent = getIntent();
         thisProfileOwnerId = intent.getStringExtra("userId");
 
         if (thisProfileOwnerId != null) {
-            if (thisProfileOwnerId.equals(userId)) userIsOnTheirOwnProfile = true;
+            String currentUserId = user == null ? "" : user.getUid();
+            if (thisProfileOwnerId.equals(currentUserId)) userIsOnTheirOwnProfile = true;
 
             binding.postDescRvProgressBar.setVisibility(View.VISIBLE);
             db.collection("users")
@@ -234,8 +235,8 @@ public class UserProfileActivity extends AppCompatActivity {
                         postRvAdapter = new PostRvAdapter(
                                 post,
                                 UserProfileActivity.this,
-                                userId,
-                                username,
+                                user == null ? null : user.getUid(),
+                                user == null ? null : user.getDisplayName(),
                                 thisProfileOwnerId,
                                 db);
 
@@ -385,7 +386,7 @@ public class UserProfileActivity extends AppCompatActivity {
             String newAboutmeText = aboutMeET.getText().toString();
             aboutMeTV.setText(newAboutmeText);
             db.collection("users")
-                    .document(userId)
+                    .document(user.getUid())
                     .update("aboutme", newAboutmeText)
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "failed updating aboutme: " + e.toString());

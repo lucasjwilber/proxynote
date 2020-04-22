@@ -27,6 +27,7 @@ public class ReportActivity extends AppCompatActivity {
     private double postLat;
     private double postLng;
     private FirebaseFirestore db;
+    private FirebaseUser user;
     private ProgressBar loadingSpinner;
 
     @Override
@@ -36,6 +37,7 @@ public class ReportActivity extends AppCompatActivity {
         loadingSpinner = findViewById(R.id.reportProgressBar);
 
         db = FirebaseFirestore.getInstance();
+        user = FirebaseAuth.getInstance().getCurrentUser();
 
         Intent intent = getIntent();
         postId = intent.getStringExtra("postId");
@@ -48,7 +50,7 @@ public class ReportActivity extends AppCompatActivity {
     }
 
     public void onReportSubmit(View v) {
-        if (!Utils.checkUserAuthorization()) {
+        if (!Utils.isUserAuthorized()) {
             Utils.showToast(ReportActivity.this, "Please log in or verify your email first.");
             return;
         }
@@ -82,7 +84,8 @@ public class ReportActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         EditText additionalInfoTV = findViewById(R.id.reportAdditionalText);
         String additionalInfo = additionalInfoTV.getText().toString();
-        String reportId = postId + "|" + sharedPreferences.getString("userId", "user id unknown");
+        String userId = user == null ? "unknown user" : user.getUid();
+        String reportId = postId + "|" + userId;
         Report report = new Report(reportId, reason, additionalInfo, postId, postUserId, postTitle, postText, postMediaStorageId, postLat, postLng);
 
         db.collection("reports")

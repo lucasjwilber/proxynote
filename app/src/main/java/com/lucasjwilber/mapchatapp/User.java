@@ -13,6 +13,7 @@ public class User {
     private int totalScore;
     private int reports;
     private String aboutme;
+    private boolean isEmailVerified;
 
     public User() {};
 
@@ -25,6 +26,14 @@ public class User {
         this.totalScore = 0;
         this.reports = 0;
         this.aboutme = "Hello!";
+    }
+
+    public boolean isEmailVerified() {
+        return isEmailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        isEmailVerified = emailVerified;
     }
 
     public String getAboutme() {

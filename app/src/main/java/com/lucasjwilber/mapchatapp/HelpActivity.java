@@ -27,6 +27,7 @@ public class HelpActivity extends AppCompatActivity {
     private final String TAG = "ljw";
     private ActivityHelpBinding binding;
     private FirebaseFirestore db;
+    private FirebaseUser user;
     private SharedPreferences sharedPreferences;
     private static final int TEXT_VIEW = 0;
     private static final int CONSTRAINT_LAYOUT = 1;
@@ -41,7 +42,7 @@ public class HelpActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
 
-        if (Utils.checkUserAuthorization()) {
+        if (Utils.isUserAuthorized()) {
             binding.questionCommentModal.setVisibility(View.VISIBLE);
         }
 
@@ -50,13 +51,14 @@ public class HelpActivity extends AppCompatActivity {
     }
 
     public void onSubmitQuestionOrCommentButtonClicked(View v) {
-        if (!Utils.checkUserAuthorization()) {
+        if (!Utils.isUserAuthorized()) {
             Utils.showToast(HelpActivity.this, "Please log in or verify your email first.");
+            return;
         }
 
         String text = binding.helpCommentBox.getText().toString();
-        String userId = sharedPreferences.getString("userId", "user id unknown");
-        String userEmail = sharedPreferences.getString("userEmail", "user email unknown");
+        String userId = user.getUid();
+        String userEmail = user.getEmail();
         QuestionOrComment qoc = new QuestionOrComment(text, userId, userEmail);
 
         db.collection("questionsAndComments")
@@ -83,10 +85,9 @@ public class HelpActivity extends AppCompatActivity {
         // this is going to be entirely hardcoded so there's no need to parameterize the adapter
         HelpRvAdapter() {
             //firebase user that hasn't verified their email:
-            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
             if (sharedPreferences.getString("loginType", "none").equals("firebase") &&
-                    firebaseUser != null &&
-                    !firebaseUser.isEmailVerified()
+                    user != null &&
+                    !user.isEmailVerified()
             ) {
                 showResendEmailTip = true;
                 helpStringIds = new int[]{
@@ -189,14 +190,13 @@ public class HelpActivity extends AppCompatActivity {
     }
 
     private void resendVerificationEmail() {
-        if (Utils.checkUserAuthorization()) {
+        if (user != null && user.isEmailVerified()) {
             Utils.showToast(HelpActivity.this, "Your account is already verified.");
         } else {
-            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-            if (firebaseUser == null) {
+            if (user == null) {
                 Log.e(TAG, "user's firebase auth instance is null, but the 'resend verification email' button was shown");
             } else {
-                firebaseUser.sendEmailVerification()
+                user.sendEmailVerification()
                         .addOnSuccessListener(r -> {
                             Utils.showToast(HelpActivity.this, "Verification email sent.");
                         })

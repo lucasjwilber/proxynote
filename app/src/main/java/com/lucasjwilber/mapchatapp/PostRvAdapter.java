@@ -31,7 +31,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 
     private final String TAG = "ljw";
     private FirebaseFirestore db;
-    private boolean userIsAuthorized;
+    private FirebaseUser user;
     private Context context;
     private Post post;
     private String currentUserId;
@@ -62,7 +62,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         this.profileOwnerId = profileOwnerId;
         this.db = db;
 
-        userIsAuthorized = Utils.checkUserAuthorization();
+//        userIsAuthorized = Utils.checkUserAuthorization();
+        user = FirebaseAuth.getInstance().getCurrentUser();
         SharedPreferences prefs = context.getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");
         upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
@@ -230,10 +231,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 //                        }
 //                    });
 //        }
-        if (!userIsAuthorized) {
+        if (!Utils.isUserAuthorized()) {
             Utils.showToast(context, "Please log in or verify your email address.");
-            //refresh in case they verify their email in the background
-            userIsAuthorized = Utils.checkUserAuthorization();
         } else {
             castVote(b);
         }
@@ -246,6 +245,9 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         int usersPreviousVote = 0;
         int currentScore = post.getScore();
         HashMap<String, Integer> voteMap = post.getVotes();
+
+        Log.i(TAG, "votemap = " + voteMap.toString());
+
         if (voteMap.containsKey(currentUserId)) {
             usersPreviousVote = voteMap.get(currentUserId);
         }
@@ -363,25 +365,25 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     private void onReportButtonClicked() {
-//        if (user == null) {
-//            Utils.showToast(context, "You must be signed in to report a post.");
-//            return;
-//        } else if (!user.isEmailVerified()) {
-//            //reload and check again first
-//            user.reload()
-//                    .addOnSuccessListener(r -> {
-//                        if (!user.isEmailVerified()) {
-//                            Utils.showToast(context, "Please verify your email first.");
-//                            return;
-//                        }
-//                    });
-//        }
-        if (!userIsAuthorized) {
-            Utils.showToast(context, "Please log in or verify your email first.");
-            //refresh in case they verify their email in the background
-            userIsAuthorized = Utils.checkUserAuthorization();
+        if (user == null) {
+            Utils.showToast(context, "You must be signed in to report a post.");
             return;
+        } else if (!user.isEmailVerified()) {
+            //reload and check again first
+            user.reload()
+                    .addOnSuccessListener(r -> {
+                        if (!user.isEmailVerified()) {
+                            Utils.showToast(context, "Please verify your email first.");
+                            return;
+                        }
+                    });
         }
+//        if (!userIsAuthorized) {
+//            Utils.showToast(context, "Please log in or verify your email first.");
+//            //refresh in case they verify their email in the background
+//            userIsAuthorized = Utils.checkUserAuthorization();
+//            return;
+//        }
         Intent goToReportActivity = new Intent(context, ReportActivity.class);
         goToReportActivity.putExtra("postId", post.getId());
         goToReportActivity.putExtra("postUserId", post.getUserId());
@@ -412,10 +414,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
 //            return;
 //        }
 
-        if (!userIsAuthorized) {
+        if (!Utils.isUserAuthorized()) {
             Utils.showToast(context, "Please log in or verify your email first.");
-            //refresh in case they verify their email in the background
-            userIsAuthorized = Utils.checkUserAuthorization();
             return;
         } else if (commentText.equals("") || commentText.length() == 0) {
             Utils.showToast(context, "Please write a comment first.");

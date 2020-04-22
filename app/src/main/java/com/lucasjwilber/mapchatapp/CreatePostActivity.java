@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -37,6 +36,8 @@ import android.widget.VideoView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -67,9 +68,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private String currentFilePath;
     private ActivityCreatePostBinding binding;
     private FirebaseFirestore db;
-    private String username;
-    private String userId;
-    private SharedPreferences sharedPreferences;
+    private FirebaseUser user;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private StorageReference storageRef;
     private Bitmap currentImage;
@@ -92,10 +91,7 @@ public class CreatePostActivity extends AppCompatActivity {
         setContentView(view);
 
         db = FirebaseFirestore.getInstance();
-
-        sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
-        username = sharedPreferences.getString("username", null);
-        userId = sharedPreferences.getString("userId", null);
+        user = FirebaseAuth.getInstance().getCurrentUser();
 
         storageRef = storage.getReference();
         loadingSpinner = findViewById(R.id.createPostProgressBar);
@@ -116,7 +112,9 @@ public class CreatePostActivity extends AppCompatActivity {
         EditText postBodyForm = binding.postBodyEditText;
         String postBody = postBodyForm.getText().toString();
 
-        if (postTitle.equals("") || postTitle.length() == 0) {
+        if (user == null) {
+            Utils.showToast(CreatePostActivity.this, "Please log in first.");
+        } else if (postTitle.equals("") || postTitle.length() == 0) {
             Utils.showToast(CreatePostActivity.this, "A post title is required.");
             return;
         } else if (postBody.equals("") || postBody.length() == 0) {
@@ -155,8 +153,8 @@ public class CreatePostActivity extends AppCompatActivity {
                                         postAndImageId = UUID.randomUUID().toString();
                                         Post post = new Post(
                                                 postAndImageId,
-                                                userId,
-                                                binding.anonymousCheckbox.isChecked() ? "Anonymous" : username,
+                                                user.getUid(),
+                                                binding.anonymousCheckbox.isChecked() ? "Anonymous" : user.getDisplayName(),
                                                 postTitle,
                                                 postBody,
                                                 formattedAddress,
@@ -236,7 +234,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
             //temp file to transcode the video into, then upload
             File transcodedVideoFile = File.createTempFile(
-                    "t" + username,  /* prefix */
+                    "t" + user.getDisplayName(),  /* prefix */
                     ".mp4",         /* suffix */
                     getExternalFilesDir(Environment.DIRECTORY_MOVIES)      /* directory */
             );
@@ -296,7 +294,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 .addOnSuccessListener(result -> {
                     //add post to user's list and +1 their total score
                     db.collection("users")
-                            .document(userId)
+                            .document(user.getUid())
                             .get()
                             .addOnSuccessListener(userData -> {
                                 User user = userData.toObject(User.class);
@@ -313,7 +311,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                     ));
 
                                     db.collection("users")
-                                            .document(userId)
+                                            .document(user.getUid())
                                             .update("postDescriptors", postDescriptors,
                                                     "totalScore", user.getTotalScore() + 1)
                                             .addOnSuccessListener(result2 -> {
@@ -502,7 +500,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
     private File createMediaFile(int requestCode) throws IOException {
         String timestamp = Long.toString(new Date().getTime());
-        String fileName = username + timestamp;
+        String fileName = user.getDisplayName() + timestamp;
         if (requestCode == REQUEST_IMAGE_CAPTURE) {
             File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
             File image = File.createTempFile(
