@@ -84,7 +84,7 @@ public class HelpActivity extends AppCompatActivity {
         HelpRvAdapter() {
             //firebase user that hasn't verified their email:
             FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-            if (sharedPreferences.getString("loginType", "").equals("firebase") &&
+            if (sharedPreferences.getString("loginType", "none").equals("firebase") &&
                     firebaseUser != null &&
                     !firebaseUser.isEmailVerified()
             ) {

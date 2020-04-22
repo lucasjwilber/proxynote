@@ -356,7 +356,7 @@ public class Utils {
 
     static boolean checkUserAuthorization() {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
-        String loginType = sharedPreferences.getString("loginType", "firebase");
+        String loginType = sharedPreferences.getString("loginType", null);
         switch (loginType) {
             case "firebase":
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();

@@ -309,7 +309,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         } else {
             menu.getItem(0).setVisible(false);
         }
-        menu.getItem(0).setIcon(getDrawable(R.drawable.posticon_128064));
         popup.show();
     }
 
@@ -334,13 +333,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     Intent i = new Intent(this, LoginActivity.class);
                     startActivity(i);
                 } else { //log out
-                    String loginType = sharedPreferences.getString("loginType", "firebase");
-                    if (loginType.equals("firebase")) {
-                        FirebaseAuth.getInstance().signOut();
-                    } else if (loginType.equals("facebook")) {
-                        LoginManager.getInstance().logOut();
-                    } else if (loginType.equals("google")) {
-                        //todo: google logout
+                    String loginType = sharedPreferences.getString("loginType", null);
+                    if (loginType != null) {
+                        switch (loginType) {
+                            case "firebase":
+                                FirebaseAuth.getInstance().signOut();
+                                break;
+                            case "facebook":
+                                LoginManager.getInstance().logOut();
+                                break;
+                            case "google":
+                                //todo: google logout
+                                break;
+                        }
                     }
                     Utils.showToast(MapActivity.this, "You are now logged out.");
                     userIsAuthorized = false;

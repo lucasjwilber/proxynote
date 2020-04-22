@@ -69,6 +69,8 @@ public class UserProfileActivity extends AppCompatActivity {
         thisProfileOwnerId = intent.getStringExtra("userId");
 
         if (thisProfileOwnerId != null) {
+            if (thisProfileOwnerId.equals(userId)) userIsOnTheirOwnProfile = true;
+
             binding.postDescRvProgressBar.setVisibility(View.VISIBLE);
             db.collection("users")
                     .document(thisProfileOwnerId)
