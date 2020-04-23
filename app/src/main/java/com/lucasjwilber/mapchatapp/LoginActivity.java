@@ -17,6 +17,12 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -26,6 +32,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lucasjwilber.mapchatapp.databinding.ActivityLoginBinding;
@@ -37,12 +44,15 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private boolean loginShown = true;
+    private static final int GOOGLE_SIGN_IN = 5;
+    private static final int FACEBOOK_SIGN_IN = 6;
     private ActivityLoginBinding binding;
     private SharedPreferences sharedPreferences;
     private final int EMAIL_VERIFICATION_CHECK_COOLDOWN = 2000;
     private Handler emailVerificationCheckRunnable;
     boolean waitingForEmailVerification;
     private CallbackManager mCallbackManager;
+    private GoogleSignInClient mGoogleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,21 +69,7 @@ public class LoginActivity extends AppCompatActivity {
         String savedEmail = sharedPreferences.getString("email", "");
         binding.loginActEmailEditText.setText(savedEmail);
 
-//        if (mAuth.getCurrentUser() != null) {
-//            user = mAuth.getCurrentUser();
-//            if (user != null && !user.isEmailVerified()) {
-//                binding.emailVerificationModal.setVisibility(View.VISIBLE);
-//                binding.loginBaseLayout.setVisibility(View.GONE);
-//            }
-//        }
-
         emailVerificationCheckRunnable = new Handler();
-
-        //facebook oath
-//        facebookLoginButton = binding.facebookLoginButton;
-//        facebookLoginButton.setReadPermissions("email", "public_profile");
-//        callbackManager = CallbackManager.Factory.create();
-//        setupFacebookButtonCallback();
 
         // Initialize Facebook Login button
         mCallbackManager = CallbackManager.Factory.create();
@@ -98,6 +94,17 @@ public class LoginActivity extends AppCompatActivity {
                 // ...
             }
         });
+
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.google_web_client_id))
+                .requestEmail()
+                .build();
+        // Build a GoogleSignInClient with the options specified by gso.
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        SignInButton googleLoginButton = binding.googleLoginButton;
+        googleLoginButton.setStyle(SignInButton.SIZE_WIDE, SignInButton.COLOR_AUTO);
+        googleLoginButton.setOnClickListener(v -> signIn());
     }
 
     @Override
@@ -131,6 +138,7 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginActConfirmPasswordPLabel.setVisibility(View.GONE);
         binding.loginActConfirmPasswordEditText.setVisibility(View.GONE);
         binding.facebookLoginButton.setVisibility(View.VISIBLE);
+        binding.googleLoginButton.setVisibility(View.VISIBLE);
     }
     public void signupButtonClicked(View v) {
         loginShown = false;
@@ -144,6 +152,7 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginActConfirmPasswordPLabel.setVisibility(View.VISIBLE);
         binding.loginActConfirmPasswordEditText.setVisibility(View.VISIBLE);
         binding.facebookLoginButton.setVisibility(View.GONE);
+        binding.googleLoginButton.setVisibility(View.GONE);
     }
 
     public void onSubmitButtonClicked(View v) {
@@ -172,12 +181,6 @@ public class LoginActivity extends AppCompatActivity {
                             user = mAuth.getCurrentUser();
                             binding.loginProgressBar.setVisibility(View.GONE);
                             sharedPreferences.edit().putString("loginType", "firebase").apply();
-//                            updateStoredUserInfo(
-//                                    "firebase",
-//                                    user.getUid(),
-//                                    user.getDisplayName(),
-//                                    user.getEmail()
-//                            );
                             finish();
                         } else {
                             Log.e(TAG, "signInWithEmail:failure", task.getException());
@@ -217,13 +220,6 @@ public class LoginActivity extends AppCompatActivity {
 
                                             createNewUser(user.getDisplayName(), user.getEmail(), user.getUid());
                                             sharedPreferences.edit().putString("loginType", "firebase").apply();
-
-//                                            updateStoredUserInfo(
-//                                                    "firebase",
-//                                                    user.getUid(),
-//                                                    user.getDisplayName(),
-//                                                    user.getEmail()
-//                                            );
                                         }
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
@@ -282,6 +278,74 @@ public class LoginActivity extends AppCompatActivity {
 
     public void onBackButtonClicked(View v) { finish(); }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == GOOGLE_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                // Google Sign In was successful, authenticate with Firebase
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                firebaseAuthWithGoogle(account);
+            } catch (ApiException e) {
+                // Google Sign In failed, update UI appropriately
+                Log.e(TAG, "Google sign in failed", e);
+            }
+        } else {
+            // If it wasn't Google, it's Facebook. Pass the activity result back to the Facebook SDK
+            mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void signIn() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, GOOGLE_SIGN_IN);
+    }
+
+    private void handleFacebookAccessToken(AccessToken token) {
+        Log.i(TAG, "handleFacebookAccessToken:" + token);
+        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        signInWithCredential(credential);
+    }
+
+    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        signInWithCredential(credential);
+    }
+
+    private void signInWithCredential(AuthCredential credential) {
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.i(TAG, "signInWithCredential:success");
+                            user = mAuth.getCurrentUser();
+                            Log.i(TAG, user.getDisplayName() + ", " + user.getUid() + ", " + user.getEmail() + ", " + user.isEmailVerified());
+                            db.collection("users")
+                                    .document(user.getUid())
+                                    .get()
+                                    .addOnSuccessListener(res -> {
+                                        User userObj = res.toObject(User.class);
+                                        if (userObj != null) {
+                                            Log.i(TAG, "existing user authenticated. userid is " + userObj.getUid() + ", username is " + userObj.getUsername());
+                                            finish();
+                                        } else {
+                                            Log.i(TAG, "creating a new user...");
+                                            createNewUser(user.getDisplayName(), user.getEmail(), user.getUid());
+                                        }
+                                    });
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInWithCredential:failure", task.getException());
+                        }
+                    }
+                });
+    }
+
     private void createNewUser(String username, String email, String userId) {
         User newUser = new User(username, email, userId);
         db.collection("users")
@@ -312,143 +376,4 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    public void facebookLoginClicked(View v) {
-        Log.i(TAG, "facebook button clicked");
-    }
-
-//    private void setupFacebookButtonCallback() {
-//        LoginManager.getInstance().registerCallback(mCallbackManager,
-//                new FacebookCallback<LoginResult>() {
-//                    @Override
-//                    public void onSuccess(LoginResult loginResult) {
-//
-//                        db.collection("users")
-//                                .document(loginResult.getAccessToken().getUserId())
-//                                .get()
-//                                .addOnSuccessListener(res -> {
-//                                    User user = res.toObject(User.class);
-//
-//                                    if (user != null) {
-//                                        Log.i(TAG, "existing user authenticated. userid is " + user.getUid() + ", username is " + user.getUsername());
-//                                        updateStoredUserInfo(
-//                                                "facebook",
-//                                                user.getUid(),
-//                                                user.getUsername(),
-//                                                user.getEmail()
-//                                        );
-//                                        finish();
-//                                    } else {
-//                                        Log.i(TAG, "creating a new user...");
-//                                        GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), (object, response) -> {
-//                                            String name;
-//                                            String email;
-//                                            String id;
-//                                            try {
-//                                                name = object.getString("name");
-//                                                email = object.getString("email");
-//                                                id = object.getString("id");
-//                                                User newUser = new User(name, email, id);
-//
-//                                                db.collection("users")
-//                                                        .document(id)
-//                                                        .set(newUser)
-//                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                                                            @Override
-//                                                            public void onSuccess(Void aVoid) {
-//                                                                Log.i(TAG, "made new user object in firestore");
-//                                                                updateStoredUserInfo(
-//                                                                        "facebook",
-//                                                                        id,
-//                                                                        name,
-//                                                                        email
-//                                                                );
-//                                                                finish();
-//                                                            }
-//                                                        })
-//                                                        .addOnFailureListener(new OnFailureListener() {
-//                                                            @Override
-//                                                            public void onFailure(@NonNull Exception e) {
-//                                                                Log.e(TAG, "failed adding new user to firestore: " + e.toString());
-//                                                            }
-//                                                        });
-//
-//                                            } catch (JSONException e) {
-//                                                Log.e(TAG, "error calling graph: " + e.toString());
-//                                            }
-//                                        });
-//
-//                                        Bundle parameters = new Bundle();
-//                                        parameters.putString("fields", "id, name, email");
-//                                        request.setParameters(parameters);
-//                                        request.executeAsync();
-//                                    }
-//
-//
-//                                });
-//                    }
-//                    @Override
-//                    public void onCancel() {
-//                        // App code
-//                    }
-//                    @Override
-//                    public void onError(FacebookException exception) {
-//                        Log.e(TAG, "error registering facebook callback: " + exception.toString());
-//                    }
-//                });
-//    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // Pass the activity result back to the Facebook SDK
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
-    }
-
-//    private void updateStoredUserInfo(String loginType, String userId, String username, String userEmail) {
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-//        editor.putString("loginType", loginType);
-//        editor.putString("userId", userId);
-//        editor.putString("username", username);
-//        editor.putString("userEmail", userEmail);
-//        editor.apply();
-//        Log.i(TAG, "updated shared prefs");
-//    }
-
-    private void handleFacebookAccessToken(AccessToken token) {
-        Log.i(TAG, "handleFacebookAccessToken:" + token);
-
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.i(TAG, "signInWithCredential:success");
-                            user = mAuth.getCurrentUser();
-                            Log.i(TAG, "signed up with facebook, username is " + user.getDisplayName() + ", id is " + user.getUid() + ", email is " + user.getEmail() +", user is email verified: " + user.isEmailVerified());
-                            db.collection("users")
-                                .document(user.getUid())
-                                .get()
-                                .addOnSuccessListener(res -> {
-                                    User userObj = res.toObject(User.class);
-                                    if (userObj != null) {
-                                        Log.i(TAG, "existing user authenticated. userid is " + userObj.getUid() + ", username is " + userObj.getUsername());
-                                        finish();
-                                    } else {
-                                        Log.i(TAG, "creating a new user...");
-                                        createNewUser(user.getDisplayName(), user.getEmail(), user.getUid());
-                                    }
-                                });
-
-                            sharedPreferences.edit().putString("loginType", "facebook").apply();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.e(TAG, "signInWithCredential:failure", task.getException());
-                            Utils.showToast(LoginActivity.this, "Login failed.");
-                        }
-                    }
-                });
-    }
 }

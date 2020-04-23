@@ -286,6 +286,16 @@
 
         </LinearLayout>
 
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/googleLoginButton"
+            android:layout_width="201dp"
+            android:layout_height="38dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:paddingTop="0dp"
+            app:layout_constraintEnd_toEndOf="@+id/facebookLoginButton"
+            app:layout_constraintStart_toStartOf="@+id/facebookLoginButton"
+            app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
         <com.facebook.login.widget.LoginButton
             android:id="@+id/facebookLoginButton"
@@ -293,10 +303,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"
-            android:onClick="facebookLoginClicked"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
+            app:layout_constraintTop_toBottomOf="@+id/googleLoginButton" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

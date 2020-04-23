@@ -40,6 +40,7 @@ public class HelpActivity extends AppCompatActivity {
         setContentView(view);
 
         db = FirebaseFirestore.getInstance();
+        user = FirebaseAuth.getInstance().getCurrentUser();
         sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
 
         if (Utils.isUserAuthorized()) {
