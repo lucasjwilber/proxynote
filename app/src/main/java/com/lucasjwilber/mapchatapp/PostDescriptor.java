@@ -4,7 +4,7 @@ package com.lucasjwilber.mapchatapp;
 // it also makes the query used for populating a user's profile more lightweight
 
 public class PostDescriptor {
-    public String id;
+    private String id;
     private boolean isAnonymous;
     private String title;
     private long timestamp;

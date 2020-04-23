@@ -64,6 +64,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 69;
     private static final int REQUEST_VIDEO_CAPTURE = 70;
     private static final int MAX_VIDEO_DURATION = 20;
+    private static final int IMAGE_QUALITY = 25;
     private String currentFilePath;
     private ActivityCreatePostBinding binding;
     private FirebaseFirestore db;
@@ -79,8 +80,8 @@ public class CreatePostActivity extends AppCompatActivity {
     private int selectedPosition;
     private ProgressBar loadingSpinner;
     private String postAndImageId;
-    File photoFile = null;
-    File videoFile = null;
+    private File photoFile = null;
+    private File videoFile = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,12 +92,11 @@ public class CreatePostActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
-        Log.i(TAG, "you are " + user.getDisplayName() + " with email " + user.getEmail());
 
         storageRef = storage.getReference();
-        loadingSpinner = findViewById(R.id.createPostProgressBar);
+        loadingSpinner = findViewById(R.id.createPost_PB);
 
-        RecyclerView iconRv = findViewById(R.id.postIconRv);
+        RecyclerView iconRv = findViewById(R.id.createPostIconsRV);
         LinearLayoutManager horizontalLayout = new LinearLayoutManager(
                 CreatePostActivity.this,
                 LinearLayoutManager.HORIZONTAL,
@@ -107,9 +107,9 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     public void createPost(View v) {
-        EditText postTitleForm = binding.postTitleEditText;
+        EditText postTitleForm = binding.createPostTitleET;
         String postTitle = postTitleForm.getText().toString();
-        EditText postBodyForm = binding.postBodyEditText;
+        EditText postBodyForm = binding.createPostTextET;
         String postBody = postBodyForm.getText().toString();
 
         if (user == null) {
@@ -154,14 +154,14 @@ public class CreatePostActivity extends AppCompatActivity {
                                         Post post = new Post(
                                                 postAndImageId,
                                                 user.getUid(),
-                                                binding.anonymousCheckbox.isChecked() ? "Anonymous" : user.getDisplayName(),
+                                                binding.createPostAnonymousCB.isChecked() ? "Anonymous" : user.getDisplayName(),
                                                 postTitle,
                                                 postBody,
                                                 formattedAddress,
                                                 userLat,
                                                 userLng);
                                         post.setIcon(selectedIcon);
-                                        if (binding.anonymousCheckbox.isChecked())
+                                        if (binding.createPostAnonymousCB.isChecked())
                                             post.setAnonymous(true);
 
                                         if (currentImage != null || currentVideo != null) {
@@ -209,7 +209,7 @@ public class CreatePostActivity extends AppCompatActivity {
         //  UPLOAD IMAGE //
         if (currentImage != null) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            currentImage.compress(Bitmap.CompressFormat.JPEG, 10, baos);
+            currentImage.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, baos);
             byte[] imageData = baos.toByteArray();
             UploadTask uploadImage = mediaRef.putBytes(imageData);
 
@@ -221,12 +221,12 @@ public class CreatePostActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "error: " + e.toString());
                     Utils.showToast(CreatePostActivity.this, "Error uploading image.");
-                    binding.createPostProgressBar.setVisibility(View.GONE);
+                    binding.createPostPB.setVisibility(View.GONE);
             });
             }).addOnFailureListener(failure -> {
                 Log.e(TAG, "failure! :" + failure.toString());
                 Utils.showToast(CreatePostActivity.this, "Error uploading image.");
-                binding.createPostProgressBar.setVisibility(View.GONE);
+                binding.createPostPB.setVisibility(View.GONE);
             });
 
         // UPLOAD VIDEO //
@@ -253,7 +253,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                     //now upload the video thumbnail
                                     StorageReference thumbnailRef = storageRef.child("thumbnail" + postAndImageId);
                                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                                    currentVideoThumbnail.compress(Bitmap.CompressFormat.JPEG, 10, baos);
+                                    currentVideoThumbnail.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, baos);
                                     byte[] thumbnailData = baos.toByteArray();
 
                                     UploadTask uploadThumbnail = thumbnailRef.putBytes(thumbnailData);
@@ -266,19 +266,19 @@ public class CreatePostActivity extends AppCompatActivity {
                                                 .addOnFailureListener(e -> {
                                                     Log.e(TAG, "error getting video thumbnail: " + e.toString());
                                                     Utils.showToast(CreatePostActivity.this, "Error uploading video.");
-                                                    binding.createPostProgressBar.setVisibility(View.GONE);
+                                                    binding.createPostPB.setVisibility(View.GONE);
                                                 });
                                     });
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e(TAG, "error: " + e.toString());
                                     Utils.showToast(CreatePostActivity.this, "Error uploading video.");
-                                    binding.createPostProgressBar.setVisibility(View.GONE);
+                                    binding.createPostPB.setVisibility(View.GONE);
                                 });
                             }).addOnFailureListener(failure -> {
                                 Log.e(TAG, "failure! :" + failure.toString());
                                 Utils.showToast(CreatePostActivity.this, "Error uploading video.");
-                                binding.createPostProgressBar.setVisibility(View.GONE);
+                                binding.createPostPB.setVisibility(View.GONE);
                             });
                         }
                         public void onTranscodeCanceled() {}
@@ -344,9 +344,9 @@ public class CreatePostActivity extends AppCompatActivity {
     public void onMediaButtonClicked(View v) {
         PackageManager pm = getPackageManager();
         if (pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
-            if (v.getId() == R.id.cameraButton) {
+            if (v.getId() == R.id.createPostCameraBtn) {
                 checkVersionBeforeLaunchingCamera(REQUEST_IMAGE_CAPTURE);
-            } else if (v.getId() == R.id.videoButton) {
+            } else if (v.getId() == R.id.createPostVideoBtn) {
                 checkVersionBeforeLaunchingCamera(REQUEST_VIDEO_CAPTURE);
             }
         } else {

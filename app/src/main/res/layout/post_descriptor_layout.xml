@@ -6,81 +6,53 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/postdescriptorTitle"
+        android:id="@+id/postDescriptorTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textAlignment="viewStart"
         android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/postdescriptorScore"
-        app:layout_constraintTop_toBottomOf="@+id/postdescriptorTimeAndLocation"
+        app:layout_constraintStart_toEndOf="@+id/postDescriptorScore"
+        app:layout_constraintTop_toBottomOf="@+id/postDescriptorTimeAndLocation"
         tools:text="title" />
 
     <TextView
-        android:id="@+id/postdescriptorScore"
+        android:id="@+id/postDescriptorScore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingEnd="10dp"
         android:textAlignment="center"
         android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="@+id/postdescriptorIcon"
-        app:layout_constraintStart_toEndOf="@+id/postdescriptorIcon"
-        app:layout_constraintTop_toTopOf="@+id/postdescriptorIcon"
+        app:layout_constraintBottom_toBottomOf="@+id/postDescriptorIcon"
+        app:layout_constraintStart_toEndOf="@+id/postDescriptorIcon"
+        app:layout_constraintTop_toTopOf="@+id/postDescriptorIcon"
         app:layout_constraintVertical_bias="0.32999998"
         tools:text="10" />
 
     <ImageView
-        android:id="@+id/postdescriptorIcon"
+        android:id="@+id/postDescriptorIcon"
         android:layout_width="44dp"
         android:layout_height="44dp"
         android:paddingLeft="12dp"
         android:paddingTop="4dp"
         android:paddingRight="12dp"
         android:paddingBottom="13dp"
-        app:layout_constraintBottom_toBottomOf="@+id/postdescriptorTitle"
+        app:layout_constraintBottom_toBottomOf="@+id/postDescriptorTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/posticon_default" />
 
     <TextView
-        android:id="@+id/postdescriptorTimeAndLocation"
+        android:id="@+id/postDescriptorTimeAndLocation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/postdescriptorTitle"
+        app:layout_constraintStart_toStartOf="@+id/postDescriptorTitle"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="time and place" />
-
-<!--    <Button-->
-<!--        android:id="@+id/deletePostButton"-->
-<!--        android:layout_width="30dp"-->
-<!--        android:layout_height="0dp"-->
-<!--        android:paddingEnd="5dp"-->
-<!--        android:background="?android:attr/selectableItemBackground"-->
-<!--        android:drawableStart="@drawable/delete"-->
-<!--        android:onClick="onDeleteButtonClick"-->
-<!--        android:visibility="gone"-->
-<!--        app:layout_constraintBottom_toBottomOf="@+id/postdescriptorScore"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="@+id/postdescriptorScore"-->
-<!--        tools:visibility="visible" />-->
-
-<!--    <Button-->
-<!--        android:id="@+id/viewOnMapButton"-->
-<!--        android:layout_width="30dp"-->
-<!--        android:layout_height="0dp"-->
-<!--        android:layout_marginEnd="5dp"-->
-<!--        android:paddingEnd="20dp"-->
-<!--        android:background="?android:attr/selectableItemBackground"-->
-<!--        android:drawableStart="@drawable/view_location"-->
-<!--        android:visibility="gone"-->
-<!--        app:layout_constraintBottom_toBottomOf="@+id/postdescriptorScore"-->
-<!--        app:layout_constraintEnd_toStartOf="@+id/deletePostButton"-->
-<!--        app:layout_constraintTop_toTopOf="@+id/postdescriptorScore"-->
-<!--        tools:visibility="visible" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

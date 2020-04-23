@@ -18,7 +18,7 @@
         android:paddingStart="6dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.195"
-        app:layout_constraintStart_toEndOf="@+id/commentUsername"
+        app:layout_constraintStart_toEndOf="@+id/postRvCommentUsername"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -33,7 +33,7 @@
         app:layout_constraintTop_toBottomOf="@+id/postRvCommentHeader" />
 
     <TextView
-        android:id="@+id/commentUsername"
+        android:id="@+id/postRvCommentUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/username"

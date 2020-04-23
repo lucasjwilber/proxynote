@@ -9,7 +9,7 @@
     tools:context=".HelpActivity">
 
     <Button
-        android:id="@+id/closeHelp"
+        android:id="@+id/helpBackBtn"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_marginStart="8dp"
@@ -21,17 +21,17 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/loginActLogo"
+        android:id="@+id/helpLogo"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/textView6"
-        app:layout_constraintEnd_toStartOf="@+id/textView6"
-        app:layout_constraintTop_toTopOf="@+id/textView6"
+        app:layout_constraintBottom_toBottomOf="@+id/helpTitle"
+        app:layout_constraintEnd_toStartOf="@+id/helpTitle"
+        app:layout_constraintTop_toTopOf="@+id/helpTitle"
         app:srcCompat="@drawable/proxynote_logo_pink" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/helpRv"
+        android:id="@+id/helpRV"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
@@ -39,15 +39,15 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="5dp"
         android:background="@color/lightgray"
-        app:layout_constraintBottom_toTopOf="@+id/questionCommentModal"
+        app:layout_constraintBottom_toTopOf="@+id/helpQuestionOrCommentContainer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.41"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loginActLogo"
+        app:layout_constraintTop_toBottomOf="@+id/helpLogo"
         tools:visibility="visible" />
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/helpTitle"
         android:layout_width="wrap_content"
         android:layout_height="35dp"
         android:layout_marginTop="8dp"
@@ -60,19 +60,19 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/questionCommentModal"
+        android:id="@+id/helpQuestionOrCommentContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/helpRv"
-        app:layout_constraintStart_toStartOf="@+id/helpRv"
+        app:layout_constraintEnd_toEndOf="@+id/helpRV"
+        app:layout_constraintStart_toStartOf="@+id/helpRV"
         tools:visibility="visible">
 
         <Button
-            android:id="@+id/submitQuestionOrCommentButton"
+            android:id="@+id/helpQuestionOrCommentSubmitBtn"
             android:layout_width="wrap_content"
             android:layout_height="35dp"
             android:layout_marginBottom="8dp"
@@ -85,7 +85,7 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <EditText
-            android:id="@+id/helpCommentBox"
+            android:id="@+id/helpQuestionOrCommentET"
             android:layout_width="0dp"
             android:layout_height="67dp"
             android:layout_marginTop="8dp"
@@ -98,7 +98,7 @@
             android:maxLength="300"
             android:padding="8dp"
             android:textSize="14sp"
-            app:layout_constraintBottom_toTopOf="@+id/submitQuestionOrCommentButton"
+            app:layout_constraintBottom_toTopOf="@+id/helpQuestionOrCommentSubmitBtn"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

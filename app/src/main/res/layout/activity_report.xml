@@ -9,7 +9,7 @@
     tools:context=".ReportActivity">
 
     <Button
-        android:id="@+id/closeReport"
+        android:id="@+id/reportBackBtn"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_marginStart="8dp"
@@ -40,7 +40,6 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/reason_for_reporting" />
@@ -94,7 +93,7 @@
         </RadioGroup>
 
         <TextView
-            android:id="@+id/reportAIlabel"
+            android:id="@+id/reportAdditionalInfoLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -104,7 +103,7 @@
             app:layout_constraintTop_toBottomOf="@+id/reportTypeRG" />
 
         <EditText
-            android:id="@+id/reportAdditionalText"
+            android:id="@+id/reportAdditionalInfoET"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
             android:background="@drawable/rounded_square_black"
@@ -112,12 +111,12 @@
             android:gravity="top|start"
             android:maxLength="200"
             android:paddingBottom="12dp"
-            app:layout_constraintStart_toStartOf="@+id/reportAIlabel"
-            app:layout_constraintTop_toBottomOf="@+id/reportAIlabel" />
+            app:layout_constraintStart_toStartOf="@+id/reportAdditionalInfoLabel"
+            app:layout_constraintTop_toBottomOf="@+id/reportAdditionalInfoLabel" />
 
 
         <Button
-            android:id="@+id/reportSubmitButton"
+            android:id="@+id/reportSubmitBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -128,10 +127,10 @@
             android:text="@string/submit"
             android:textColor="#FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/reportAdditionalText"
+            app:layout_constraintEnd_toEndOf="@+id/reportAdditionalInfoET"
             app:layout_constraintHorizontal_bias="0.509"
-            app:layout_constraintStart_toStartOf="@+id/reportAdditionalText"
-            app:layout_constraintTop_toBottomOf="@+id/reportAdditionalText" />
+            app:layout_constraintStart_toStartOf="@+id/reportAdditionalInfoET"
+            app:layout_constraintTop_toBottomOf="@+id/reportAdditionalInfoET" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -149,7 +148,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
-        android:id="@+id/reportProgressBar"
+        android:id="@+id/reportPB"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

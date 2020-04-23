@@ -62,7 +62,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         this.profileOwnerId = profileOwnerId;
         this.db = db;
 
-//        userIsAuthorized = Utils.checkUserAuthorization();
         user = FirebaseAuth.getInstance().getCurrentUser();
         SharedPreferences prefs = context.getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");
@@ -96,7 +95,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                         .inflate(R.layout.post_layout, parent, false);
 
                 addCommentBox = l.findViewById(R.id.postRvPostReplyBox);
-                replyLoadingSpinner = l.findViewById(R.id.replySubmitProgressBar);
+                replyLoadingSpinner = l.findViewById(R.id.replySubmitPB);
 
                 postScore = l.findViewById(R.id.postRvHeaderScore);
                 String postScoreText = Long.toString(post.getScore());
@@ -127,7 +126,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 TextView postText = l.findViewById(R.id.postRvPostText);
                 postText.setText(post.getText());
 
-                Button addCommentButton = l.findViewById(R.id.postRvPostReplyButton);
+                Button addCommentButton = l.findViewById(R.id.postRvPostReplyBtn);
                 addCommentButton.setOnClickListener(v -> addCommentToPost(addCommentBox.getText().toString()));
 
                 TextView commentCount = l.findViewById(R.id.postCommentCount);
@@ -152,8 +151,9 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                             .into(postImage);
 
                     if (post.getVideoUrl() != null) {
-                        ImageView playButton = l.findViewById(R.id.postRvPlayButton);
-                        playButton.setVisibility(View.VISIBLE);
+                        ImageView videoIndicator = l.findViewById(R.id.postRvVideoIndicator);
+                        videoIndicator.setVisibility(View.VISIBLE);
+                        Log.i(TAG, "should be showing the opaque video icon");
                     }
 
                     String type = post.getImageUrl() != null ? "image" : "video";
@@ -194,7 +194,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         if (getItemViewType(position) == POST_COMMENT) {
             Comment comment = post.getComments().get(position - 1);
 
-            TextView commentUsername = holder.constraintLayout.findViewById(R.id.commentUsername);
+            TextView commentUsername = holder.constraintLayout.findViewById(R.id.postRvCommentUsername);
             commentUsername.setText(comment.getUsername());
             commentUsername.setOnClickListener(v -> onUsernameClicked(comment.getUserId()));
 
@@ -322,7 +322,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                                                 //update the postDescriptor for this post:
                                                 List<PostDescriptor> postDescriptors = user.getPostDescriptors();
                                                 for (PostDescriptor pd : postDescriptors) {
-                                                    if (pd.id.equals(post.getId())) {
+                                                    if (pd.getId().equals(post.getId())) {
                                                         pd.setScore(pd.getScore() + finalScoreChange);
                                                     }
                                                 }

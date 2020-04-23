@@ -100,7 +100,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         periodicLocationUpdateHandler = new Handler();
         markerList = new ArrayList<>();
-        postRv = binding.postRecyclerView;
+        postRv = binding.mapPostRV;
         postRv.setLayoutManager(new LinearLayoutManager(this));
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -318,6 +318,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     startActivity(i);
                 } else { //log out
                     FirebaseAuth.getInstance().signOut();
+                    user = null;
+                    //for facebook:
                     AccessToken.setCurrentAccessToken(null);
                     Utils.showToast(MapActivity.this, "You are now logged out.");
                 }
@@ -454,8 +456,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         if (allZonesOnScreen.size() == 0) {
             return;
         } else {
-            binding.postQueryRefreshButton.setVisibility(View.GONE);
-            binding.postQueryPB.setVisibility(View.VISIBLE);
+            binding.mapRefreshPostsBtn.setVisibility(View.GONE);
+            binding.mapRefreshPostsPB.setVisibility(View.VISIBLE);
         }
         int totalQueryLimit = 50;
 
@@ -493,13 +495,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                             }
 
                             cache.addAll(zones);
-                            binding.postQueryPB.setVisibility(View.GONE);
-                            binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
+                            binding.mapRefreshPostsPB.setVisibility(View.GONE);
+                            binding.mapRefreshPostsBtn.setVisibility(View.VISIBLE);
                         })
                         .addOnFailureListener(e -> {
                             Log.e(TAG, "Error getting posts: " + e.toString());
-                            binding.postQueryPB.setVisibility(View.GONE);
-                            binding.postQueryRefreshButton.setVisibility(View.VISIBLE);
+                            binding.mapRefreshPostsPB.setVisibility(View.GONE);
+                            binding.mapRefreshPostsBtn.setVisibility(View.VISIBLE);
                         });
     }
 
@@ -550,8 +552,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postRv.setVisibility(View.GONE);
         postRv.setAdapter(null);
         binding.mapLoginSuggestionModal.setVisibility(View.GONE);
-        binding.verifyEmailReminder.setVisibility(View.GONE);
-        binding.mapPostRvProgressBar.setVisibility(View.GONE);
+        binding.mapPostRvPB.setVisibility(View.GONE);
     }
 
     @Override
@@ -567,7 +568,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     }
 
     private void setPostRvAdapter(String postId) {
-        binding.mapPostRvProgressBar.setVisibility(View.VISIBLE);
+        binding.mapPostRvPB.setVisibility(View.VISIBLE);
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         if (postId != null) {
@@ -608,7 +609,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         } else {
                             postRv.setBackground(getDrawable(R.drawable.rounded_square_yellow));
                         }
-                        binding.mapPostRvProgressBar.setVisibility(View.GONE);
+                        binding.mapPostRvPB.setVisibility(View.GONE);
                     })
                     .addOnFailureListener(e -> Log.e(TAG, "error getting post: " + e.toString()));
         }

@@ -44,12 +44,12 @@ public class HelpActivity extends AppCompatActivity {
         sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
 
         if (Utils.isUserAuthorized()) {
-            binding.questionCommentModal.setVisibility(View.VISIBLE);
+            binding.helpQuestionOrCommentContainer.setVisibility(View.VISIBLE);
         }
 
-        binding.helpRv.setLayoutManager(new LinearLayoutManager(this));
-        binding.helpRv.setAdapter(new HelpRvAdapter());
-        binding.helpRv.setHasFixedSize(true);
+        binding.helpRV.setLayoutManager(new LinearLayoutManager(this));
+        binding.helpRV.setAdapter(new HelpRvAdapter());
+        binding.helpRV.setHasFixedSize(true);
     }
 
     public void onSubmitQuestionOrCommentButtonClicked(View v) {
@@ -58,7 +58,11 @@ public class HelpActivity extends AppCompatActivity {
             return;
         }
 
-        String text = binding.helpCommentBox.getText().toString();
+        String text = binding.helpQuestionOrCommentET.getText().toString();
+        if (text.equals("") || text.length() == 0) {
+            Utils.showToast(HelpActivity.this, "Please write something first.");
+            return;
+        }
         String userId = user.getUid();
         String userEmail = user.getEmail();
         QuestionOrComment qoc = new QuestionOrComment(text, userId, userEmail);
@@ -66,8 +70,9 @@ public class HelpActivity extends AppCompatActivity {
         db.collection("questionsAndComments")
                 .add(qoc)
                 .addOnSuccessListener(s -> {
-                    binding.helpCommentBox.setText("");
+                    binding.helpQuestionOrCommentET.setText("");
                     Utils.showToast(this, "Submitted! Thank you.");
+                    binding.helpQuestionOrCommentContainer.setVisibility(View.GONE);
                 })
                 .addOnFailureListener(e -> Log.e(TAG, "error submitting question/comment: " + e.toString()));
     }
@@ -82,7 +87,7 @@ public class HelpActivity extends AppCompatActivity {
 
         int[] helpStringIds;
         boolean showResendEmailTip;
-        int positionOfResendEmailCL = 11;
+        int positionOfResendEmailCL = 9;
 
         // this is going to be entirely hardcoded so there's no need to parameterize the adapter
         HelpRvAdapter() {
@@ -98,8 +103,6 @@ public class HelpActivity extends AppCompatActivity {
                         R.string.gi2,
                         R.string.gi4,
                         R.string.gi5,
-                        R.string.gi6,
-                        R.string.gi7,
                         R.string.faq,
                         R.string.q1,
                         R.string.a1,
@@ -115,8 +118,6 @@ public class HelpActivity extends AppCompatActivity {
                         R.string.gi2,
                         R.string.gi4,
                         R.string.gi5,
-                        R.string.gi6,
-                        R.string.gi7,
                         R.string.faq,
                         R.string.q1,
                         R.string.a1,
@@ -167,9 +168,9 @@ public class HelpActivity extends AppCompatActivity {
                 if (position != positionOfResendEmailCL) {
                     holder.textView.setText(getString(helpStringIds[position]));
                 } else {
-                    TextView tv = holder.constraintLayout.findViewById(R.id.helpResendEmailTv);
+                    TextView tv = holder.constraintLayout.findViewById(R.id.helpResendEmailTV);
                     tv.setText(getString(helpStringIds[position]));
-                    Button b = holder.constraintLayout.findViewById(R.id.helpResendEmailButton);
+                    Button b = holder.constraintLayout.findViewById(R.id.helpResendEmailBtn);
                     b.setOnClickListener(x -> resendVerificationEmail());
                 }
             } else {
@@ -177,10 +178,10 @@ public class HelpActivity extends AppCompatActivity {
             }
 
             //"General Information" and "FAQ" headers:
-            if (position == 0 || position == 7) {
+            if (position == 0 || position == 5) {
                 holder.textView.setTextSize(20);
             //bold the questions in the FAQ section:
-            } else if (position != positionOfResendEmailCL && position > 7 && position % 2 == 0) {
+            } else if (position != positionOfResendEmailCL && position > 5 && position % 2 == 0) {
                 holder.textView.setTypeface(holder.textView.getTypeface(), Typeface.BOLD_ITALIC);
             }
         }

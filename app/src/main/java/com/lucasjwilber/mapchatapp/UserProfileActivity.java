@@ -5,10 +5,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.SharedElementCallback;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,8 +35,6 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private final String TAG = "ljw";
     private String thisProfileOwnerId;
-//    private String userId;
-//    private String username;
     private FirebaseFirestore db;
     private FirebaseUser user;
     private FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -59,7 +54,7 @@ public class UserProfileActivity extends AppCompatActivity {
         binding = ActivityUserProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.profileOnePostRv.setLayoutManager(new LinearLayoutManager(this));
+        binding.userProfilePostRV.setLayoutManager(new LinearLayoutManager(this));
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -70,11 +65,11 @@ public class UserProfileActivity extends AppCompatActivity {
                 thisProfileOwnerId != null &&
                 thisProfileOwnerId.equals(user.getUid());
 
-        if (userIsOnTheirOwnProfile) binding.aboutMeEditBtn.setVisibility(View.VISIBLE);
+        if (userIsOnTheirOwnProfile) binding.userProfileAboutMeEditBtn.setVisibility(View.VISIBLE);
 
 
         if (thisProfileOwnerId != null) {
-            binding.postDescRvProgressBar.setVisibility(View.VISIBLE);
+            binding.userProfilePostDescriptorsRvPB.setVisibility(View.VISIBLE);
 
             db.collection("users")
                     .document(thisProfileOwnerId)
@@ -88,12 +83,12 @@ public class UserProfileActivity extends AppCompatActivity {
                             return;
                         }
 
-                        binding.profileUsername.setText(thisProfileOwner.getUsername());
+                        binding.userProfileUsername.setText(thisProfileOwner.getUsername());
                         String userScoreText = "(" +
                                 thisProfileOwner.getTotalScore() +
                                 (thisProfileOwner.getTotalScore() == 1 || thisProfileOwner.getTotalScore() == -1 ? " point)" : " points)");
-                        binding.profileScore.setText(userScoreText);
-                        binding.aboutMeTV.setText(thisProfileOwner.getAboutme());
+                        binding.userProfileScore.setText(userScoreText);
+                        binding.userProfileAboutMeTV.setText(thisProfileOwner.getAboutme());
 
                         List<PostDescriptor> visiblePostDescriptors = new ArrayList<>();
                         if (userIsOnTheirOwnProfile) {
@@ -106,19 +101,19 @@ public class UserProfileActivity extends AppCompatActivity {
 
                         if (visiblePostDescriptors == null || visiblePostDescriptors.size() == 0) {
                             String noPostsText = thisProfileOwner.getUsername() + " hasn't made any posts yet.";
-                            binding.profileNoCommentsYet.setText(noPostsText);
-                            binding.profileNoCommentsYet.setVisibility(View.VISIBLE);
+                            binding.userProfileNoCommentsYet.setText(noPostsText);
+                            binding.userProfileNoCommentsYet.setVisibility(View.VISIBLE);
                         } else {
                             postDescriptorsRvLayoutManager = new LinearLayoutManager(this);
-                            binding.profileAllPostsRv.setLayoutManager(postDescriptorsRvLayoutManager);
+                            binding.userProfilePostDescriptorsRV.setLayoutManager(postDescriptorsRvLayoutManager);
                             postDescriptorsRvAdapter = new PostSelectAdapter(visiblePostDescriptors);
-                            binding.profileAllPostsRv.setAdapter(postDescriptorsRvAdapter);
+                            binding.userProfilePostDescriptorsRV.setAdapter(postDescriptorsRvAdapter);
                         }
-                        binding.postDescRvProgressBar.setVisibility(View.GONE);
+                        binding.userProfilePostDescriptorsRvPB.setVisibility(View.GONE);
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "error getting the profile owner's user object: " + e.toString());
-                        binding.postDescRvProgressBar.setVisibility(View.GONE);
+                        binding.userProfilePostDescriptorsRvPB.setVisibility(View.GONE);
                     });
         }
     }
@@ -160,10 +155,10 @@ public class UserProfileActivity extends AppCompatActivity {
             long time = pd.getTimestamp();
             String place = pd.getLocation() == null ? "" : " @ " + pd.getLocation();
 
-            ImageView iconView = holder.constraintLayout.findViewById(R.id.postdescriptorIcon);
-            TextView scoreView = holder.constraintLayout.findViewById(R.id.postdescriptorScore);
-            TextView timeAndPlaceView = holder.constraintLayout.findViewById(R.id.postdescriptorTimeAndLocation);
-            TextView titleView = holder.constraintLayout.findViewById(R.id.postdescriptorTitle);
+            ImageView iconView = holder.constraintLayout.findViewById(R.id.postDescriptorIcon);
+            TextView scoreView = holder.constraintLayout.findViewById(R.id.postDescriptorScore);
+            TextView timeAndPlaceView = holder.constraintLayout.findViewById(R.id.postDescriptorTimeAndLocation);
+            TextView titleView = holder.constraintLayout.findViewById(R.id.postDescriptorTitle);
             ConstraintLayout cl = holder.constraintLayout;
             holder.constraintLayout.setOnClickListener(v -> onPostDescriptorClicked(cl));
 
@@ -198,15 +193,15 @@ public class UserProfileActivity extends AppCompatActivity {
 
         public void onPostDescriptorClicked(ConstraintLayout cl) {
             selectedPostId = cl.getTag().toString();
-            binding.profileOnePostRv.setAdapter(null);
-            binding.profPostRvContainer.setVisibility(View.VISIBLE);
-            binding.profPostRvButtons.setVisibility(View.VISIBLE);
-            binding.postRvProgressBar.setVisibility(View.VISIBLE);
+            binding.userProfilePostRV.setAdapter(null);
+            binding.userProfilePostRvBackground.setVisibility(View.VISIBLE);
+            binding.userProfilePostButtonsContainer.setVisibility(View.VISIBLE);
+            binding.userProfilePostRvPB.setVisibility(View.VISIBLE);
 
-            binding.aboutMeLayout.setVisibility(View.INVISIBLE);
-            binding.allPostsLabel.setVisibility(View.INVISIBLE);
-            binding.aboutMeEditBtn.setVisibility(View.INVISIBLE);
-            binding.closeUserProfile.setVisibility(View.INVISIBLE);
+            binding.userProfileAboutMeLayout.setVisibility(View.INVISIBLE);
+            binding.userProfilePostsLabel.setVisibility(View.INVISIBLE);
+            binding.userProfileAboutMeEditBtn.setVisibility(View.INVISIBLE);
+            binding.userProfileBackBtn.setVisibility(View.INVISIBLE);
 
             if (selectedDV != null) {
                 selectedDV.setBackgroundColor(getResources().getColor(R.color.white));
@@ -215,7 +210,7 @@ public class UserProfileActivity extends AppCompatActivity {
             cl.setBackgroundColor(getResources().getColor(R.color.lightgray));
 
             if (userIsOnTheirOwnProfile) {
-                binding.profDeletePostBtn.setVisibility(View.VISIBLE);
+                binding.userProfileDeletePostBtn.setVisibility(View.VISIBLE);
             }
             db.collection("posts")
                     .document(selectedPostId)
@@ -228,8 +223,8 @@ public class UserProfileActivity extends AppCompatActivity {
                             hidePostRv(null);
                             selectedDV.removeAllViews();
                             selectedDV.setVisibility(View.GONE);
-                            binding.profileOnePostRv.setAdapter(null);
-                            binding.profileOnePostRv.setBackground(null);
+                            binding.userProfilePostRV.setAdapter(null);
+                            binding.userProfilePostRV.setBackground(null);
                             return;
                         }
 
@@ -246,27 +241,27 @@ public class UserProfileActivity extends AppCompatActivity {
                                 db);
 
                         if (post.getScore() >= 20) {
-                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_red));
+                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_red));
                         } else if (post.getScore() >= 15) {
-                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_orangered));
+                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_orangered));
                         } else if (post.getScore() >= 10) {
-                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_orange));
+                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_orange));
                         } else if (post.getScore() >= 5) {
-                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_yelloworange));
+                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_yelloworange));
                         } else if (post.getScore() <= -5) {
-                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_brown));
+                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_brown));
                         } else {
-                            binding.profileOnePostRv.setBackground(getDrawable(R.drawable.rounded_square_yellow));
+                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_yellow));
                         }
 
-                        binding.profileOnePostRv.setAdapter(postRvAdapter);
-                        binding.profileOnePostRv.setVisibility(View.VISIBLE);
-                        binding.postRvProgressBar.setVisibility(View.GONE);
+                        binding.userProfilePostRV.setAdapter(postRvAdapter);
+                        binding.userProfilePostRV.setVisibility(View.VISIBLE);
+                        binding.userProfilePostRvPB.setVisibility(View.GONE);
 
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "error getting post: " + e.toString());
-                        binding.postRvProgressBar.setVisibility(View.GONE);
+                        binding.userProfilePostRvPB.setVisibility(View.GONE);
                     });
         }
 
@@ -275,12 +270,12 @@ public class UserProfileActivity extends AppCompatActivity {
 
     public void onDeleteButtonClick(View v) {
         if (!userIsOnTheirOwnProfile) return;
-        binding.deletePostModal.setVisibility(View.VISIBLE);
+        binding.userProfileDeletePostModal.setVisibility(View.VISIBLE);
     }
     public void yesDelete(View v) {
         if (!userIsOnTheirOwnProfile) return;
         v.setEnabled(false);
-        binding.deletePostProgressBar.setVisibility(View.VISIBLE);
+        binding.userProfileDeletePostPB.setVisibility(View.VISIBLE);
 
         db.collection("posts")
                 .document(selectedPostId)
@@ -316,34 +311,34 @@ public class UserProfileActivity extends AppCompatActivity {
 
                                                 selectedDV.removeAllViews();
                                                 selectedDV.setVisibility(View.GONE);
-                                                binding.profileOnePostRv.setAdapter(null);
-                                                binding.profileOnePostRv.setBackground(null);
+                                                binding.userProfilePostRV.setAdapter(null);
+                                                binding.userProfilePostRV.setBackground(null);
 
                                                 db.collection("users")
                                                         .document(thisProfileOwnerId)
                                                         .update("postDescriptors", usersNewPDs,
                                                                 "totalScore", user.getTotalScore() - postScore)
                                                         .addOnSuccessListener(result3 -> {
-                                                            binding.deletePostProgressBar.setVisibility(View.GONE);
+                                                            binding.userProfileDeletePostPB.setVisibility(View.GONE);
                                                             Utils.showToast(UserProfileActivity.this, "Post deleted.");
                                                             v.setEnabled(true);
                                                         })
                                                         .addOnFailureListener(e -> {
                                                             Log.e(TAG, "error removing the deleted post's PD: " + e.toString());
-                                                            binding.deletePostProgressBar.setVisibility(View.GONE);
+                                                            binding.userProfileDeletePostPB.setVisibility(View.GONE);
                                                             v.setEnabled(true);
                                                         });
 
                                             })
                                             .addOnFailureListener(e -> {
                                                 Log.e(TAG, "error getting user to delete this PD");
-                                                binding.deletePostProgressBar.setVisibility(View.GONE);
+                                                binding.userProfileDeletePostPB.setVisibility(View.GONE);
                                                 v.setEnabled(true);
                                             });
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e(TAG, "error deleting post: " + e.toString());
-                                    binding.deletePostProgressBar.setVisibility(View.GONE);
+                                    binding.userProfileDeletePostPB.setVisibility(View.GONE);
                                     v.setEnabled(true);
                                 });
 
@@ -365,22 +360,22 @@ public class UserProfileActivity extends AppCompatActivity {
                     Log.e(TAG, "failed deleting the video thumbnail: " + e.toString());
                 });
 
-        binding.deletePostModal.setVisibility(View.GONE);
+        binding.userProfileDeletePostModal.setVisibility(View.GONE);
     }
     public void noDelete(View v) {
-        binding.deletePostModal.setVisibility(View.GONE);
+        binding.userProfileDeletePostModal.setVisibility(View.GONE);
     }
 
     public void onEditAboutmeButtonClicked(View v) {
-        TextView aboutMeTV = binding.aboutMeTV;
-        EditText aboutMeET = binding.aboutMeET;
+        TextView aboutMeTV = binding.userProfileAboutMeTV;
+        EditText aboutMeET = binding.userProfileAboutMeET;
 
         if (!userIsOnTheirOwnProfile) return;
         aboutMeBeingEdited = !aboutMeBeingEdited;
         aboutMeTV.setVisibility(aboutMeBeingEdited ? View.GONE : View.VISIBLE);
         aboutMeET.setVisibility(aboutMeBeingEdited ? View.VISIBLE : View.GONE);
         String buttonText = aboutMeBeingEdited ? "SAVE" : "EDIT";
-        binding.aboutMeEditBtn.setText(buttonText);
+        binding.userProfileAboutMeEditBtn.setText(buttonText);
 
         //on "edit" click:
         if (aboutMeBeingEdited) {
@@ -408,12 +403,12 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     public void hidePostRv(View v) {
-        binding.profPostRvContainer.setVisibility(View.GONE);
-        binding.profPostRvButtons.setVisibility(View.GONE);
-        binding.aboutMeLayout.setVisibility(View.VISIBLE);
-        binding.aboutMeEditBtn.setVisibility(userIsOnTheirOwnProfile ? View.VISIBLE : View.GONE);
-        binding.closeUserProfile.setVisibility(View.VISIBLE);
-        binding.allPostsLabel.setVisibility(View.VISIBLE);
+        binding.userProfilePostRvBackground.setVisibility(View.GONE);
+        binding.userProfilePostButtonsContainer.setVisibility(View.GONE);
+        binding.userProfileAboutMeLayout.setVisibility(View.VISIBLE);
+        binding.userProfileAboutMeEditBtn.setVisibility(userIsOnTheirOwnProfile ? View.VISIBLE : View.GONE);
+        binding.userProfileBackBtn.setVisibility(View.VISIBLE);
+        binding.userProfilePostsLabel.setVisibility(View.VISIBLE);
     }
 
     public void onBackButtonClicked(View v) {

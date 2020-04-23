@@ -15,7 +15,7 @@
         android:id="@+id/mapLayout" >
 
         <ImageButton
-            android:id="@+id/menuButton"
+            android:id="@+id/mapMenuButton"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:layout_marginStart="16dp"
@@ -58,7 +58,7 @@
             />
 
         <ImageButton
-            android:id="@+id/postQueryRefreshButton"
+            android:id="@+id/mapRefreshPostsBtn"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginEnd="14dp"
@@ -70,7 +70,7 @@
             />
 
         <ProgressBar
-            android:id="@+id/postQueryPB"
+            android:id="@+id/mapRefreshPostsPB"
             android:layout_width="27dp"
             android:layout_height="27dp"
             android:layout_marginEnd="14dp"
@@ -81,7 +81,7 @@
             />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/addPostButton"
+            android:id="@+id/mapCreatePostBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="50dp"
@@ -95,7 +95,7 @@
 
         <!-- post recycler view-->
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/postRecyclerView"
+            android:id="@+id/mapPostRV"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scrollbars="vertical"
@@ -112,16 +112,16 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ProgressBar
-            android:id="@+id/mapPostRvProgressBar"
+            android:id="@+id/mapPostRvPB"
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/postRecyclerView"
-            app:layout_constraintEnd_toEndOf="@+id/postRecyclerView"
-            app:layout_constraintStart_toStartOf="@+id/postRecyclerView"
-            app:layout_constraintTop_toTopOf="@+id/postRecyclerView" />
+            app:layout_constraintBottom_toBottomOf="@+id/mapPostRV"
+            app:layout_constraintEnd_toEndOf="@+id/mapPostRV"
+            app:layout_constraintStart_toStartOf="@+id/mapPostRV"
+            app:layout_constraintTop_toTopOf="@+id/mapPostRV" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/mapLoginSuggestionModal"
@@ -135,7 +135,6 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                android:id="@+id/mapLoginSuggestion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/you_must_be_logged_in_to_post"
@@ -148,56 +147,16 @@
                 app:layout_constraintVertical_bias="0.30" />
 
             <Button
-                android:id="@+id/mapLoginSuggestionButton"
+                android:id="@+id/mapLoginSuggestionBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="40dp"
                 android:background="@drawable/rounded_square_filled_accentcolor"
                 android:onClick="onLoginSuggestionButtonClick"
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp"
                 android:text="@string/login_signup"
                 android:textColor="@color/white"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/verifyEmailReminder"
-            android:layout_width="280dp"
-            android:layout_height="170dp"
-            android:background="@drawable/rounded_square_accentcolor"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:text="@string/verify_before_posting"
-                android:textAlignment="center"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.30" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:id="@+id/mapResendEmailButton"
-                android:background="?android:attr/selectableItemBackground"
-                android:onClick="onResendEmailVerificationClick"
-                android:text="@string/resend_verification_email"
-                android:textColor="@color/colorAccent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>

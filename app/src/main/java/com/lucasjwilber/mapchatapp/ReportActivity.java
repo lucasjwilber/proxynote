@@ -2,9 +2,7 @@ package com.lucasjwilber.mapchatapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -34,7 +32,7 @@ public class ReportActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
-        loadingSpinner = findViewById(R.id.reportProgressBar);
+        loadingSpinner = findViewById(R.id.reportPB);
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
@@ -81,8 +79,7 @@ public class ReportActivity extends AppCompatActivity {
 
         loadingSpinner.setVisibility(View.VISIBLE);
 
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
-        EditText additionalInfoTV = findViewById(R.id.reportAdditionalText);
+        EditText additionalInfoTV = findViewById(R.id.reportAdditionalInfoET);
         String additionalInfo = additionalInfoTV.getText().toString();
         String userId = user == null ? "unknown user" : user.getUid();
         String reportId = postId + "|" + userId;

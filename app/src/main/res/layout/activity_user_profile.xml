@@ -20,7 +20,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/profileUsername"
+            android:id="@+id/userProfileUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -30,7 +30,7 @@
             tools:text="username" />
 
         <TextView
-            android:id="@+id/profileScore"
+            android:id="@+id/userProfileScore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -42,7 +42,7 @@
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/profileAllPostsRv"
+        android:id="@+id/userProfilePostDescriptorsRV"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="12dp"
@@ -54,22 +54,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/aboutMeLayout"
+        app:layout_constraintTop_toBottomOf="@+id/userProfileAboutMeLayout"
         app:layout_constraintVertical_bias="0.0" />
 
     <ProgressBar
-        android:id="@+id/postDescRvProgressBar"
+        android:id="@+id/userProfilePostDescriptorsRvPB"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_centerHorizontal="true"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/profileAllPostsRv"
-        app:layout_constraintEnd_toEndOf="@+id/profileAllPostsRv"
-        app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
-        app:layout_constraintTop_toTopOf="@+id/profileAllPostsRv" />
+        app:layout_constraintBottom_toBottomOf="@+id/userProfilePostDescriptorsRV"
+        app:layout_constraintEnd_toEndOf="@+id/userProfilePostDescriptorsRV"
+        app:layout_constraintStart_toStartOf="@+id/userProfilePostDescriptorsRV"
+        app:layout_constraintTop_toTopOf="@+id/userProfilePostDescriptorsRV" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/profPostRvButtons"
+        android:id="@+id/userProfilePostButtonsContainer"
         android:layout_width="0dp"
         android:layout_height="70dp"
         android:animateLayoutChanges="true"
@@ -82,7 +82,7 @@
         tools:visibility="visible">
 
         <Button
-            android:id="@+id/profViewOnMapBtn"
+            android:id="@+id/userProfileViewOnMapBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -97,7 +97,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/profDeletePostBtn"
+            android:id="@+id/userProfileDeletePostBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -114,7 +114,7 @@
             tools:visibility="visible" />
 
         <Button
-            android:id="@+id/profClosePostRvBtn"
+            android:id="@+id/userProfileClosePostBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
@@ -131,7 +131,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/profPostRvContainer"
+        android:id="@+id/userProfilePostRvBackground"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:animateLayoutChanges="true"
@@ -142,11 +142,11 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profPostRvButtons"
+        app:layout_constraintTop_toBottomOf="@+id/userProfilePostButtonsContainer"
         tools:visibility="visible">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/profileOnePostRv"
+            android:id="@+id/userProfilePostRV"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="45dp"
@@ -160,19 +160,19 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ProgressBar
-            android:id="@+id/postRvProgressBar"
+            android:id="@+id/userProfilePostRvPB"
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/profileOnePostRv"
-            app:layout_constraintEnd_toEndOf="@+id/profileOnePostRv"
-            app:layout_constraintStart_toStartOf="@+id/profileOnePostRv"
-            app:layout_constraintTop_toTopOf="@+id/profileOnePostRv" />
+            app:layout_constraintBottom_toBottomOf="@+id/userProfilePostRV"
+            app:layout_constraintEnd_toEndOf="@+id/userProfilePostRV"
+            app:layout_constraintStart_toStartOf="@+id/userProfilePostRV"
+            app:layout_constraintTop_toTopOf="@+id/userProfilePostRV" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/deletePostModal"
+            android:id="@+id/userProfileDeletePostModal"
             android:layout_width="354dp"
             android:layout_height="211dp"
             android:layout_margin="25dp"
@@ -200,7 +200,7 @@
                 tools:text="Are you sure you want to delete this post?" />
 
             <Button
-                android:id="@+id/yesDeleteButton"
+                android:id="@+id/uerProfileYesDeleteBtn"
                 android:layout_width="60dp"
                 android:layout_height="30dp"
                 android:layout_marginStart="40dp"
@@ -215,7 +215,7 @@
                 tools:text="Yes" />
 
             <Button
-                android:id="@+id/noDeleteButton"
+                android:id="@+id/userProfileNoDeleteBtn"
                 android:layout_width="60dp"
                 android:layout_height="30dp"
                 android:layout_marginEnd="40dp"
@@ -233,15 +233,15 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
-        android:id="@+id/allPostsLabel"
+        android:id="@+id/userProfilePostsLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/posts"
-        app:layout_constraintBottom_toTopOf="@+id/profileAllPostsRv"
-        app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv" />
+        app:layout_constraintBottom_toTopOf="@+id/userProfilePostDescriptorsRV"
+        app:layout_constraintStart_toStartOf="@+id/userProfilePostDescriptorsRV" />
 
     <TextView
-        android:id="@+id/profileNoCommentsYet"
+        android:id="@+id/userProfileNoCommentsYet"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="76dp"
@@ -249,25 +249,24 @@
         android:text="@string/this_user_has_no_posts"
         android:textAlignment="center"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/profileAllPostsRv"
-        app:layout_constraintEnd_toEndOf="@+id/profileAllPostsRv"
-        app:layout_constraintStart_toStartOf="@+id/profileAllPostsRv"
-        app:layout_constraintTop_toTopOf="@+id/profileAllPostsRv" />
+        app:layout_constraintBottom_toBottomOf="@+id/userProfilePostDescriptorsRV"
+        app:layout_constraintEnd_toEndOf="@+id/userProfilePostDescriptorsRV"
+        app:layout_constraintStart_toStartOf="@+id/userProfilePostDescriptorsRV"
+        app:layout_constraintTop_toTopOf="@+id/userProfilePostDescriptorsRV" />
 
     <ProgressBar
-        android:id="@+id/deletePostProgressBar"
-        style="?android:attr/progressBarStyle"
+        android:id="@+id/userProfileDeletePostPB"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/profileAllPostsRv"
-        app:layout_constraintEnd_toEndOf="@+id/profileAllPostsRv"
+        app:layout_constraintBottom_toBottomOf="@+id/userProfilePostDescriptorsRV"
+        app:layout_constraintEnd_toEndOf="@+id/userProfilePostDescriptorsRV"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/profileAllPostsRv" />
+        app:layout_constraintTop_toTopOf="@+id/userProfilePostDescriptorsRV" />
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/aboutMeLayout"
+        android:id="@+id/userProfileAboutMeLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="60dp"
@@ -279,7 +278,7 @@
         app:layout_constraintTop_toBottomOf="@+id/userProfileHeader">
 
         <TextView
-            android:id="@+id/aboutMeTV"
+            android:id="@+id/userProfileAboutMeTV"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
@@ -288,10 +287,10 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/aboutMeET" />
+            app:layout_constraintTop_toTopOf="@+id/userProfileAboutMeET" />
 
         <EditText
-            android:id="@+id/aboutMeET"
+            android:id="@+id/userProfileAboutMeET"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_square_black"
@@ -308,7 +307,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button
-        android:id="@+id/aboutMeEditBtn"
+        android:id="@+id/userProfileAboutMeEditBtn"
         android:layout_width="35dp"
         android:layout_height="20dp"
         android:background="?android:attr/selectableItemBackground"
@@ -317,13 +316,13 @@
         android:textColor="@color/colorAccent"
         android:textSize="12sp"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/aboutMeLayout"
-        app:layout_constraintEnd_toStartOf="@+id/aboutMeLayout"
-        app:layout_constraintTop_toTopOf="@+id/aboutMeLayout"
+        app:layout_constraintBottom_toBottomOf="@+id/userProfileAboutMeLayout"
+        app:layout_constraintEnd_toStartOf="@+id/userProfileAboutMeLayout"
+        app:layout_constraintTop_toTopOf="@+id/userProfileAboutMeLayout"
         tools:visibility="visible" />
 
     <Button
-        android:id="@+id/closeUserProfile"
+        android:id="@+id/userProfileBackBtn"
         android:layout_width="35dp"
         android:layout_height="30dp"
         android:layout_marginStart="8dp"

@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -45,7 +44,7 @@ public class LoginActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private final int EMAIL_VERIFICATION_CHECK_COOLDOWN = 2000;
     private Handler emailVerificationCheckRunnable;
-    boolean waitingForEmailVerification;
+    private boolean waitingForEmailVerification;
     private CallbackManager mCallbackManager;
     private GoogleSignInClient mGoogleSignInClient;
 
@@ -62,19 +61,19 @@ public class LoginActivity extends AppCompatActivity {
         //autofill email ET if it was saved
         sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         String savedEmail = sharedPreferences.getString("email", "");
-        binding.loginActEmailEditText.setText(savedEmail);
+        binding.loginEmailET.setText(savedEmail);
 
         emailVerificationCheckRunnable = new Handler();
 
         // Initialize Facebook Login button
         mCallbackManager = CallbackManager.Factory.create();
-        LoginButton loginButton = binding.facebookLoginButton;
+        LoginButton loginButton = binding.loginWithFacebookBtn;
         loginButton.setReadPermissions("email", "public_profile");
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.i(TAG, "facebook:onSuccess:" + loginResult);
-                binding.loginProgressBar.setVisibility(View.VISIBLE);
+                binding.loginPB.setVisibility(View.VISIBLE);
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
             @Override
@@ -94,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
         // Build a GoogleSignInClient with the options specified by gso.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-        SignInButton googleLoginButton = binding.googleLoginButton;
+        SignInButton googleLoginButton = binding.loginWithGoogleBtn;
         googleLoginButton.setStyle(SignInButton.SIZE_WIDE, SignInButton.COLOR_LIGHT);
         googleLoginButton.setOnClickListener(v -> googleSignIn());
     }
@@ -120,26 +119,26 @@ public class LoginActivity extends AppCompatActivity {
     public void loginButtonClicked(View v) {
         loginShown = true;
         String submitBtnText = "LOGIN";
-        binding.loginButton.setTextColor(getResources().getColor(R.color.colorAccent));
-        binding.signupButton.setTextColor(getResources().getColor(R.color.gray));
-        binding.loginActSubmitButton.setText(submitBtnText);
-        binding.loginActUsernameLabel.setVisibility(View.GONE);
-        binding.loginActUsernameEditText.setVisibility(View.GONE);
-        binding.loginActConfirmPasswordCLabel.setVisibility(View.GONE);
-        binding.loginActConfirmPasswordPLabel.setVisibility(View.GONE);
-        binding.loginActConfirmPasswordEditText.setVisibility(View.GONE);
+        binding.loginShowLoginBtn.setTextColor(getResources().getColor(R.color.colorAccent));
+        binding.loginShowSignupBtn.setTextColor(getResources().getColor(R.color.gray));
+        binding.loginSubmitBtn.setText(submitBtnText);
+        binding.loginUsernameLabel.setVisibility(View.GONE);
+        binding.loginUsernameET.setVisibility(View.GONE);
+        binding.loginConfirmPasswordCLabel.setVisibility(View.GONE);
+        binding.loginConfirmPasswordPLabel.setVisibility(View.GONE);
+        binding.loginConfirmPasswordET.setVisibility(View.GONE);
     }
     public void signupButtonClicked(View v) {
         loginShown = false;
         String submitBtnText = "SIGN UP";
-        binding.loginActSubmitButton.setText(submitBtnText);
-        binding.signupButton.setTextColor(getResources().getColor(R.color.colorAccent));
-        binding.loginButton.setTextColor(getResources().getColor(R.color.gray));
-        binding.loginActUsernameLabel.setVisibility(View.VISIBLE);
-        binding.loginActUsernameEditText.setVisibility(View.VISIBLE);
-        binding.loginActConfirmPasswordCLabel.setVisibility(View.VISIBLE);
-        binding.loginActConfirmPasswordPLabel.setVisibility(View.VISIBLE);
-        binding.loginActConfirmPasswordEditText.setVisibility(View.VISIBLE);
+        binding.loginSubmitBtn.setText(submitBtnText);
+        binding.loginShowSignupBtn.setTextColor(getResources().getColor(R.color.colorAccent));
+        binding.loginShowLoginBtn.setTextColor(getResources().getColor(R.color.gray));
+        binding.loginUsernameLabel.setVisibility(View.VISIBLE);
+        binding.loginUsernameET.setVisibility(View.VISIBLE);
+        binding.loginConfirmPasswordCLabel.setVisibility(View.VISIBLE);
+        binding.loginConfirmPasswordPLabel.setVisibility(View.VISIBLE);
+        binding.loginConfirmPasswordET.setVisibility(View.VISIBLE);
     }
 
     public void onSubmitButtonClicked(View v) {
@@ -151,42 +150,42 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void loginSubmit() {
-        String email = binding.loginActEmailEditText.getText().toString();
-        String password = binding.loginActPasswordEditText.getText().toString();
+        String email = binding.loginEmailET.getText().toString();
+        String password = binding.loginPasswordET.getText().toString();
         if (email.equals("") || email.length() == 0 || password.equals("") || password.length() == 0) {
             Utils.showToast(LoginActivity.this, "Please enter your email and password.");
             return;
         }
 
-        binding.loginProgressBar.setVisibility(View.VISIBLE);
+        binding.loginPB.setVisibility(View.VISIBLE);
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         user = mAuth.getCurrentUser();
-                        binding.loginProgressBar.setVisibility(View.GONE);
+                        binding.loginPB.setVisibility(View.GONE);
                         sharedPreferences.edit().putString("loginType", "firebase").apply();
                         finish();
                     } else {
                         Log.e(TAG, "signInWithEmail:failure", task.getException());
                         Utils.showToast(LoginActivity.this, "Username or password incorrect.");
-                        binding.loginProgressBar.setVisibility(View.GONE);
+                        binding.loginPB.setVisibility(View.GONE);
                     }
                 });
     }
 
     public void signupSubmit() {
-        String username = binding.loginActUsernameEditText.getText().toString();
-        String email = binding.loginActEmailEditText.getText().toString();
-        String password = binding.loginActPasswordEditText.getText().toString();
-        String confirmedPassword = binding.loginActConfirmPasswordEditText.getText().toString();
+        String username = binding.loginUsernameET.getText().toString();
+        String email = binding.loginEmailET.getText().toString();
+        String password = binding.loginPasswordET.getText().toString();
+        String confirmedPassword = binding.loginConfirmPasswordET.getText().toString();
 
         if (!password.equals(confirmedPassword)) {
             Utils.showToast(LoginActivity.this, "Passwords do not match.");
             return;
         }
 
-        binding.loginProgressBar.setVisibility(View.VISIBLE);
+        binding.loginPB.setVisibility(View.VISIBLE);
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
@@ -209,7 +208,7 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         Log.e(TAG, "createUserWithEmail:failure", task.getException());
                         Utils.showToast(LoginActivity.this, "This email address is invalid or already in use.");
-                        binding.loginProgressBar.setVisibility(View.GONE);
+                        binding.loginPB.setVisibility(View.GONE);
                     }
                 });
     }
@@ -227,8 +226,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void waitForEmailVerification() {
-        binding.loginBackButton.setVisibility(View.GONE);
-        binding.emailVerificationModal.setVisibility(View.VISIBLE);
+        binding.loginBackBtn.setVisibility(View.GONE);
+        binding.loginEmailVerificationModal.setVisibility(View.VISIBLE);
         binding.loginBaseLayout.setVisibility(View.GONE);
         waitingForEmailVerification = true;
 
@@ -272,7 +271,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void googleSignIn() {
-        binding.loginProgressBar.setVisibility(View.VISIBLE);
+        binding.loginPB.setVisibility(View.VISIBLE);
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, GOOGLE_SIGN_IN);
     }
@@ -304,35 +303,35 @@ public class LoginActivity extends AppCompatActivity {
                                     User userObj = res.toObject(User.class);
                                     if (userObj != null) {
                                         Log.i(TAG, "existing user authenticated. userid is " + userObj.getUid() + ", username is " + userObj.getUsername());
-                                        binding.loginProgressBar.setVisibility(View.GONE);
+                                        binding.loginPB.setVisibility(View.GONE);
                                         finish();
                                     } else {
                                         Log.i(TAG, "creating a new user...");
                                         showChooseUsernameModal();
-                                        binding.loginProgressBar.setVisibility(View.GONE);
+                                        binding.loginPB.setVisibility(View.GONE);
                                     }
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e(TAG, "error adding new user to db: " + e.toString());
-                                    binding.loginProgressBar.setVisibility(View.GONE);
+                                    binding.loginPB.setVisibility(View.GONE);
                                 });
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithCredential:failure", task.getException());
                         Utils.showToast(LoginActivity.this, "There was a problem signing in.");
-                        binding.loginProgressBar.setVisibility(View.GONE);
+                        binding.loginPB.setVisibility(View.GONE);
                     }
                 });
     }
 
     private void showChooseUsernameModal() {
-        binding.chooseUsernameEditText.setText(user.getDisplayName());
-        binding.chooseUsernameLayout.setVisibility(View.VISIBLE);
+        binding.loginChooseUsernameET.setText(user.getDisplayName());
+        binding.loginChooseUsernameModal.setVisibility(View.VISIBLE);
     }
 
     public void onUsernameSelected(View v) {
-        binding.chooseUsernameProgressBar.setVisibility(View.VISIBLE);
-        String username = binding.chooseUsernameEditText.getText().toString();
+        binding.loginChooseUsernamePB.setVisibility(View.VISIBLE);
+        String username = binding.loginChooseUsernameET.getText().toString();
 
         UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
         user.updateProfile(userProfileChangeRequest)
@@ -350,14 +349,14 @@ public class LoginActivity extends AppCompatActivity {
                 .set(newUser)
                 .addOnSuccessListener(aVoid -> {
                     Log.i(TAG, "new user created in users collection");
-                    binding.loginProgressBar.setVisibility(View.GONE);
-                    binding.chooseUsernameProgressBar.setVisibility(View.GONE);
+                    binding.loginPB.setVisibility(View.GONE);
+                    binding.loginChooseUsernamePB.setVisibility(View.GONE);
                     if (finishOnComplete) finish();
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "failed adding new user to firestore: " + e.toString());
-                    binding.loginProgressBar.setVisibility(View.GONE);
-                    binding.chooseUsernameProgressBar.setVisibility(View.GONE);
+                    binding.loginPB.setVisibility(View.GONE);
+                    binding.loginChooseUsernamePB.setVisibility(View.GONE);
                 });
     }
 
