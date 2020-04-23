@@ -80,7 +80,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         User thisProfileOwner = result.toObject(User.class);
 
                         if (thisProfileOwner == null) {
-                            Utils.showToast(UserProfileActivity.this, "This user account has been deleted.");
+                            Utils.showToast(UserProfileActivity.this, "This account has been deleted.");
                             finish();
                             return;
                         }

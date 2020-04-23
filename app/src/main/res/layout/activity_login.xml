@@ -57,7 +57,7 @@
         android:id="@+id/loginBaseLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="58dp"
+        android:layout_marginTop="80dp"
         android:animateLayoutChanges="true"
         android:background="@color/lightgray"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -211,7 +211,7 @@
             <Button
                 android:id="@+id/loginActSubmitButton"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="4dp"
@@ -289,23 +289,23 @@
         <com.google.android.gms.common.SignInButton
             android:id="@+id/googleLoginButton"
             android:layout_width="201dp"
-            android:layout_height="38dp"
+            android:layout_height="37dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             android:paddingTop="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/facebookLoginButton"
             app:layout_constraintEnd_toEndOf="@+id/facebookLoginButton"
-            app:layout_constraintStart_toStartOf="@+id/facebookLoginButton"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
+            app:layout_constraintStart_toStartOf="@+id/facebookLoginButton" />
 
         <com.facebook.login.widget.LoginButton
             android:id="@+id/facebookLoginButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_marginBottom="130dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/googleLoginButton" />
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

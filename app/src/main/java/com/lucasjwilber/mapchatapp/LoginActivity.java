@@ -1,6 +1,5 @@
 package com.lucasjwilber.mapchatapp;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -23,12 +22,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -44,8 +39,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private boolean loginShown = true;
-    private static final int GOOGLE_SIGN_IN = 5;
-    private static final int FACEBOOK_SIGN_IN = 6;
+    private static final int GOOGLE_SIGN_IN = 600613;
     private ActivityLoginBinding binding;
     private SharedPreferences sharedPreferences;
     private final int EMAIL_VERIFICATION_CHECK_COOLDOWN = 2000;
@@ -103,8 +97,8 @@ public class LoginActivity extends AppCompatActivity {
         // Build a GoogleSignInClient with the options specified by gso.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         SignInButton googleLoginButton = binding.googleLoginButton;
-        googleLoginButton.setStyle(SignInButton.SIZE_WIDE, SignInButton.COLOR_AUTO);
-        googleLoginButton.setOnClickListener(v -> signIn());
+        googleLoginButton.setStyle(SignInButton.SIZE_WIDE, SignInButton.COLOR_LIGHT);
+        googleLoginButton.setOnClickListener(v -> googleSignIn());
     }
 
     @Override
@@ -113,7 +107,6 @@ public class LoginActivity extends AppCompatActivity {
         if (waitingForEmailVerification) {
             waitForEmailVerification();
         }
-        Log.i(TAG, "user is " + user);
     }
     @Override
     public void onPause() {
@@ -137,8 +130,6 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginActConfirmPasswordCLabel.setVisibility(View.GONE);
         binding.loginActConfirmPasswordPLabel.setVisibility(View.GONE);
         binding.loginActConfirmPasswordEditText.setVisibility(View.GONE);
-        binding.facebookLoginButton.setVisibility(View.VISIBLE);
-        binding.googleLoginButton.setVisibility(View.VISIBLE);
     }
     public void signupButtonClicked(View v) {
         loginShown = false;
@@ -151,8 +142,6 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginActConfirmPasswordCLabel.setVisibility(View.VISIBLE);
         binding.loginActConfirmPasswordPLabel.setVisibility(View.VISIBLE);
         binding.loginActConfirmPasswordEditText.setVisibility(View.VISIBLE);
-        binding.facebookLoginButton.setVisibility(View.GONE);
-        binding.googleLoginButton.setVisibility(View.GONE);
     }
 
     public void onSubmitButtonClicked(View v) {
@@ -174,19 +163,16 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginProgressBar.setVisibility(View.VISIBLE);
 
         mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            user = mAuth.getCurrentUser();
-                            binding.loginProgressBar.setVisibility(View.GONE);
-                            sharedPreferences.edit().putString("loginType", "firebase").apply();
-                            finish();
-                        } else {
-                            Log.e(TAG, "signInWithEmail:failure", task.getException());
-                            Utils.showToast(LoginActivity.this, "Username or password incorrect.");
-                            binding.loginProgressBar.setVisibility(View.GONE);
-                        }
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        user = mAuth.getCurrentUser();
+                        binding.loginProgressBar.setVisibility(View.GONE);
+                        sharedPreferences.edit().putString("loginType", "firebase").apply();
+                        finish();
+                    } else {
+                        Log.e(TAG, "signInWithEmail:failure", task.getException());
+                        Utils.showToast(LoginActivity.this, "Username or password incorrect.");
+                        binding.loginProgressBar.setVisibility(View.GONE);
                     }
                 });
     }
@@ -205,36 +191,27 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginProgressBar.setVisibility(View.VISIBLE);
 
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            user = mAuth.getCurrentUser();
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        user = mAuth.getCurrentUser();
 
-                            // set the user's display name (username). this can't be done while creating the user unfortunately.
-                            UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
-                            user.updateProfile(userProfileChangeRequest)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
+                        // set the user's display name (username). this can't be done while creating the user unfortunately.
+                        UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
+                        user.updateProfile(userProfileChangeRequest)
+                                .addOnSuccessListener(aVoid -> {
+                                    createNewUser(user.getDisplayName(), user.getEmail(), user.getUid());
+                                    sharedPreferences.edit().putString("loginType", "firebase").apply();
+                                })
+                                .addOnFailureListener(e -> Log.i(TAG, "failed adding username to user"));
 
-                                            createNewUser(user.getDisplayName(), user.getEmail(), user.getUid());
-                                            sharedPreferences.edit().putString("loginType", "firebase").apply();
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.i(TAG, "failed adding username to user");
-                                        }
-                                    });
+                        user.sendEmailVerification()
+                            .addOnSuccessListener(r -> waitForEmailVerification())
+                            .addOnFailureListener(e -> Log.e(TAG, "error sending email verification: " + e.toString()));
 
-
-                        } else {
-                            Log.e(TAG, "createUserWithEmail:failure", task.getException());
-                            Utils.showToast(LoginActivity.this, "This email address is invalid or already in use.");
-                            binding.loginProgressBar.setVisibility(View.GONE);
-                        }
+                    } else {
+                        Log.e(TAG, "createUserWithEmail:failure", task.getException());
+                        Utils.showToast(LoginActivity.this, "This email address is invalid or already in use.");
+                        binding.loginProgressBar.setVisibility(View.GONE);
                     }
                 });
     }
@@ -246,9 +223,7 @@ public class LoginActivity extends AppCompatActivity {
     public void onResendEmailVerificationClick(View v) {
         if (user != null) {
             user.sendEmailVerification()
-            .addOnSuccessListener(r -> {
-                Utils.showToast(LoginActivity.this, "Verification email sent.");
-            })
+            .addOnSuccessListener(r -> Utils.showToast(LoginActivity.this, "Verification email sent."))
             .addOnFailureListener(e -> Log.e(TAG, "error sending ver email: " + e.toString()));
         }
     }
@@ -298,9 +273,10 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void signIn() {
+    private void googleSignIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, GOOGLE_SIGN_IN);
+        binding.loginProgressBar.setVisibility(View.VISIBLE);
     }
 
     private void handleFacebookAccessToken(AccessToken token) {
@@ -317,31 +293,28 @@ public class LoginActivity extends AppCompatActivity {
 
     private void signInWithCredential(AuthCredential credential) {
         mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.i(TAG, "signInWithCredential:success");
-                            user = mAuth.getCurrentUser();
-                            Log.i(TAG, user.getDisplayName() + ", " + user.getUid() + ", " + user.getEmail() + ", " + user.isEmailVerified());
-                            db.collection("users")
-                                    .document(user.getUid())
-                                    .get()
-                                    .addOnSuccessListener(res -> {
-                                        User userObj = res.toObject(User.class);
-                                        if (userObj != null) {
-                                            Log.i(TAG, "existing user authenticated. userid is " + userObj.getUid() + ", username is " + userObj.getUsername());
-                                            finish();
-                                        } else {
-                                            Log.i(TAG, "creating a new user...");
-                                            createNewUser(user.getDisplayName(), user.getEmail(), user.getUid());
-                                        }
-                                    });
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithCredential:failure", task.getException());
-                        }
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.i(TAG, "signInWithCredential:success");
+                        user = mAuth.getCurrentUser();
+                        Log.i(TAG, user.getDisplayName() + ", " + user.getUid() + ", " + user.getEmail() + ", " + user.isEmailVerified());
+                        db.collection("users")
+                                .document(user.getUid())
+                                .get()
+                                .addOnSuccessListener(res -> {
+                                    User userObj = res.toObject(User.class);
+                                    if (userObj != null) {
+                                        Log.i(TAG, "existing user authenticated. userid is " + userObj.getUid() + ", username is " + userObj.getUsername());
+                                        finish();
+                                    } else {
+                                        Log.i(TAG, "creating a new user...");
+                                        createNewUser(user.getDisplayName(), user.getEmail(), user.getUid());
+                                    }
+                                });
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG, "signInWithCredential:failure", task.getException());
                     }
                 });
     }
@@ -351,28 +324,14 @@ public class LoginActivity extends AppCompatActivity {
         db.collection("users")
                 .document(userId)
                 .set(newUser)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        user.sendEmailVerification()
-                                .addOnSuccessListener(r -> {
-                                    waitForEmailVerification();
-                                    binding.loginProgressBar.setVisibility(View.GONE);
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e(TAG, "error sending email verification: " + e.toString());
-                                    binding.loginProgressBar.setVisibility(View.GONE);
-                                });
-                        Log.i(TAG, "new user created in users collection");
-                        finish();
-                    }
+                .addOnSuccessListener(aVoid -> {
+                    Log.i(TAG, "new user created in users collection");
+                    binding.loginProgressBar.setVisibility(View.GONE);
+                    finish();
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "failed adding new user to firestore: " + e.toString());
-                        binding.loginProgressBar.setVisibility(View.GONE);
-                    }
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "failed adding new user to firestore: " + e.toString());
+                    binding.loginProgressBar.setVisibility(View.GONE);
                 });
     }
 
