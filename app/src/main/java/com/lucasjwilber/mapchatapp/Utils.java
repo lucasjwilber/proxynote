@@ -354,61 +354,16 @@ public class Utils {
         return zonesOnScreen;
     }
 
-
-//    static boolean checkUserAuthorization() {
-//        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
-//        String loginType = sharedPreferences.getString("loginType", null);
-//        switch (loginType) {
-//            case "firebase":
-//                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//                if (user == null) {
-//                    return false;
-//                } else {
-//                    user.reload();
-//                    return user.isEmailVerified();
-//                }
-//            case "facebook":
-//                AccessToken facebookAccessToken = AccessToken.getCurrentAccessToken();
-//                return facebookAccessToken != null && !facebookAccessToken.isExpired();
-//            case "google":
-//                //google oauth
-//                return false;
-//            default:
-//                return false;
-//        }
-//    }
     static boolean isUserAuthorized() {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         String loginType = sharedPreferences.getString("loginType", null);
-
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
+            user.reload();
             return loginType == null || !loginType.equals("firebase") || user.isEmailVerified();
         } else {
             return false;
         }
     }
-
-//    static String getUserId() {
-//        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
-//        String loginType = sharedPreferences.getString("loginType", "firebase");
-//
-//        switch (loginType) {
-//            case "firebase":
-//                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-//                    return FirebaseAuth.getInstance().getCurrentUser().getUid();
-//                } else {
-//                    return null;
-//                }
-//            case "facebook":
-//                AccessToken accessToken = AccessToken.getCurrentAccessToken();
-//                return accessToken.getUserId();
-//            case "google":
-//                //google oauth
-//                return null;
-//            default:
-//                return null;
-//        }
-//    }
 
 }

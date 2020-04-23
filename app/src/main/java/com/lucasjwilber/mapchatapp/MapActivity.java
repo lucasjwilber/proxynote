@@ -24,8 +24,6 @@ import android.view.View;
 import android.widget.PopupMenu;
 
 import com.facebook.AccessToken;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -57,17 +55,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     private final String TAG = "ljw";
     private ActivityMapBinding binding;
-    private GoogleMap mMap;
-    private FusedLocationProviderClient fusedLocationClient;
     private FirebaseFirestore db;
     private FirebaseUser user;
+    private SharedPreferences sharedPreferences;
     private String loginType;
-    private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
-    private final int LOCATION_UPDATE_COOLDOWN = 30000;
+
+    private GoogleMap mMap;
+    private boolean mapHasBeenSetUp;
+    private FusedLocationProviderClient fusedLocationClient;
     private double userLat;
     private double userLng;
-    private Marker userMarker;
+    private final int FINE_LOCATION_PERMISSION_REQUEST_CODE = 69;
+    private final int LOCATION_UPDATE_COOLDOWN = 30000;
     private LatLngBounds cameraBounds;
+    private Handler periodicLocationUpdateHandler;
+
     private BitmapDescriptor userLocationIcon;
     private BitmapDescriptor postOutlineYellow;
     private BitmapDescriptor postOutlineYellowOrange;
@@ -78,10 +80,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     private String currentSelectedPostId;
     private RecyclerView postRv;
     private RecyclerView.Adapter postRvAdapter;
-    private boolean mapHasBeenSetUp;
-    SharedPreferences sharedPreferences;
+
+    private Marker userMarker;
     private boolean areMarkersShown = true;
-    private Handler periodicLocationUpdateHandler;
     private List<Marker> markerList;
     private HashSet<String> zoneCacheTiny;
     private HashSet<String> zoneCacheSmall;
@@ -95,27 +96,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         binding = ActivityMapBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        postRv = binding.postRecyclerView;
-        postRv.setHasFixedSize(true);
-        postRv.setLayoutManager(new LinearLayoutManager(this));
-
         db = FirebaseFirestore.getInstance();
         sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
-
-//        Log.i(TAG, "userid is " + userId + ", username is " + username);
-
         periodicLocationUpdateHandler = new Handler();
         markerList = new ArrayList<>();
-
-        userLocationIcon = Utils.getBitmapDescriptorFromSvg(R.drawable.user_location_pin, MapActivity.this);
-        postOutlineYellow = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yellow, MapActivity.this);
-        postOutlineYellowOrange = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yelloworange, MapActivity.this);
-        postOutlineOrange = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_orange, MapActivity.this);
-        postOutlineOrangeRed = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_orangered, MapActivity.this);
-        postOutlineRed = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_red, MapActivity.this);
-        postOutlineBrown = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_brown, MapActivity.this);
-
-
+        postRv = binding.postRecyclerView;
+        postRv.setLayoutManager(new LinearLayoutManager(this));
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -134,6 +120,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             getUserLatLng(true);
         }
 
+        userLocationIcon = Utils.getBitmapDescriptorFromSvg(R.drawable.user_location_pin, MapActivity.this);
+        postOutlineYellow = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yellow, MapActivity.this);
+        postOutlineYellowOrange = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_yelloworange, MapActivity.this);
+        postOutlineOrange = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_orange, MapActivity.this);
+        postOutlineOrangeRed = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_orangered, MapActivity.this);
+        postOutlineRed = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_red, MapActivity.this);
+        postOutlineBrown = Utils.getBitmapDescriptorFromSvg(R.drawable.postoutline_brown, MapActivity.this);
     }
 
     @Override
@@ -141,18 +134,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         super.onResume();
 
         user = FirebaseAuth.getInstance().getCurrentUser();
-        Log.i(TAG, "user is " + user);
-
         loginType = sharedPreferences.getString("loginType", null);
-
-        //post data may have changed. delete all stored markers, clear the caches, and get posts
         refreshMapData(null);
-
         startGetLocationLooper();
 
         // if the postRv is open, refresh it to prevent vote manipulation via out-of-date scores
         if (postRv.getVisibility() == View.VISIBLE && mMap != null) {
-            postRv.setVisibility(View.GONE);
             postRvAdapter = null;
 
             // make sure it wasn't just deleted before showing it
@@ -225,14 +212,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             Handler handler = new Handler(Looper.getMainLooper()) {
                 @Override
                 public void handleMessage(Message input) {
-
                     //if we got here from a click on the "show on map" button in a user profile,
                     //center on that marker, else center on the user's location.
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(finalLat, finalLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 
                     setMapStyle(sharedPreferences.getInt("mapStyle", R.id.mapStyleCobalt));
-
                     mMap.setMinZoomPreference(5f);
 
                     if (userMarker != null) userMarker.remove();
@@ -306,14 +291,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             menu.getItem(0).setVisible(false);
         } else {
-            menu.getItem(4).setTitle("Log Out");
+            menu.getItem(3).setTitle("Log Out");
         }
         popup.show();
     }
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        SharedPreferences.Editor editor;
+//        SharedPreferences.Editor editor;
 
         switch (item.getItemId()) {
             case R.id.menuProfile:
@@ -338,7 +323,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 }
                 return true;
 
-            // map styles //
+            // map styles
             case R.id.mapStyleDay:
             case R.id.mapStyleNight:
             case R.id.mapStyleLightGray:
@@ -348,36 +333,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 return setMapStyle(item.getItemId());
 
             //distance types
-            case R.id.distanceTypeImperial:
-                editor = sharedPreferences.edit().putString("distanceType", "imperial");
-                editor.apply();
-                return true;
-            case R.id.distanceTypeMetric:
-                editor = sharedPreferences.edit().putString("distanceType", "metric");
-                editor.apply();
-                return true;
+//            case R.id.distanceTypeImperial:
+//                editor = sharedPreferences.edit().putString("distanceType", "imperial");
+//                editor.apply();
+//                return true;
+//            case R.id.distanceTypeMetric:
+//                editor = sharedPreferences.edit().putString("distanceType", "metric");
+//                editor.apply();
+//                return true;
 
-            //filter options
-//            case R.id.filterAgeNone:
-//                editor = sharedPreferences.edit().putLong("postMaxAge", 0L);
-//                editor.apply();
-//                refreshMapData(null);
-//                return true;
-//            case R.id.filterAgeOneDay:
-//                editor = sharedPreferences.edit().putLong("postMaxAge", 86400000L);
-//                editor.apply();
-//                refreshMapData(null);
-//                return true;
-//            case R.id.filterAgeThreeDays:
-//                editor = sharedPreferences.edit().putLong("postMaxAge", 259200000L);
-//                editor.apply();
-//                refreshMapData(null);
-//                return true;
-//            case R.id.filterAgeOneWeek:
-//                editor = sharedPreferences.edit().putLong("postMaxAge", 604800000L);
-//                editor.apply();
-//                refreshMapData(null);
-//                return true;
             default:
                 return false;
         }
@@ -450,7 +414,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         if (user != null) {
             if (loginType != null && loginType.equals("firebase") && !user.isEmailVerified()) {
-                Utils.showToast(MapActivity.this, "Please verifiy your email address first.");
+                user.reload()
+                        .addOnSuccessListener(r -> {
+                            if (user.isEmailVerified()) {
+                                Intent goToCreatePostAct = new Intent(this, CreatePostActivity.class);
+                                startActivity(goToCreatePostAct);
+                            } else {
+                                Utils.showToast(MapActivity.this, "Please verify your email address first.");
+                            }
+                        });
             } else {
                 Intent goToCreatePostAct = new Intent(this, CreatePostActivity.class);
                 startActivity(goToCreatePostAct);

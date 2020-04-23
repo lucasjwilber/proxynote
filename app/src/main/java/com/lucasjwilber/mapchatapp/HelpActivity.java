@@ -49,6 +49,7 @@ public class HelpActivity extends AppCompatActivity {
 
         binding.helpRv.setLayoutManager(new LinearLayoutManager(this));
         binding.helpRv.setAdapter(new HelpRvAdapter());
+        binding.helpRv.setHasFixedSize(true);
     }
 
     public void onSubmitQuestionOrCommentButtonClicked(View v) {

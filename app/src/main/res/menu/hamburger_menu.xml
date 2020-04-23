@@ -41,44 +41,22 @@
             </item>
         </menu>
     </item>
-    <item
-        android:id="@+id/settingsDistanceType"
-        android:orderInCategory="1"
-        android:title="@string/change_distance_type" >
-        <menu>
-            <item
-                android:id="@+id/distanceTypeImperial"
-                android:title="@string/imperial" >
-            </item>
-            <item
-                android:id="@+id/distanceTypeMetric"
-                android:title="@string/metric" >
-            </item>
-        </menu>
-    </item>
+
+<!--    <item-->
+<!--        android:id="@+id/settingsDistanceType"-->
+<!--        android:orderInCategory="1"-->
+<!--        android:title="@string/change_distance_type" >-->
+<!--        <menu>-->
 <!--            <item-->
-<!--                android:id="@+id/menuFilterAge"-->
-<!--                android:orderInCategory="2"-->
-<!--                android:title="@string/max_post_age" >-->
-<!--                <menu>-->
-<!--                    <item-->
-<!--                        android:id="@+id/filterAgeNone"-->
-<!--                        android:title="@string/none" >-->
-<!--                    </item>-->
-<!--                    <item-->
-<!--                        android:id="@+id/filterAgeOneDay"-->
-<!--                        android:title="@string/one_day" >-->
-<!--                    </item>-->
-<!--                    <item-->
-<!--                        android:id="@+id/filterAgeThreeDays"-->
-<!--                        android:title="@string/three_days" >-->
-<!--                    </item>-->
-<!--                    <item-->
-<!--                        android:id="@+id/filterAgeOneWeek"-->
-<!--                        android:title="@string/seven_days" >-->
-<!--                    </item>-->
-<!--                </menu>-->
+<!--                android:id="@+id/distanceTypeImperial"-->
+<!--                android:title="@string/imperial" >-->
 <!--            </item>-->
+<!--            <item-->
+<!--                android:id="@+id/distanceTypeMetric"-->
+<!--                android:title="@string/metric" >-->
+<!--            </item>-->
+<!--        </menu>-->
+<!--    </item>-->
 
     <item android:id="@+id/menuHelp"
         android:title="@string/help"
