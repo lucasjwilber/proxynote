@@ -91,6 +91,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
+        Log.i(TAG, "you are " + user.getDisplayName() + " with email " + user.getEmail());
 
         storageRef = storage.getReference();
         loadingSpinner = findViewById(R.id.createPostProgressBar);

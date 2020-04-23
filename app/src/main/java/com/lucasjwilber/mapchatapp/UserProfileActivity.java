@@ -52,7 +52,6 @@ public class UserProfileActivity extends AppCompatActivity {
     private LatLng selectedPostLatLng;
     private boolean userIsOnTheirOwnProfile;
     private boolean aboutMeBeingEdited;
-    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,22 +62,26 @@ public class UserProfileActivity extends AppCompatActivity {
         binding.profileOnePostRv.setLayoutManager(new LinearLayoutManager(this));
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
-        sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
 
         Intent intent = getIntent();
         thisProfileOwnerId = intent.getStringExtra("userId");
+        userIsOnTheirOwnProfile =
+                user != null &&
+                thisProfileOwnerId != null &&
+                thisProfileOwnerId.equals(user.getUid());
+
+        if (userIsOnTheirOwnProfile) binding.aboutMeEditBtn.setVisibility(View.VISIBLE);
+
 
         if (thisProfileOwnerId != null) {
-            String currentUserId = user == null ? "" : user.getUid();
-            if (thisProfileOwnerId.equals(currentUserId)) userIsOnTheirOwnProfile = true;
-
             binding.postDescRvProgressBar.setVisibility(View.VISIBLE);
+
             db.collection("users")
                     .document(thisProfileOwnerId)
                     .get()
                     .addOnSuccessListener(result -> {
-                        User thisProfileOwner = result.toObject(User.class);
 
+                        User thisProfileOwner = result.toObject(User.class);
                         if (thisProfileOwner == null) {
                             Utils.showToast(UserProfileActivity.this, "This account has been deleted.");
                             finish();
@@ -120,7 +123,9 @@ public class UserProfileActivity extends AppCompatActivity {
         }
     }
 
-    //list of post descriptors RV:
+
+    //// list of post descriptors RV ////
+
     public class PostSelectAdapter extends RecyclerView.Adapter<PostSelectAdapter.PostTitleViewholder> {
         List<PostDescriptor> userPostDescriptors;
 
@@ -267,6 +272,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
     }
 
+
     public void onDeleteButtonClick(View v) {
         if (!userIsOnTheirOwnProfile) return;
         binding.deletePostModal.setVisibility(View.VISIBLE);
@@ -405,7 +411,7 @@ public class UserProfileActivity extends AppCompatActivity {
         binding.profPostRvContainer.setVisibility(View.GONE);
         binding.profPostRvButtons.setVisibility(View.GONE);
         binding.aboutMeLayout.setVisibility(View.VISIBLE);
-        binding.aboutMeEditBtn.setVisibility(View.VISIBLE);
+        binding.aboutMeEditBtn.setVisibility(userIsOnTheirOwnProfile ? View.VISIBLE : View.GONE);
         binding.closeUserProfile.setVisibility(View.VISIBLE);
         binding.allPostsLabel.setVisibility(View.VISIBLE);
     }

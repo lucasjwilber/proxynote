@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -307,7 +308,8 @@ public class LoginActivity extends AppCompatActivity {
                                         finish();
                                     } else {
                                         Log.i(TAG, "creating a new user...");
-                                        createNewUser(user.getDisplayName(), user.getUid(), true);
+                                        showChooseUsernameModal();
+                                        binding.loginProgressBar.setVisibility(View.GONE);
                                     }
                                 })
                                 .addOnFailureListener(e -> {
@@ -323,6 +325,24 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    private void showChooseUsernameModal() {
+        binding.chooseUsernameEditText.setText(user.getDisplayName());
+        binding.chooseUsernameLayout.setVisibility(View.VISIBLE);
+    }
+
+    public void onUsernameSelected(View v) {
+        binding.chooseUsernameProgressBar.setVisibility(View.VISIBLE);
+        String username = binding.chooseUsernameEditText.getText().toString();
+
+        UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
+        user.updateProfile(userProfileChangeRequest)
+                .addOnSuccessListener(aVoid -> {
+                    createNewUser(username, user.getUid(), true);
+                    sharedPreferences.edit().putString("loginType", "firebase").apply();
+                })
+                .addOnFailureListener(e -> Log.i(TAG, "failed adding username to user"));
+    }
+
     private void createNewUser(String username, String userId, boolean finishOnComplete) {
         User newUser = new User(username, userId);
         db.collection("users")
@@ -331,12 +351,15 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnSuccessListener(aVoid -> {
                     Log.i(TAG, "new user created in users collection");
                     binding.loginProgressBar.setVisibility(View.GONE);
+                    binding.chooseUsernameProgressBar.setVisibility(View.GONE);
                     if (finishOnComplete) finish();
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "failed adding new user to firestore: " + e.toString());
                     binding.loginProgressBar.setVisibility(View.GONE);
+                    binding.chooseUsernameProgressBar.setVisibility(View.GONE);
                 });
     }
+
 
 }
