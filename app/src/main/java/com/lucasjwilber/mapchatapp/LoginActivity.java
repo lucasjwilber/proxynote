@@ -119,25 +119,25 @@ public class LoginActivity extends AppCompatActivity {
     public void loginButtonClicked(View v) {
         loginShown = true;
         String submitBtnText = "LOGIN";
-        binding.loginShowLoginBtn.setTextColor(getResources().getColor(R.color.colorAccent));
-        binding.loginShowSignupBtn.setTextColor(getResources().getColor(R.color.gray));
+        binding.loginShowLoginBtn.setTextColor(getResources().getColor(R.color.white));
+        binding.loginShowSignupBtn.setTextColor(getResources().getColor(R.color.whiteOpaque));
         binding.loginSubmitBtn.setText(submitBtnText);
-        binding.loginUsernameLabel.setVisibility(View.GONE);
+//        binding.loginUsernameLabel.setVisibility(View.GONE);
         binding.loginUsernameET.setVisibility(View.GONE);
-        binding.loginConfirmPasswordCLabel.setVisibility(View.GONE);
-        binding.loginConfirmPasswordPLabel.setVisibility(View.GONE);
+//        binding.loginConfirmPasswordCLabel.setVisibility(View.GONE);
+//        binding.loginConfirmPasswordPLabel.setVisibility(View.GONE);
         binding.loginConfirmPasswordET.setVisibility(View.GONE);
     }
     public void signupButtonClicked(View v) {
         loginShown = false;
         String submitBtnText = "SIGN UP";
         binding.loginSubmitBtn.setText(submitBtnText);
-        binding.loginShowSignupBtn.setTextColor(getResources().getColor(R.color.colorAccent));
-        binding.loginShowLoginBtn.setTextColor(getResources().getColor(R.color.gray));
-        binding.loginUsernameLabel.setVisibility(View.VISIBLE);
+        binding.loginShowSignupBtn.setTextColor(getResources().getColor(R.color.white));
+        binding.loginShowLoginBtn.setTextColor(getResources().getColor(R.color.whiteOpaque));
+//        binding.loginUsernameLabel.setVisibility(View.VISIBLE);
         binding.loginUsernameET.setVisibility(View.VISIBLE);
-        binding.loginConfirmPasswordCLabel.setVisibility(View.VISIBLE);
-        binding.loginConfirmPasswordPLabel.setVisibility(View.VISIBLE);
+//        binding.loginConfirmPasswordCLabel.setVisibility(View.VISIBLE);
+//        binding.loginConfirmPasswordPLabel.setVisibility(View.VISIBLE);
         binding.loginConfirmPasswordET.setVisibility(View.VISIBLE);
     }
 
@@ -180,7 +180,14 @@ public class LoginActivity extends AppCompatActivity {
         String password = binding.loginPasswordET.getText().toString();
         String confirmedPassword = binding.loginConfirmPasswordET.getText().toString();
 
-        if (!password.equals(confirmedPassword)) {
+        if (username.equals("") || username.length() == 0 ||
+        email.equals("") || email.length() == 0 ||
+        password.equals("") || password.length() == 0 ||
+        confirmedPassword.equals("") || confirmedPassword.length() == 0
+        ) {
+            Utils.showToast(LoginActivity.this, "Please fill out all fields.");
+            return;
+        } else if (!password.equals(confirmedPassword)) {
             Utils.showToast(LoginActivity.this, "Passwords do not match.");
             return;
         }

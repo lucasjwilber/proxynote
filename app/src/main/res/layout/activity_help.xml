@@ -28,7 +28,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/helpTitle"
         app:layout_constraintEnd_toStartOf="@+id/helpTitle"
         app:layout_constraintTop_toTopOf="@+id/helpTitle"
-        app:srcCompat="@drawable/proxynote_logo_pink" />
+        app:srcCompat="@drawable/logo_pink" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/helpRV"
