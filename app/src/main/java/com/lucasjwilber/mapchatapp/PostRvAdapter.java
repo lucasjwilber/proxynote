@@ -365,7 +365,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     private void onReportButtonClicked() {
-        if (user == null) {
+        if (user == null || user.isAnonymous()) {
             Utils.showToast(context, "You must be signed in to report a post.");
             return;
         } else if (!user.isEmailVerified()) {

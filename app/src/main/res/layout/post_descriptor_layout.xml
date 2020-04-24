@@ -40,8 +40,7 @@
         android:paddingBottom="13dp"
         app:layout_constraintBottom_toBottomOf="@+id/postDescriptorTitle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintTop_toTopOf="@+id/postDescriptorTimeAndLocation"
         app:srcCompat="@drawable/posticon_default" />
 
     <TextView
@@ -51,6 +50,7 @@
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/postDescriptorTitle"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="time and place" />

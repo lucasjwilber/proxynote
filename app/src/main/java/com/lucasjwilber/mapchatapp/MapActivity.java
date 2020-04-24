@@ -132,8 +132,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     @Override
     public void onResume() {
         super.onResume();
-
         user = FirebaseAuth.getInstance().getCurrentUser();
+
+        //sign unauthorized users in anonymously to allow them to read from the db
+        if (user == null) {
+            FirebaseAuth.getInstance().signInAnonymously()
+                    .addOnSuccessListener(res -> {
+                        Log.i(TAG, "user is signed in anonymously.");
+                    })
+            .addOnFailureListener(e -> {
+                //try again once
+                FirebaseAuth.getInstance().signInAnonymously();
+                Log.e(TAG, "error signing in anonymously: " + e.toString());
+            });
+        }
+
         loginType = sharedPreferences.getString("loginType", null);
         refreshMapData(null);
         startGetLocationLooper();
@@ -288,7 +301,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         popup.inflate(R.menu.hamburger_menu);
 
         Menu menu = popup.getMenu();
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null || FirebaseAuth.getInstance().getCurrentUser().isAnonymous()) {
             menu.getItem(0).setVisible(false);
         } else {
             menu.getItem(3).setTitle("Log Out");
@@ -312,7 +325,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 startActivity(goToHelp);
                 return true;
             case R.id.menuLoginLogout:
-                if (FirebaseAuth.getInstance().getCurrentUser() == null) { //go to login/signup page
+                if (FirebaseAuth.getInstance().getCurrentUser() == null || FirebaseAuth.getInstance().getCurrentUser().isAnonymous()) { //go to login/signup page
                     postRv.setVisibility(View.GONE);
                     Intent i = new Intent(this, LoginActivity.class);
                     startActivity(i);
@@ -322,6 +335,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     //for facebook:
                     AccessToken.setCurrentAccessToken(null);
                     Utils.showToast(MapActivity.this, "You are now logged out.");
+
+                    //sign in anonymously so they can still read from the db
+                    FirebaseAuth.getInstance().signInAnonymously()
+                            .addOnSuccessListener(res -> {
+                                Log.i(TAG, "user is signed in anonymously.");
+                            })
+                            .addOnFailureListener(e -> {
+                                //try again once
+                                FirebaseAuth.getInstance().signInAnonymously();
+                                Log.e(TAG, "error signing in anonymously: " + e.toString());
+                            });
                 }
                 return true;
 
@@ -414,7 +438,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void onCreatePostButtonClick(View v) {
         hideAllModals();
 
-        if (user != null) {
+        if (user == null || user.isAnonymous()) {
+            binding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
+        } else {
             if (loginType != null && loginType.equals("firebase") && !user.isEmailVerified()) {
                 user.reload()
                         .addOnSuccessListener(r -> {
@@ -429,8 +455,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 Intent goToCreatePostAct = new Intent(this, CreatePostActivity.class);
                 startActivity(goToCreatePostAct);
             }
-        } else {
-            binding.mapLoginSuggestionModal.setVisibility(View.VISIBLE);
         }
     }
 

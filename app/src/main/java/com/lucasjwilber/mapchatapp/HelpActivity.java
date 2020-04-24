@@ -196,7 +196,7 @@ public class HelpActivity extends AppCompatActivity {
         if (user != null && user.isEmailVerified()) {
             Utils.showToast(HelpActivity.this, "Your account is already verified.");
         } else {
-            if (user == null) {
+            if (user == null || user.isAnonymous()) {
                 Log.e(TAG, "user's firebase auth instance is null, but the 'resend verification email' button was shown");
             } else {
                 user.sendEmailVerification()

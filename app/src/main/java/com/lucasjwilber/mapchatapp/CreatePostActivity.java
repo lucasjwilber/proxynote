@@ -112,7 +112,7 @@ public class CreatePostActivity extends AppCompatActivity {
         EditText postBodyForm = binding.createPostTextET;
         String postBody = postBodyForm.getText().toString();
 
-        if (user == null) {
+        if (user == null || user.isAnonymous()) {
             Utils.showToast(CreatePostActivity.this, "Please log in first.");
         } else if (postTitle.equals("") || postTitle.length() == 0) {
             Utils.showToast(CreatePostActivity.this, "A post title is required.");

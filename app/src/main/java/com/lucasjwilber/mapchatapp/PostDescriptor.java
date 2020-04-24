@@ -1,7 +1,7 @@
 package com.lucasjwilber.mapchatapp;
 
 // the purpose of this class is to provide a link between posts and users without nesting all posts in users.
-// it also makes the query used for populating a user's profile more lightweight
+// it also keeps queries that populate user profile recyclerviews much more lightweight.
 
 public class PostDescriptor {
     private String id;

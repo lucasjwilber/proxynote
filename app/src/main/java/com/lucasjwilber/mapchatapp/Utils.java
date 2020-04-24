@@ -353,11 +353,11 @@ public class Utils {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         String loginType = sharedPreferences.getString("loginType", null);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
+        if (user == null || user.isAnonymous()) {
+            return false;
+        } else {
             user.reload();
             return loginType == null || !loginType.equals("firebase") || user.isEmailVerified();
-        } else {
-            return false;
         }
     }
 

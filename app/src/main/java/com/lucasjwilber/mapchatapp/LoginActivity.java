@@ -160,6 +160,12 @@ public class LoginActivity extends AppCompatActivity {
 
         binding.loginPB.setVisibility(View.VISIBLE);
 
+        //clear any previous credentials
+        FirebaseAuth.getInstance().signOut();
+        user = null;
+        //for facebook:
+        AccessToken.setCurrentAccessToken(null);
+
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
@@ -194,6 +200,12 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         binding.loginPB.setVisibility(View.VISIBLE);
+
+        //clear any previous credentials
+        FirebaseAuth.getInstance().signOut();
+        user = null;
+        //for facebook:
+        AccessToken.setCurrentAccessToken(null);
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
@@ -310,6 +322,13 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signInWithCredential(AuthCredential credential, String loginType) {
+
+        //clear any previous credentials
+        FirebaseAuth.getInstance().signOut();
+        user = null;
+        //for facebook:
+        AccessToken.setCurrentAccessToken(null);
+
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
@@ -341,6 +360,16 @@ public class LoginActivity extends AppCompatActivity {
                         Log.w(TAG, "signInWithCredential:failure", task.getException());
                         Utils.showToast(LoginActivity.this, "There was a problem signing in.");
                         binding.loginPB.setVisibility(View.GONE);
+
+                        FirebaseAuth.getInstance().signInAnonymously()
+                                .addOnSuccessListener(res -> {
+                                    Log.i(TAG, "user is signed in anonymously.");
+                                })
+                                .addOnFailureListener(e -> {
+                                    //try again once
+                                    FirebaseAuth.getInstance().signInAnonymously();
+                                    Log.e(TAG, "error signing in anonymously: " + e.toString());
+                                });
                     }
                 });
     }
