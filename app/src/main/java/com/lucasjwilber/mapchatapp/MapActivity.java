@@ -325,25 +325,32 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                 startActivity(goToHelp);
                 return true;
             case R.id.menuLoginLogout:
-                if (FirebaseAuth.getInstance().getCurrentUser() == null || FirebaseAuth.getInstance().getCurrentUser().isAnonymous()) { //go to login/signup page
+                FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                if (mAuth.getCurrentUser() == null || mAuth.getCurrentUser().isAnonymous()) { //go to login/signup page
                     postRv.setVisibility(View.GONE);
                     Intent i = new Intent(this, LoginActivity.class);
                     startActivity(i);
                 } else { //log out
-                    FirebaseAuth.getInstance().signOut();
+
+                    //delete anonymous users to prevent a build-up of them in firestore
+                    if (mAuth.getCurrentUser().isAnonymous()) {
+                        mAuth.getCurrentUser().delete();
+                    }
+
+                    mAuth.signOut();
                     user = null;
                     //for facebook:
                     AccessToken.setCurrentAccessToken(null);
                     Utils.showToast(MapActivity.this, "You are now logged out.");
 
                     //sign in anonymously so they can still read from the db
-                    FirebaseAuth.getInstance().signInAnonymously()
+                    mAuth.signInAnonymously()
                             .addOnSuccessListener(res -> {
                                 Log.i(TAG, "user is signed in anonymously.");
                             })
                             .addOnFailureListener(e -> {
                                 //try again once
-                                FirebaseAuth.getInstance().signInAnonymously();
+                                mAuth.signInAnonymously();
                                 Log.e(TAG, "error signing in anonymously: " + e.toString());
                             });
                 }

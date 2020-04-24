@@ -161,7 +161,10 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginPB.setVisibility(View.VISIBLE);
 
         //clear any previous credentials
-        FirebaseAuth.getInstance().signOut();
+        if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isAnonymous()) {
+            mAuth.getCurrentUser().delete();
+        }
+        mAuth.signOut();
         user = null;
         //for facebook:
         AccessToken.setCurrentAccessToken(null);
@@ -202,7 +205,10 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginPB.setVisibility(View.VISIBLE);
 
         //clear any previous credentials
-        FirebaseAuth.getInstance().signOut();
+        if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isAnonymous()) {
+            mAuth.getCurrentUser().delete();
+        }
+        mAuth.signOut();
         user = null;
         //for facebook:
         AccessToken.setCurrentAccessToken(null);
@@ -324,7 +330,10 @@ public class LoginActivity extends AppCompatActivity {
     private void signInWithCredential(AuthCredential credential, String loginType) {
 
         //clear any previous credentials
-        FirebaseAuth.getInstance().signOut();
+        if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isAnonymous()) {
+            mAuth.getCurrentUser().delete();
+        }
+        mAuth.signOut();
         user = null;
         //for facebook:
         AccessToken.setCurrentAccessToken(null);
@@ -361,13 +370,13 @@ public class LoginActivity extends AppCompatActivity {
                         Utils.showToast(LoginActivity.this, "There was a problem signing in.");
                         binding.loginPB.setVisibility(View.GONE);
 
-                        FirebaseAuth.getInstance().signInAnonymously()
+                        mAuth.signInAnonymously()
                                 .addOnSuccessListener(res -> {
                                     Log.i(TAG, "user is signed in anonymously.");
                                 })
                                 .addOnFailureListener(e -> {
                                     //try again once
-                                    FirebaseAuth.getInstance().signInAnonymously();
+                                    mAuth.signInAnonymously();
                                     Log.e(TAG, "error signing in anonymously: " + e.toString());
                                 });
                     }
@@ -423,7 +432,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void sendPasswordResetEmail() {
         String email = binding.loginResetPWEmailET.getText().toString();
-        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+        mAuth.sendPasswordResetEmail(email)
                 .addOnSuccessListener(success -> {
                     Utils.showToast(LoginActivity.this, "Password reset email sent.");
                     binding.loginBaseLayout.setVisibility(View.VISIBLE);
