@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 
+import com.bumptech.glide.util.Util;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -209,12 +210,18 @@ public class LoginActivity extends AppCompatActivity {
                                 .addOnFailureListener(e -> Log.i(TAG, "failed adding username to user"));
 
                         user.sendEmailVerification()
-                            .addOnSuccessListener(r -> waitForEmailVerification())
-                            .addOnFailureListener(e -> Log.e(TAG, "error sending email verification: " + e.toString()));
+                            .addOnSuccessListener(r -> {
+                                waitForEmailVerification();
+                                binding.loginPB.setVisibility(View.GONE);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "error sending email verification: " + e.toString());
+                                Utils.showToast(LoginActivity.this, "Error sending account verification email");
+                            });
 
                     } else {
                         Log.e(TAG, "createUserWithEmail:failure", task.getException());
-                        Utils.showToast(LoginActivity.this, "This email address is invalid or already in use.");
+                        Utils.showToast(LoginActivity.this, "This email address is invalid or already in use");
                         binding.loginPB.setVisibility(View.GONE);
                     }
                 });
@@ -255,7 +262,14 @@ public class LoginActivity extends AppCompatActivity {
         }, EMAIL_VERIFICATION_CHECK_COOLDOWN);
     }
 
-    public void onBackButtonClicked(View v) { finish(); }
+    public void onBackButtonClicked(View v) {
+        if (binding.loginResetPasswordModal.getVisibility() == View.VISIBLE) {
+            binding.loginBaseLayout.setVisibility(View.VISIBLE);
+            binding.loginResetPasswordModal.setVisibility(View.GONE);
+        } else {
+            finish();
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -332,12 +346,14 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void showChooseUsernameModal() {
+        String chooseUsernameText = "Welcome to ProxyNote " + user.getDisplayName() + "! Now's your chance to change your username:";
+        binding.loginChooseUsernameTitle.setText(chooseUsernameText);
         binding.loginChooseUsernameET.setText(user.getDisplayName());
         binding.loginChooseUsernameModal.setVisibility(View.VISIBLE);
     }
 
-    public void onUsernameSelected(View v) {
-        binding.loginChooseUsernamePB.setVisibility(View.VISIBLE);
+    public void onUsernameChangeSubmit(View v) {
+        binding.loginPB.setVisibility(View.VISIBLE);
         String username = binding.loginChooseUsernameET.getText().toString();
 
         UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
@@ -357,13 +373,37 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnSuccessListener(aVoid -> {
                     Log.i(TAG, "new user created in users collection");
                     binding.loginPB.setVisibility(View.GONE);
-                    binding.loginChooseUsernamePB.setVisibility(View.GONE);
                     if (finishOnComplete) finish();
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "failed adding new user to firestore: " + e.toString());
                     binding.loginPB.setVisibility(View.GONE);
-                    binding.loginChooseUsernamePB.setVisibility(View.GONE);
+                });
+    }
+
+    public void showPasswordResetModal(View v) {
+        binding.loginBaseLayout.setVisibility(View.GONE);
+        binding.loginResetPasswordModal.setVisibility(View.VISIBLE);
+        binding.loginResetPasswordBtn.setOnClickListener(x -> sendPasswordResetEmail());
+    }
+
+    public void hidePasswordResetModal(View v) {
+        binding.loginBaseLayout.setVisibility(View.VISIBLE);
+        binding.loginResetPasswordModal.setVisibility(View.GONE);
+    }
+
+    private void sendPasswordResetEmail() {
+        String email = binding.loginResetPWEmailET.getText().toString();
+        FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                .addOnSuccessListener(success -> {
+                    Utils.showToast(LoginActivity.this, "Password reset email sent.");
+                    binding.loginBaseLayout.setVisibility(View.VISIBLE);
+                    binding.loginResetPasswordModal.setVisibility(View.GONE);
+                    binding.loginResetPWEmailET.setText("");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "couldn't send password reset: " + e.toString());
+                    Utils.showToast(LoginActivity.this, "Error sending password reset email.");
                 });
     }
 
