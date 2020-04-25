@@ -317,6 +317,10 @@ public class LoginActivity extends AppCompatActivity {
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+
+        //clear any previously used facebook token:
+        AccessToken.setCurrentAccessToken(null);
+        
         signInWithCredential(credential, "google");
     }
 
@@ -328,8 +332,6 @@ public class LoginActivity extends AppCompatActivity {
         }
         mAuth.signOut();
         user = null;
-        //for facebook:
-        AccessToken.setCurrentAccessToken(null);
 
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, task -> {
