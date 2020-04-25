@@ -3,7 +3,6 @@ package com.lucasjwilber.mapchatapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -528,7 +527,7 @@ public class CreatePostActivity extends AppCompatActivity {
         if (selectedIconView != null) selectedIconView.setBackground(null);
         selectedIconView = (ImageView) v;
         selectedIcon = (int) v.getTag();
-        v.setBackground(getDrawable(R.drawable.postoutline_yellow));
+        v.setBackground(getResources().getDrawable(R.drawable.postoutline_yellow));
         selectedPosition = position;
         iconSelected = true;
     }
@@ -555,7 +554,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(IconSelectAdapter.IconViewholder holder, int position) {
-            holder.imageView.setImageDrawable(getDrawable(icons[position]));
+            holder.imageView.setImageDrawable(getResources().getDrawable(icons[position]));
 
             holder.imageView.setOnClickListener(v -> onIconClick(v, holder.getAdapterPosition()));
 
@@ -563,7 +562,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 holder.imageView.setBackground(null);
             }
             if (iconSelected && selectedPosition == position) {
-                holder.imageView.setBackground(getDrawable(R.drawable.postoutline_accent));
+                holder.imageView.setBackground(getResources().getDrawable(R.drawable.postoutline_accent));
             }
             holder.imageView.setTag(position);
         }

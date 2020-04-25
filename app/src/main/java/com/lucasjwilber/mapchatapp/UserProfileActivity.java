@@ -164,17 +164,17 @@ public class UserProfileActivity extends AppCompatActivity {
 
             iconView.setImageBitmap(Utils.getPostIconBitmap(icon, getApplicationContext()));
             if (score >= 20) {
-                iconView.setBackground(getDrawable(R.drawable.postoutline_red));
+                iconView.setBackground(getResources().getDrawable(R.drawable.postoutline_red));
             } else if (score >= 15) {
-                iconView.setBackground(getDrawable(R.drawable.postoutline_orangered));
+                iconView.setBackground(getResources().getDrawable(R.drawable.postoutline_orangered));
             } else if (score >= 10) {
-                iconView.setBackground(getDrawable(R.drawable.postoutline_orange));
+                iconView.setBackground(getResources().getDrawable(R.drawable.postoutline_orange));
             } else if (score >= 5) {
-                iconView.setBackground(getDrawable(R.drawable.postoutline_yelloworange));
+                iconView.setBackground(getResources().getDrawable(R.drawable.postoutline_yelloworange));
             } else if (score <= -5) {
-                iconView.setBackground(getDrawable(R.drawable.postoutline_brown));
+                iconView.setBackground(getResources().getDrawable(R.drawable.postoutline_brown));
             } else {
-                iconView.setBackground(getDrawable(R.drawable.postoutline_yellow));
+                iconView.setBackground(getResources().getDrawable(R.drawable.postoutline_yellow));
             }
 
             scoreView.setText(Integer.toString(score));
@@ -203,10 +203,10 @@ public class UserProfileActivity extends AppCompatActivity {
             binding.userProfileBackBtn.setVisibility(View.INVISIBLE);
 
             if (selectedDV != null) {
-                selectedDV.setBackground(getDrawable(R.drawable.pdv_background));
+                selectedDV.setBackground(getResources().getDrawable(R.drawable.pdv_background));
             }
             selectedDV = cl;
-            cl.setBackground(getDrawable(R.drawable.selected_pdv_background));
+            cl.setBackground(getResources().getDrawable(R.drawable.selected_pdv_background));
 
             if (userIsOnTheirOwnProfile) {
                 binding.userProfileDeletePostBtn.setVisibility(View.VISIBLE);
@@ -240,17 +240,17 @@ public class UserProfileActivity extends AppCompatActivity {
                                 db);
 
                         if (post.getScore() >= 20) {
-                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_red));
+                            binding.userProfilePostRV.setBackground(getResources().getDrawable(R.drawable.rounded_square_red));
                         } else if (post.getScore() >= 15) {
-                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_orangered));
+                            binding.userProfilePostRV.setBackground(getResources().getDrawable(R.drawable.rounded_square_orangered));
                         } else if (post.getScore() >= 10) {
-                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_orange));
+                            binding.userProfilePostRV.setBackground(getResources().getDrawable(R.drawable.rounded_square_orange));
                         } else if (post.getScore() >= 5) {
-                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_yelloworange));
+                            binding.userProfilePostRV.setBackground(getResources().getDrawable(R.drawable.rounded_square_yelloworange));
                         } else if (post.getScore() <= -5) {
-                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_brown));
+                            binding.userProfilePostRV.setBackground(getResources().getDrawable(R.drawable.rounded_square_brown));
                         } else {
-                            binding.userProfilePostRV.setBackground(getDrawable(R.drawable.rounded_square_yellow));
+                            binding.userProfilePostRV.setBackground(getResources().getDrawable(R.drawable.rounded_square_yellow));
                         }
 
                         binding.userProfilePostRV.setAdapter(postRvAdapter);

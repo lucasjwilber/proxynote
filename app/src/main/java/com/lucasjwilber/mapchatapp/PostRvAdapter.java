@@ -65,8 +65,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         user = FirebaseAuth.getInstance().getCurrentUser();
         SharedPreferences prefs = context.getSharedPreferences("proxyNotePrefs", Context.MODE_PRIVATE);
         distanceType = prefs.getString("distanceType", "imperial");
-        upArrowColored = context.getDrawable(R.drawable.arrow_up_colored);
-        downArrowColored = context.getDrawable(R.drawable.arrow_down_colored);
+        upArrowColored = context.getResources().getDrawable(R.drawable.arrow_up_colored);
+        downArrowColored = context.getResources().getDrawable(R.drawable.arrow_down_colored);
     }
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
@@ -216,21 +216,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     public void onVoteButtonClick(Button b) {
-//        if (user == null) {
-//            Utils.showToast(context, "You must be logged in to vote.");
-//        } else {
-//            //reload and check again first in case user logged out or verified their email while this RV is open
-//            user.reload()
-//                    .addOnSuccessListener(r -> {
-//                        if (user == null) {
-//                            Utils.showToast(context, "You must be logged in to vote.");
-//                        } else if (!user.isEmailVerified()) {
-//                            Utils.showToast(context, "Please verify your email first.");
-//                        } else {
-//                            castVote(b);
-//                        }
-//                    });
-//        }
         if (!Utils.isUserAuthorized()) {
             Utils.showToast(context, "Please log in or verify your email address.");
         } else {
@@ -259,32 +244,32 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             if (usersPreviousVote == -1) {
                 usersNewVote = 0;
                 scoreChange = 1;
-                downvoteButton.setBackground(context.getDrawable(R.drawable.arrow_down));
+                downvoteButton.setBackground(context.getResources().getDrawable(R.drawable.arrow_down));
             } else if (usersPreviousVote == 0) {
                 usersNewVote = -1;
                 scoreChange = -1;
-                downvoteButton.setBackground(context.getDrawable(R.drawable.arrow_down_colored));
+                downvoteButton.setBackground(context.getResources().getDrawable(R.drawable.arrow_down_colored));
             } else { //if (usersPreviousVote == 1)
                 usersNewVote = -1;
                 scoreChange = -2;
-                downvoteButton.setBackground(context.getDrawable(R.drawable.arrow_down_colored));
-                upvoteButton.setBackground(context.getDrawable(R.drawable.arrow_up));
+                downvoteButton.setBackground(context.getResources().getDrawable(R.drawable.arrow_down_colored));
+                upvoteButton.setBackground(context.getResources().getDrawable(R.drawable.arrow_up));
             }
         }
         if (b == upvoteButton) {
             if (usersPreviousVote == -1) {
                 usersNewVote = 1;
                 scoreChange = 2;
-                downvoteButton.setBackground(context.getDrawable(R.drawable.arrow_down));
-                upvoteButton.setBackground(context.getDrawable(R.drawable.arrow_up_colored));
+                downvoteButton.setBackground(context.getResources().getDrawable(R.drawable.arrow_down));
+                upvoteButton.setBackground(context.getResources().getDrawable(R.drawable.arrow_up_colored));
             } else if (usersPreviousVote == 0) {
                 usersNewVote = 1;
                 scoreChange = 1;
-                upvoteButton.setBackground(context.getDrawable(R.drawable.arrow_up_colored));
+                upvoteButton.setBackground(context.getResources().getDrawable(R.drawable.arrow_up_colored));
             } else { //if (usersPreviousVote == 1)
                 usersNewVote = 0;
                 scoreChange = -1;
-                upvoteButton.setBackground(context.getDrawable(R.drawable.arrow_up));
+                upvoteButton.setBackground(context.getResources().getDrawable(R.drawable.arrow_up));
             }
         }
 
@@ -378,12 +363,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                         }
                     });
         }
-//        if (!userIsAuthorized) {
-//            Utils.showToast(context, "Please log in or verify your email first.");
-//            //refresh in case they verify their email in the background
-//            userIsAuthorized = Utils.checkUserAuthorization();
-//            return;
-//        }
         Intent goToReportActivity = new Intent(context, ReportActivity.class);
         goToReportActivity.putExtra("postId", post.getId());
         goToReportActivity.putExtra("postUserId", post.getUserId());
@@ -396,24 +375,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     public void addCommentToPost(String commentText) {
-        Log.i(TAG, commentText);
-//        if (user == null) {
-//            Utils.showToast(context, "You must be logged in to comment.");
-//            return;
-//        } else if (!user.isEmailVerified()) {
-//            //reload and check again first
-//            user.reload()
-//                    .addOnSuccessListener(r -> {
-//                        if (!user.isEmailVerified()) {
-//                            Utils.showToast(context, "Please verify your email first.");
-//                            return;
-//                        }
-//                    });
-//        } else if (commentText.equals("") || commentText.length() == 0) {
-//            Utils.showToast(context, "Please write a comment first.");
-//            return;
-//        }
-
         if (!Utils.isUserAuthorized()) {
             Utils.showToast(context, "Please log in or verify your email first.");
             return;

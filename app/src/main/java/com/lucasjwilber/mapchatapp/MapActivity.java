@@ -47,7 +47,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         PopupMenu.OnMenuItemClickListener,
@@ -312,7 +311,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-//        SharedPreferences.Editor editor;
 
         switch (item.getItemId()) {
             case R.id.menuProfile:
@@ -619,17 +617,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                         postRv.setAdapter(postRvAdapter);
                         //set border color of this based on the post score
                         if (post.getScore() >= 20) {
-                            postRv.setBackground(getDrawable(R.drawable.rounded_square_red));
+                            postRv.setBackground(getResources().getDrawable(R.drawable.rounded_square_red));
                         } else if (post.getScore() >= 15) {
-                            postRv.setBackground(getDrawable(R.drawable.rounded_square_orangered));
+                            postRv.setBackground(getResources().getDrawable(R.drawable.rounded_square_orangered));
                         } else if (post.getScore() >= 10) {
-                            postRv.setBackground(getDrawable(R.drawable.rounded_square_orange));
+                            postRv.setBackground(getResources().getDrawable(R.drawable.rounded_square_orange));
                         } else if (post.getScore() >= 5) {
-                            postRv.setBackground(getDrawable(R.drawable.rounded_square_yelloworange));
+                            postRv.setBackground(getResources().getDrawable(R.drawable.rounded_square_yelloworange));
                         } else if (post.getScore() <= -5) {
-                            postRv.setBackground(getDrawable(R.drawable.rounded_square_brown));
+                            postRv.setBackground(getResources().getDrawable(R.drawable.rounded_square_brown));
                         } else {
-                            postRv.setBackground(getDrawable(R.drawable.rounded_square_yellow));
+                            postRv.setBackground(getResources().getDrawable(R.drawable.rounded_square_yellow));
                         }
                         binding.mapPostRvPB.setVisibility(View.GONE);
                     })
@@ -646,7 +644,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void toggleMarkerVisibility(View v) {
         areMarkersShown = !areMarkersShown;
         for (Marker marker : markerList) marker.setVisible(areMarkersShown);
-        v.setBackground(areMarkersShown ? getDrawable(R.drawable.visibility) : getDrawable(R.drawable.visibility_off));
+        v.setBackground(areMarkersShown ?
+                getResources().getDrawable(R.drawable.visibility) :
+                getResources().getDrawable(R.drawable.visibility_off));
     }
 
     public void refreshMapData(View v) {

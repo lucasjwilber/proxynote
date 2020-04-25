@@ -123,9 +123,9 @@ public class Utils {
     static Bitmap getPostIconBitmap(int code, Context context) {
         Drawable drawable;
         if (code < 0 || code > iconIds.length) {
-            drawable = context.getDrawable(R.drawable.posticon_default);
+            drawable = context.getResources().getDrawable(R.drawable.posticon_default);
         } else {
-            drawable = context.getDrawable(iconIds[code]);
+            drawable = context.getResources().getDrawable(iconIds[code]);
         }
         Canvas canvas = new Canvas();
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -137,7 +137,7 @@ public class Utils {
 
     //this is used primarily to get the post outlines and user-location pin
     static BitmapDescriptor getBitmapDescriptorFromSvg(int resourceId, Context context) {
-        Drawable drawable = context.getDrawable(resourceId);
+        Drawable drawable = context.getResources().getDrawable(resourceId);
         Canvas canvas = new Canvas();
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         canvas.setBitmap(bitmap);

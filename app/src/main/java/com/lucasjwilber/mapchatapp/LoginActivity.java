@@ -122,10 +122,7 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginShowLoginBtn.setTextColor(getResources().getColor(R.color.white));
         binding.loginShowSignupBtn.setTextColor(getResources().getColor(R.color.whiteOpaque));
         binding.loginSubmitBtn.setText(submitBtnText);
-//        binding.loginUsernameLabel.setVisibility(View.GONE);
         binding.loginUsernameET.setVisibility(View.GONE);
-//        binding.loginConfirmPasswordCLabel.setVisibility(View.GONE);
-//        binding.loginConfirmPasswordPLabel.setVisibility(View.GONE);
         binding.loginConfirmPasswordET.setVisibility(View.GONE);
     }
     public void signupButtonClicked(View v) {
@@ -134,10 +131,7 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginSubmitBtn.setText(submitBtnText);
         binding.loginShowSignupBtn.setTextColor(getResources().getColor(R.color.white));
         binding.loginShowLoginBtn.setTextColor(getResources().getColor(R.color.whiteOpaque));
-//        binding.loginUsernameLabel.setVisibility(View.VISIBLE);
         binding.loginUsernameET.setVisibility(View.VISIBLE);
-//        binding.loginConfirmPasswordCLabel.setVisibility(View.VISIBLE);
-//        binding.loginConfirmPasswordPLabel.setVisibility(View.VISIBLE);
         binding.loginConfirmPasswordET.setVisibility(View.VISIBLE);
     }
 
@@ -443,6 +437,5 @@ public class LoginActivity extends AppCompatActivity {
                     Utils.showToast(LoginActivity.this, "Error sending password reset email.");
                 });
     }
-
 
 }
