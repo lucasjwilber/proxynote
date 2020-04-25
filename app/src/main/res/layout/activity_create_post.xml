@@ -183,7 +183,7 @@
             android:layout_marginTop="8dp"
             android:background="@drawable/rounded_square_filled_accentcolor"
             android:onClick="createPost"
-            android:text="@string/post"
+            android:text="@string/done"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
             android:textStyle="bold"

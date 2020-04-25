@@ -325,7 +325,7 @@ public class Utils {
             increment = 10;
         }
 
-        while (leftCounter <= rightCounter) {
+        while (leftCounter <= rightCounter + increment) {
             while (bottomCounter <= top) {
                 //tinyZone by default
                 String zone = getTinyZone(bottomCounter, left);

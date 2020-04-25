@@ -4,12 +4,11 @@
         android:width="3dp"
         android:color="@color/colorAccent"
         />
+    <solid android:color="@color/lightgray" />
     <padding
         android:left="3dp"
         android:right="3dp"
         android:top="3dp"
-        android:bottom="3dp"
-        />
-
-    <corners android:radius="4dp" />
+        android:bottom="3dp" />
+    <corners android:radius="24dp" />
 </shape>

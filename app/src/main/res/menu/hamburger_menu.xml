@@ -7,7 +7,7 @@
     <item
         android:id="@+id/menuProfile"
         android:orderInCategory="0"
-        android:icon="@drawable/posticon_127881"
+        android:icon="@drawable/user_location_pin"
         android:title="@string/my_profile" />
 
     <item
