@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 
-import com.bumptech.glide.util.Util;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;

@@ -378,18 +378,19 @@ public class CreatePostActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == REQUEST_IMAGE_CAPTURE || requestCode == REQUEST_VIDEO_CAPTURE) {
+
             // If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
+            ) {
                 // permission granted:
-                if (ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.CAMERA)
-                        == PackageManager.PERMISSION_GRANTED) {
-
+//                if (ContextCompat.checkSelfPermission(this,
+//                        Manifest.permission.CAMERA)
+//                        == PackageManager.PERMISSION_GRANTED
+//                ) {
                     //launch camera
                     dispatchRecordMediaIntent(requestCode);
-                }
+//                }
             }
         }
     }
@@ -415,10 +416,11 @@ public class CreatePostActivity extends AppCompatActivity {
                     startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                 }
             }
+
         } else if (requestCode == REQUEST_VIDEO_CAPTURE) {
             Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-            if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
 
+            if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
                 // Create the File where the photo should go
                 try {
                     videoFile = createMediaFile(requestCode);

@@ -8,7 +8,9 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.MediaController;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
@@ -20,12 +22,17 @@ import com.lucasjwilber.mapchatapp.databinding.ActivityFullScreenMediaBinding;
 
 public class FullScreenMediaActivity extends AppCompatActivity {
     private ActivityFullScreenMediaBinding binding;
+    private VideoView vv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityFullScreenMediaBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        MediaController controller = new MediaController(this);
+        vv = binding.fullScreenVideo;
+        vv.setMediaController(controller);
 
         Intent intent = getIntent();
         String type = intent.getStringExtra("type");
@@ -45,7 +52,7 @@ public class FullScreenMediaActivity extends AppCompatActivity {
                     }
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                        binding.fullScreenPB.setVisibility(View.GONE);
+                        if (type.equals("image")) binding.fullScreenPB.setVisibility(View.GONE);
                         return false;
                     }
                 })
@@ -54,21 +61,15 @@ public class FullScreenMediaActivity extends AppCompatActivity {
         // if it's a video load it
         if (type.equals("video")) {
             Uri video = Uri.parse(url);
-            VideoView vv = binding.fullScreenVideo;
             vv.setVideoURI(video);
-            vv.setOnInfoListener((mp, what, extra) -> {
-                if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
+            vv.setVisibility(View.VISIBLE);
+            vv.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override public void onPrepared(MediaPlayer mp) {
                     binding.fullScreenPB.setVisibility(View.GONE);
-                    return true;
+                    binding.fullScreenImage.setVisibility(View.GONE);
+                    vv.start();
                 }
-                else if(what == MediaPlayer.MEDIA_INFO_BUFFERING_START){
-                    binding.fullScreenPB.setVisibility(View.VISIBLE);
-                    return true;
-                }
-                return false;
             });
-            binding.fullScreenPlayBtn.setVisibility(View.VISIBLE);
-            binding.fullScreenPB.setVisibility(View.GONE);
         }
     }
 
@@ -76,21 +77,4 @@ public class FullScreenMediaActivity extends AppCompatActivity {
         finish();
     }
 
-    public void onPlayVideoClicked(View v) {
-        VideoView vv = binding.fullScreenVideo;
-        binding.fullScreenImage.setVisibility(View.GONE);
-        vv.setVisibility(View.VISIBLE);
-        binding.fullScreenPlayBtn.setVisibility(View.GONE);
-        binding.fullScreenPauseBtn.setVisibility(View.VISIBLE);
-        vv.start();
-        vv.setOnCompletionListener(mp -> {
-            binding.fullScreenPauseBtn.setVisibility(View.GONE);
-            binding.fullScreenPlayBtn.setVisibility(View.VISIBLE);
-        });
-    }
-    public void onPauseVideoClicked(View v) {
-        binding.fullScreenPlayBtn.setVisibility(View.VISIBLE);
-        binding.fullScreenPauseBtn.setVisibility(View.GONE);
-        binding.fullScreenVideo.pause();
-    }
 }

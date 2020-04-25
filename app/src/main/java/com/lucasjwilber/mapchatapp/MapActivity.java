@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         PopupMenu.OnMenuItemClickListener,
@@ -230,7 +231,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(finalLat, finalLng)));
                     cameraBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
 
-                    setMapStyle(sharedPreferences.getInt("mapStyle", R.id.mapStyleCobalt));
+                    setMapStyle(sharedPreferences.getInt("mapStyle", R.id.mapStyleDarkGray));
                     mMap.setMinZoomPreference(5f);
 
                     if (userMarker != null) userMarker.remove();
@@ -365,16 +366,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             case R.id.mapStyleSatellite:
                 return setMapStyle(item.getItemId());
 
-            //distance types
-//            case R.id.distanceTypeImperial:
-//                editor = sharedPreferences.edit().putString("distanceType", "imperial");
-//                editor.apply();
-//                return true;
-//            case R.id.distanceTypeMetric:
-//                editor = sharedPreferences.edit().putString("distanceType", "metric");
-//                editor.apply();
-//                return true;
-
             default:
                 return false;
         }
@@ -413,6 +404,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     Log.e(TAG, "Can't find style. Error: ", e);
                 }
                 return true;
+            default:
             case R.id.mapStyleDarkGray:
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 try {
@@ -423,7 +415,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     Log.e(TAG, "Can't find style. Error: ", e);
                 }
                 return true;
-            default:
             case R.id.mapStyleCobalt:
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 try {
@@ -490,7 +481,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
             binding.mapRefreshPostsBtn.setVisibility(View.GONE);
             binding.mapRefreshPostsPB.setVisibility(View.VISIBLE);
         }
-        int totalQueryLimit = 50;
+        int totalQueryLimit = 30;
 
         int postsPerZoneLimit = 1 + ( (int) Math.ceil(totalQueryLimit / allZonesOnScreen.size()));
         String zoneType = Utils.getZoneType(cameraBounds);

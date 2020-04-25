@@ -148,12 +148,12 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                     Glide.with(parent)
                             .load(post.getImageUrl() != null ? post.getImageUrl() : post.getVideoThumbnailUrl())
                             .thumbnail(.25f)
+                            .centerCrop()
                             .into(postImage);
 
-                    if (post.getVideoUrl() != null) {
+                    if (post.getVideoUrl() != null || post.getVideoThumbnailUrl() != null) {
                         ImageView videoIndicator = l.findViewById(R.id.postRvVideoIndicator);
                         videoIndicator.setVisibility(View.VISIBLE);
-                        Log.i(TAG, "should be showing the opaque video icon");
                     }
 
                     String type = post.getImageUrl() != null ? "image" : "video";

@@ -31,34 +31,6 @@
         tools:visibility="visible" />
 
     <Button
-        android:id="@+id/fullScreenPlayBtn"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginBottom="20dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:drawableTop="@drawable/play_circle_outline"
-        android:onClick="onPlayVideoClicked"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible" />
-
-    <Button
-        android:id="@+id/fullScreenPauseBtn"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginBottom="20dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:drawableTop="@drawable/pause_circle_outline"
-        android:onClick="onPauseVideoClicked"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible" />
-
-    <Button
         android:id="@+id/fullScreenBackBtn"
         android:layout_width="35dp"
         android:layout_height="35dp"
