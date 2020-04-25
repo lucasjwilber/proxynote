@@ -77,7 +77,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private ImageView selectedIconView;
     private boolean iconSelected;
     private int selectedPosition;
-    private ProgressBar loadingSpinner;
+    private ProgressBar progressBar;
     private String postAndImageId;
     private File photoFile = null;
     private File videoFile = null;
@@ -93,7 +93,7 @@ public class CreatePostActivity extends AppCompatActivity {
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         storageRef = storage.getReference();
-        loadingSpinner = findViewById(R.id.createPost_PB);
+        progressBar = findViewById(R.id.createPost_PB);
 
         RecyclerView iconRv = findViewById(R.id.createPostIconsRV);
         LinearLayoutManager horizontalLayout = new LinearLayoutManager(
@@ -121,9 +121,8 @@ public class CreatePostActivity extends AppCompatActivity {
             return;
         }
 
-        loadingSpinner.setVisibility(View.VISIBLE);
-
-        Utils.showToast(CreatePostActivity.this, "Creating post...");
+        progressBar.setVisibility(View.VISIBLE);
+        binding.createPostUploadingModal.setVisibility(View.VISIBLE);
 
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(CreatePostActivity.this);
         fusedLocationClient.getLastLocation()
@@ -135,6 +134,7 @@ public class CreatePostActivity extends AppCompatActivity {
                         userLat = location.getLatitude();
                         userLng = location.getLongitude();
 
+                        //network requires async
                         AsyncTask.execute(() -> {
                             try {
                                 URL url = new URL(getResources().getString(R.string.formatted_address_url) +
@@ -145,6 +145,15 @@ public class CreatePostActivity extends AppCompatActivity {
                                 String formattedAddress = in.readLine();
                                 in.close();
                                 con.disconnect();
+
+                                //since this is async it can't touch views, so create a handler to update the message text
+                                Handler handler = new Handler(Looper.getMainLooper()) {
+                                    @Override
+                                    public void handleMessage(@NonNull Message msg) {
+                                        binding.createPostUploadingMessage.setText(R.string.creating_post);
+                                    }
+                                };
+                                handler.obtainMessage().sendToTarget();
 
                                 new Thread(new Runnable() {
                                     @Override
@@ -177,36 +186,41 @@ public class CreatePostActivity extends AppCompatActivity {
 
                             } catch (MalformedURLException e) {
                                 Log.e(TAG, "malformedURLexception:\n" + e.toString());
+                                hideUploadingModal("Something went wrong.");
                             } catch (ProtocolException e) {
                                 Log.e(TAG, "protocol exception:\n" + e.toString());
+                                hideUploadingModal("Something went wrong.");
                             } catch (IOException e) {
                                 Log.e(TAG, "IO exception:\n" + e.toString());
+                                hideUploadingModal("Something went wrong.");
                             }
 
                         });
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Utils.showToast(CreatePostActivity.this, "Unable to get your location.");
+                    hideUploadingModal("Unable to get your location.");
                     Log.e(TAG, "failed getting location: " + e.toString());
                 });
     }
 
     private void uploadMediaThenPost(Post post) throws IOException {
-        Handler handler = new Handler(Looper.getMainLooper()) {
-            @Override
-            public void handleMessage(@NonNull Message msg) {
-                String message = currentImage != null ? "Uploading image..." : "Uploading video...";
-                Utils.showToast(CreatePostActivity.this, message);
-            }
-        };
-        handler.obtainMessage().sendToTarget();
+//        Handler handler = new Handler(Looper.getMainLooper()) {
+//            @Override
+//            public void handleMessage(@NonNull Message msg) {
+//                String message = currentImage != null ? "Uploading image..." : "Uploading video...";
+//                Utils.showToast(CreatePostActivity.this, message);
+//            }
+//        };
+//        handler.obtainMessage().sendToTarget();
 
         StorageReference mediaRef = storageRef.child(postAndImageId);
         post.setMediaStorageId(postAndImageId);
 
         //  UPLOAD IMAGE //
         if (currentImage != null) {
+            binding.createPostUploadingMessage.setText(R.string.uploading_image);
+
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             currentImage.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, baos);
             byte[] imageData = baos.toByteArray();
@@ -219,17 +233,16 @@ public class CreatePostActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "error: " + e.toString());
-                    Utils.showToast(CreatePostActivity.this, "Error uploading image.");
-                    binding.createPostPB.setVisibility(View.GONE);
+                    hideUploadingModal("Error uploading image.");
             });
             }).addOnFailureListener(failure -> {
                 Log.e(TAG, "failure! :" + failure.toString());
-                Utils.showToast(CreatePostActivity.this, "Error uploading image.");
-                binding.createPostPB.setVisibility(View.GONE);
+                hideUploadingModal("Error uploading image.");
             });
 
         // UPLOAD VIDEO //
         } else {
+            binding.createPostUploadingMessage.setText(R.string.uploading_video);
 
             //temp file to transcode the video into, then upload
             File transcodedVideoFile = File.createTempFile(
@@ -264,20 +277,17 @@ public class CreatePostActivity extends AppCompatActivity {
                                                 })
                                                 .addOnFailureListener(e -> {
                                                     Log.e(TAG, "error getting video thumbnail: " + e.toString());
-                                                    Utils.showToast(CreatePostActivity.this, "Error uploading video.");
-                                                    binding.createPostPB.setVisibility(View.GONE);
+                                                    hideUploadingModal("Error uploading video.");
                                                 });
                                     });
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e(TAG, "error: " + e.toString());
-                                    Utils.showToast(CreatePostActivity.this, "Error uploading video.");
-                                    binding.createPostPB.setVisibility(View.GONE);
+                                    hideUploadingModal("Error uploading video.");
                                 });
                             }).addOnFailureListener(failure -> {
                                 Log.e(TAG, "failure! :" + failure.toString());
-                                Utils.showToast(CreatePostActivity.this, "Error uploading video.");
-                                binding.createPostPB.setVisibility(View.GONE);
+                                hideUploadingModal("Error uploading video.");
                             });
                         }
                         public void onTranscodeCanceled() {}
@@ -287,6 +297,8 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     public void uploadPost(Post post) {
+        binding.createPostUploadingMessage.setText(R.string.uploading_post);
+
         db.collection("posts")
                 .document(post.getId())
                 .set(post)
@@ -314,29 +326,27 @@ public class CreatePostActivity extends AppCompatActivity {
                                             .update("postDescriptors", postDescriptors,
                                                     "totalScore", user.getTotalScore() + 1)
                                             .addOnSuccessListener(result2 -> {
-                                                loadingSpinner.setVisibility(View.GONE);
+                                                progressBar.setVisibility(View.GONE);
                                             })
                                             .addOnFailureListener(e -> {
                                                 Log.e(TAG, "Error updating user's post descriptors list " + e);
-                                                loadingSpinner.setVisibility(View.GONE);
-                                                Utils.showToast(CreatePostActivity.this, "Error uploading post.");
+                                                hideUploadingModal("Error uploading post.");
                                             });
                                 }
 
                             })
                             .addOnFailureListener(e -> {
                                 Log.e(TAG, "Error getting user: " + e);
-                                loadingSpinner.setVisibility(View.GONE);
-                                Utils.showToast(CreatePostActivity.this, "Error uploading post.");
+                                hideUploadingModal("Error uploading post.");
                             });
 
+                    Utils.showToast(this, "Post created!");
                     finish();
 
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error adding post to db: " + e);
-                    loadingSpinner.setVisibility(View.GONE);
-                    Utils.showToast(CreatePostActivity.this, "Error uploading post.");
+                    hideUploadingModal("Error uploading post.");
                 });
     }
 
@@ -575,6 +585,12 @@ public class CreatePostActivity extends AppCompatActivity {
 
     public void onBackButtonClicked(View v) {
         finish();
+    }
+
+    private void hideUploadingModal(String message) {
+        binding.createPostUploadingModal.setVisibility(View.GONE);
+        binding.createPostPB.setVisibility(View.GONE);
+        Utils.showToast(CreatePostActivity.this, message);
     }
 
 }
