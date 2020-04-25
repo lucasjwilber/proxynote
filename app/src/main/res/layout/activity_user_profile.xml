@@ -6,6 +6,7 @@
     android:id="@+id/userProfileLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:background="@color/lightgray"
     tools:context=".UserProfileActivity">
 
@@ -49,10 +50,8 @@
         android:background="@drawable/user_profile_pdv_rv_background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userProfileAboutMeLayout"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/userProfileAboutMeLayout" />
 
     <ProgressBar
         android:id="@+id/userProfilePostDescriptorsRvPB"
@@ -140,7 +139,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/userProfilePostButtonsContainer"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/userProfilePostRV"
@@ -170,11 +169,10 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/userProfileDeletePostModal"
-            android:layout_width="354dp"
-            android:layout_height="211dp"
-            android:layout_margin="25dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/rounded_square_black_lightgrayfill"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:animateLayoutChanges="true"
+            android:background="@color/darkgray"
             android:clickable="true"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
@@ -189,6 +187,8 @@
                 android:layout_height="wrap_content"
                 android:text="@string/confirm_delete"
                 android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -200,7 +200,7 @@
                 android:id="@+id/uerProfileYesDeleteBtn"
                 android:layout_width="60dp"
                 android:layout_height="30dp"
-                android:layout_marginStart="40dp"
+                android:layout_marginStart="60dp"
                 android:background="@drawable/rounded_square_accentcolor"
                 android:onClick="yesDelete"
                 android:text="@string/yes"
@@ -215,7 +215,7 @@
                 android:id="@+id/userProfileNoDeleteBtn"
                 android:layout_width="60dp"
                 android:layout_height="30dp"
-                android:layout_marginEnd="40dp"
+                android:layout_marginEnd="60dp"
                 android:background="@drawable/rounded_square_accentcolor"
                 android:onClick="noDelete"
                 android:text="@string/no"
