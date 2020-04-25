@@ -62,13 +62,13 @@ public class FullScreenMediaActivity extends AppCompatActivity {
             Uri video = Uri.parse(url);
             vv.setVideoURI(video);
             vv.setVisibility(View.VISIBLE);
-            vv.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override public void onPrepared(MediaPlayer mp) {
-                    binding.fullScreenPB.setVisibility(View.GONE);
-                    binding.fullScreenImage.setVisibility(View.GONE);
-                    vv.start();
-                }
+            vv.setOnPreparedListener(mp -> {
+                binding.fullScreenPB.setVisibility(View.GONE);
+                binding.fullScreenImage.setVisibility(View.GONE);
+                vv.start();
             });
+            //loop video
+            vv.setOnCompletionListener(mp -> vv.start());
         }
     }
 

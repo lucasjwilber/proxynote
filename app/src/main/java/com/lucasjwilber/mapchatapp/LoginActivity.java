@@ -124,6 +124,7 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginSubmitBtn.setText(submitBtnText);
         binding.loginUsernameET.setVisibility(View.GONE);
         binding.loginConfirmPasswordET.setVisibility(View.GONE);
+        binding.loginForgotPwBtn.setVisibility(View.VISIBLE);
     }
     public void signupButtonClicked(View v) {
         loginShown = false;
@@ -133,6 +134,7 @@ public class LoginActivity extends AppCompatActivity {
         binding.loginShowLoginBtn.setTextColor(getResources().getColor(R.color.whiteOpaque));
         binding.loginUsernameET.setVisibility(View.VISIBLE);
         binding.loginConfirmPasswordET.setVisibility(View.VISIBLE);
+        binding.loginForgotPwBtn.setVisibility(View.GONE);
     }
 
     public void onSubmitButtonClicked(View v) {
@@ -320,7 +322,7 @@ public class LoginActivity extends AppCompatActivity {
 
         //clear any previously used facebook token:
         AccessToken.setCurrentAccessToken(null);
-        
+
         signInWithCredential(credential, "google");
     }
 

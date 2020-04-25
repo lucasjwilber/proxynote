@@ -407,6 +407,8 @@ public class UserProfileActivity extends AppCompatActivity {
         binding.userProfileAboutMeLayout.setVisibility(View.VISIBLE);
         binding.userProfileAboutMeEditBtn.setVisibility(userIsOnTheirOwnProfile ? View.VISIBLE : View.GONE);
         binding.userProfileBackBtn.setVisibility(View.VISIBLE);
+        binding.userProfileBackBtn.setVisibility(View.VISIBLE);
+        binding.userProfileDeletePostModal.setVisibility(View.GONE);
     }
 
     public void onBackButtonClicked(View v) {
