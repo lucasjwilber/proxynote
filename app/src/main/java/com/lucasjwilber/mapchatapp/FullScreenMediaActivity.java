@@ -51,7 +51,7 @@ public class FullScreenMediaActivity extends AppCompatActivity {
                 })
                 .into(binding.fullScreenImage);
 
-        // if it's a video load the video
+        // if it's a video load it
         if (type.equals("video")) {
             Uri video = Uri.parse(url);
             VideoView vv = binding.fullScreenVideo;

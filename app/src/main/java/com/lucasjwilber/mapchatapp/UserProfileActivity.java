@@ -199,15 +199,14 @@ public class UserProfileActivity extends AppCompatActivity {
             binding.userProfilePostRvPB.setVisibility(View.VISIBLE);
 
             binding.userProfileAboutMeLayout.setVisibility(View.INVISIBLE);
-            binding.userProfilePostsLabel.setVisibility(View.INVISIBLE);
             binding.userProfileAboutMeEditBtn.setVisibility(View.INVISIBLE);
             binding.userProfileBackBtn.setVisibility(View.INVISIBLE);
 
             if (selectedDV != null) {
-                selectedDV.setBackgroundColor(getResources().getColor(R.color.white));
+                selectedDV.setBackground(getDrawable(R.drawable.pdv_background));
             }
             selectedDV = cl;
-            cl.setBackgroundColor(getResources().getColor(R.color.lightgray));
+            cl.setBackground(getDrawable(R.drawable.selected_pdv_background));
 
             if (userIsOnTheirOwnProfile) {
                 binding.userProfileDeletePostBtn.setVisibility(View.VISIBLE);
@@ -408,7 +407,6 @@ public class UserProfileActivity extends AppCompatActivity {
         binding.userProfileAboutMeLayout.setVisibility(View.VISIBLE);
         binding.userProfileAboutMeEditBtn.setVisibility(userIsOnTheirOwnProfile ? View.VISIBLE : View.GONE);
         binding.userProfileBackBtn.setVisibility(View.VISIBLE);
-        binding.userProfilePostsLabel.setVisibility(View.VISIBLE);
     }
 
     public void onBackButtonClicked(View v) {

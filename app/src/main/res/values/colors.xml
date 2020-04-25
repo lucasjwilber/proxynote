@@ -13,6 +13,7 @@
     <color name="white">#ffffff</color>
     <color name="whiteOpaque">#85ffffff</color>
     <color name="lightgray">#e0e0e0</color>
+    <color name="selectedPDVgray">#c0c0c0</color>
     <color name="gray">#878787</color>
     <color name="darkgray">#444444</color>
 </resources>

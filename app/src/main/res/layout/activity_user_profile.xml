@@ -45,11 +45,8 @@
         android:id="@+id/userProfilePostDescriptorsRV"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="42dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/rounded_square_black"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/user_profile_pdv_rv_background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -143,7 +140,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/userProfilePostButtonsContainer"
-        tools:visibility="visible">
+        tools:visibility="gone">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/userProfilePostRV"
@@ -233,14 +230,6 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
-        android:id="@+id/userProfilePostsLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/posts"
-        app:layout_constraintBottom_toTopOf="@+id/userProfilePostDescriptorsRV"
-        app:layout_constraintStart_toStartOf="@+id/userProfilePostDescriptorsRV" />
-
-    <TextView
         android:id="@+id/userProfileNoCommentsYet"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -267,11 +256,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/userProfileAboutMeLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="60dp"
+        android:layout_width="312dp"
+        android:layout_height="63dp"
+        android:layout_marginTop="24dp"
         android:paddingBottom="6dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -283,22 +270,29 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
             android:layout_marginTop="6dp"
+            android:layout_marginEnd="6dp"
             android:textColor="@color/darkgray"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/userProfileAboutMeET" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/userProfileAboutMeET"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="1dp"
             android:background="@drawable/rounded_square_black"
             android:imeOptions="actionDone"
-            android:inputType="textPersonName"
+            android:inputType="textMultiLine"
+            android:maxLines="3"
             android:maxLength="120"
+            android:textAlignment="textStart"
             android:textSize="16sp"
             android:visibility="gone"
+            android:hint="@string/about_me"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -316,7 +310,6 @@
         android:textColor="@color/colorAccent"
         android:textSize="12sp"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/userProfileAboutMeLayout"
         app:layout_constraintEnd_toStartOf="@+id/userProfileAboutMeLayout"
         app:layout_constraintTop_toTopOf="@+id/userProfileAboutMeLayout"
         tools:visibility="visible" />
