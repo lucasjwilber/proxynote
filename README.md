@@ -2,12 +2,13 @@
 Share what you see! Leave notes, images, and videos on a map for others to see and vote on.
 
 ## Built With
-* Firebase Auth
+* Firebase Auth + Google and Facebook OAuth
 * Firestore Database
 * Firebase Storage
 * Firebase Cloud Functions
 * Glide (https://github.com/bumptech/glide)
 * Transcoder (https://github.com/natario1/Transcoder)
+* Google Maps and Geocode APIs
 
 ## Author
 Lucas Wilber

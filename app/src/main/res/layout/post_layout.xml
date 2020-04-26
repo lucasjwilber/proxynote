@@ -10,13 +10,14 @@
         android:id="@+id/postRvUsername"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:text="@string/username"
         android:textAlignment="viewStart"
         android:textColor="@color/colorAccent"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/postRvHeaderReportBtn"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/postRvHeaderVoteUpBtn"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="username" />
 
@@ -24,11 +25,13 @@
         android:id="@+id/postRvTimeAndPlace"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="8dp"
         android:textAlignment="viewStart"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/postRvHeaderVoteUpBtn"
         app:layout_constraintTop_toBottomOf="@+id/postRvUsername" />
 
     <Button
@@ -48,8 +51,8 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:background="@drawable/arrow_up"
-        app:layout_constraintStart_toStartOf="@+id/postRvUsername"
-        app:layout_constraintTop_toBottomOf="@+id/postRvTimeAndPlace" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/postRvHeaderScore"
@@ -68,7 +71,6 @@
         android:layout_height="30dp"
         android:background="@drawable/arrow_down"
         app:layout_constraintEnd_toEndOf="@+id/postRvHeaderVoteUpBtn"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/postRvHeaderVoteUpBtn"
         app:layout_constraintTop_toBottomOf="@+id/postRvHeaderScore" />
 
@@ -76,16 +78,15 @@
         android:id="@+id/postRvHeaderTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="30dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
         android:text="@string/title"
         android:textAlignment="center"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/postRvHeaderVoteDownBtn"
         app:layout_constraintEnd_toEndOf="@+id/postRvHeaderReportBtn"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/postRvHeaderVoteUpBtn"
-        app:layout_constraintTop_toBottomOf="@+id/postRvTimeAndPlace" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/postRvHeaderVoteDownBtn" />
 
     <ImageView
         android:id="@+id/postRvPostImage"
@@ -94,7 +95,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/postRvHeaderVoteDownBtn"
+        app:layout_constraintTop_toBottomOf="@+id/postRvHeaderTitle"
         tools:visibility="visible" />
 
     <ImageView

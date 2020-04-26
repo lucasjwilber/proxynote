@@ -24,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -47,6 +48,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private ProgressBar replyLoadingSpinner;
     private static final int POST_HEADER = 0;
     private static final int POST_COMMENT = 1;
+    private long timeOfLastComment;
 
     PostRvAdapter(
             Post post,
@@ -67,6 +69,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         distanceType = prefs.getString("distanceType", "imperial");
         upArrowColored = context.getResources().getDrawable(R.drawable.arrow_up_colored);
         downArrowColored = context.getResources().getDrawable(R.drawable.arrow_down_colored);
+        timeOfLastComment = new Date().getTime() - 2000;
     }
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
@@ -231,8 +234,6 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         int currentScore = post.getScore();
         HashMap<String, Integer> voteMap = post.getVotes();
 
-        Log.i(TAG, "votemap = " + voteMap.toString());
-
         if (voteMap.containsKey(currentUserId)) {
             usersPreviousVote = voteMap.get(currentUserId);
         }
@@ -381,7 +382,13 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         } else if (commentText.equals("") || commentText.length() == 0) {
             Utils.showToast(context, "Please write a comment first.");
             return;
+        //2 second cooldown between comments
+        } else if (!(new Date().getTime() > timeOfLastComment + 2000)) {
+            Utils.showToast(context, "You're commenting too fast");
+            return;
         }
+        
+        timeOfLastComment = new Date().getTime();
         replyLoadingSpinner.setVisibility(View.VISIBLE);
 
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
