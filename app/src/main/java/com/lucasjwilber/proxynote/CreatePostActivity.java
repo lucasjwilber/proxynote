@@ -205,15 +205,6 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     private void uploadMediaThenPost(Post post) throws IOException {
-//        Handler handler = new Handler(Looper.getMainLooper()) {
-//            @Override
-//            public void handleMessage(@NonNull Message msg) {
-//                String message = currentImage != null ? "Uploading image..." : "Uploading video...";
-//                Utils.showToast(CreatePostActivity.this, message);
-//            }
-//        };
-//        handler.obtainMessage().sendToTarget();
-
         StorageReference mediaRef = storageRef.child(postAndImageId);
         post.setMediaStorageId(postAndImageId);
 
@@ -392,14 +383,8 @@ public class CreatePostActivity extends AppCompatActivity {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED
             ) {
-                // permission granted:
-//                if (ContextCompat.checkSelfPermission(this,
-//                        Manifest.permission.CAMERA)
-//                        == PackageManager.PERMISSION_GRANTED
-//                ) {
-                    //launch camera
-                    dispatchRecordMediaIntent(requestCode);
-//                }
+                //launch camera
+                dispatchRecordMediaIntent(requestCode);
             }
         }
     }
@@ -410,7 +395,6 @@ public class CreatePostActivity extends AppCompatActivity {
             // Ensure that there's a camera activity to handle the intent
             if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
                 // Create the File where the photo should go
-//                File photoFile = null;
                 try {
                     photoFile = createMediaFile(requestCode);
                 } catch (IOException ex) {
