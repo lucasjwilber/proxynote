@@ -556,7 +556,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 holder.imageView.setBackground(null);
             }
             if (iconSelected && selectedPosition == position) {
-                holder.imageView.setBackground(getResources().getDrawable(R.drawable.postoutline_accent));
+                holder.imageView.setBackground(getResources().getDrawable(R.drawable.postoutline_yellow));
             }
             holder.imageView.setTag(position);
         }
