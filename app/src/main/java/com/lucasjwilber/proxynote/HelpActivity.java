@@ -1,4 +1,4 @@
-package com.lucasjwilber.mapchatapp;
+package com.lucasjwilber.proxynote;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,7 +20,7 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.lucasjwilber.mapchatapp.databinding.ActivityHelpBinding;
+import com.lucasjwilber.proxynote.databinding.ActivityHelpBinding;
 
 public class HelpActivity extends AppCompatActivity {
 

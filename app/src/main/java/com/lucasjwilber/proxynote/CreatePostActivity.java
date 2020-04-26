@@ -1,4 +1,4 @@
-package com.lucasjwilber.mapchatapp;
+package com.lucasjwilber.proxynote;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,7 +40,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.lucasjwilber.mapchatapp.databinding.ActivityCreatePostBinding;
+import com.lucasjwilber.proxynote.databinding.ActivityCreatePostBinding;
 import com.otaliastudios.transcoder.Transcoder;
 import com.otaliastudios.transcoder.TranscoderListener;
 
@@ -419,7 +419,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 // Continue only if the File was successfully created
                 if (photoFile != null) {
                     Uri photoURI = FileProvider.getUriForFile(this,
-                            "com.lucasjwilber.mapchatapp.fileprovider",
+                            "com.lucasjwilber.proxynote.fileprovider",
                             photoFile);
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                     startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -439,7 +439,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 // Continue only if the File was successfully created
                 if (videoFile != null) {
                     Uri videoURI = FileProvider.getUriForFile(this,
-                            "com.lucasjwilber.mapchatapp.fileprovider",
+                            "com.lucasjwilber.proxynote.fileprovider",
                             videoFile);
                     takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoURI);
                     takeVideoIntent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, MAX_VIDEO_DURATION);

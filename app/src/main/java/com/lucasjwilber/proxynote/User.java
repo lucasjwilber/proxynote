@@ -1,4 +1,4 @@
-package com.lucasjwilber.mapchatapp;
+package com.lucasjwilber.proxynote;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -15,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.lucasjwilber.mapchatapp"
+        applicationId "com.lucasjwilber.proxynote"
 //        min 21 for nav bar coloring, 23 for ImageView.setForegroundDrawable
         minSdkVersion 18
         targetSdkVersion 29

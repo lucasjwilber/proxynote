@@ -1,4 +1,4 @@
-package com.lucasjwilber.mapchatapp;
+package com.lucasjwilber.proxynote;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -30,7 +30,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.lucasjwilber.mapchatapp.databinding.ActivityLoginBinding;
+import com.lucasjwilber.proxynote.databinding.ActivityLoginBinding;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -295,7 +295,8 @@ public class LoginActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
+                binding.loginPB.setVisibility(View.GONE);
+                Utils.showToast(LoginActivity.this, "Google sign in failed");
                 Log.e(TAG, "Google sign in failed", e);
             }
         } else {

@@ -1,11 +1,10 @@
-package com.lucasjwilber.mapchatapp;
+package com.lucasjwilber.proxynote;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -17,7 +16,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.lucasjwilber.mapchatapp.databinding.ActivityFullScreenMediaBinding;
+import com.lucasjwilber.proxynote.databinding.ActivityFullScreenMediaBinding;
 
 public class FullScreenMediaActivity extends AppCompatActivity {
     private ActivityFullScreenMediaBinding binding;

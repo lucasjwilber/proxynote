@@ -1,4 +1,4 @@
-package com.lucasjwilber.mapchatapp;
+package com.lucasjwilber.proxynote;
 
 import android.content.Context;
 import android.content.SharedPreferences;

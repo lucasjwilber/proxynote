@@ -1,4 +1,4 @@
-package com.lucasjwilber.mapchatapp;
+package com.lucasjwilber.proxynote;
 
 public class Report {
     //the id format is "[post/comment id]|[reporting user id]",

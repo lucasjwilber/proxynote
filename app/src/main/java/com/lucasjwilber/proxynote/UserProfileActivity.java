@@ -1,4 +1,4 @@
-package com.lucasjwilber.mapchatapp;
+package com.lucasjwilber.proxynote;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -23,7 +23,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.lucasjwilber.mapchatapp.databinding.ActivityUserProfileBinding;
+import com.lucasjwilber.proxynote.databinding.ActivityUserProfileBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

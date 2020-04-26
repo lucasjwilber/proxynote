@@ -1,4 +1,4 @@
-package com.lucasjwilber.mapchatapp;
+package com.lucasjwilber.proxynote;
 
 // the purpose of this class is to provide a link between posts and users without nesting all posts in users.
 // it also keeps queries that populate user profile recyclerviews much more lightweight.

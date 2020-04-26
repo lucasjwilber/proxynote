@@ -1,4 +1,4 @@
-package com.lucasjwilber.mapchatapp;
+package com.lucasjwilber.proxynote;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -41,7 +41,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.lucasjwilber.mapchatapp.databinding.ActivityMapBinding;
+import com.lucasjwilber.proxynote.databinding.ActivityMapBinding;
 
 import java.util.ArrayList;
 import java.util.Arrays;
