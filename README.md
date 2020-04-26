@@ -1,5 +1,5 @@
-# ProxyNote
-Share what you see! Leave notes, images, and videos on a map for others to see and vote on.
+# ![ProxyNote logo](/app/src/main/res/drawable/logo_pink.png) ProxyNote
+Share what you see! Leave notes, images, and videos on a map for others to see, vote, and comment on.
 
 ## Built With
 * Firebase Auth + Google and Facebook OAuth
