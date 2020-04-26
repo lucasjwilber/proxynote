@@ -11,6 +11,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
         android:text="@string/username"
         android:textAlignment="viewStart"
@@ -49,7 +50,7 @@
     <Button
         android:id="@+id/postRvHeaderVoteUpBtn"
         android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_height="23dp"
         android:background="@drawable/arrow_up"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -68,7 +69,7 @@
     <Button
         android:id="@+id/postRvHeaderVoteDownBtn"
         android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_height="23dp"
         android:background="@drawable/arrow_down"
         app:layout_constraintEnd_toEndOf="@+id/postRvHeaderVoteUpBtn"
         app:layout_constraintStart_toStartOf="@+id/postRvHeaderVoteUpBtn"
@@ -92,6 +93,7 @@
         android:id="@+id/postRvPostImage"
         android:layout_width="0dp"
         android:layout_height="200dp"
+        android:layout_marginTop="5dp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -102,12 +104,12 @@
         android:id="@+id/postRvVideoIndicator"
         android:layout_width="55dp"
         android:layout_height="55dp"
+        android:foreground="@drawable/video_opaque"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/postRvPostImage"
         app:layout_constraintEnd_toEndOf="@+id/postRvPostImage"
         app:layout_constraintStart_toStartOf="@+id/postRvPostImage"
-        app:layout_constraintTop_toTopOf="@+id/postRvPostImage"
-        app:srcCompat="@drawable/video_opaque" />
+        app:layout_constraintTop_toTopOf="@+id/postRvPostImage" />
 
     <TextView
         android:id="@+id/postRvPostText"
@@ -128,9 +130,8 @@
         android:id="@+id/postRvPostReplyBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="45dp"
-        android:paddingBottom="12dp"
         android:background="@drawable/rounded_square_black"
         android:gravity="top|start"
         android:hint="@string/add_a_comment"
@@ -138,6 +139,7 @@
         android:inputType="textMultiLine"
         android:lines="2"
         android:maxLength="300"
+        android:paddingBottom="12dp"
         android:textAlignment="viewStart"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
