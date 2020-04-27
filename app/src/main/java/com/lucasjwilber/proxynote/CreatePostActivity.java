@@ -77,7 +77,6 @@ public class CreatePostActivity extends AppCompatActivity {
     private ImageView selectedIconView;
     private boolean iconSelected;
     private int selectedPosition;
-    private ProgressBar progressBar;
     private String postAndImageId;
     private File photoFile = null;
     private File videoFile = null;
@@ -91,9 +90,17 @@ public class CreatePostActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
-
         storageRef = storage.getReference();
-        progressBar = findViewById(R.id.createPost_PB);
+
+        binding.createPostTitleET.addTextChangedListener(Utils.makeTextWatcher(
+                binding.createPostTitleET,
+                binding.createPostTitleETcounter,
+                60));
+
+        binding.createPostTextET.addTextChangedListener(Utils.makeTextWatcher(
+                binding.createPostTextET,
+                binding.createPostTextETcounter,
+                250));
 
         RecyclerView iconRv = findViewById(R.id.createPostIconsRV);
         LinearLayoutManager horizontalLayout = new LinearLayoutManager(
@@ -121,7 +128,7 @@ public class CreatePostActivity extends AppCompatActivity {
             return;
         }
 
-        progressBar.setVisibility(View.VISIBLE);
+        binding.createPostPB.setVisibility(View.VISIBLE);
         binding.createPostUploadingModal.setVisibility(View.VISIBLE);
 
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(CreatePostActivity.this);
@@ -317,7 +324,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                             .update("postDescriptors", postDescriptors,
                                                     "totalScore", user.getTotalScore() + 1)
                                             .addOnSuccessListener(result2 -> {
-                                                progressBar.setVisibility(View.GONE);
+                                                binding.createPostPB.setVisibility(View.GONE);
                                             })
                                             .addOnFailureListener(e -> {
                                                 Log.e(TAG, "Error updating user's post descriptors list " + e);

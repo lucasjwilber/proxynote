@@ -229,6 +229,7 @@
                 app:layout_constraintStart_toStartOf="@+id/textView2"
                 app:layout_constraintTop_toBottomOf="@+id/textView2"
                 tools:text="No" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -268,7 +269,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/userProfileHeader"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <TextView
             android:id="@+id/userProfileAboutMeTV"
@@ -282,7 +283,8 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="gone" />
 
         <EditText
             android:id="@+id/userProfileAboutMeET"
@@ -292,7 +294,7 @@
             android:layout_marginTop="1dp"
             android:background="@drawable/rounded_square_black"
             android:hint="@string/about_me"
-            android:inputType="text"
+            android:inputType="textMultiLine"
             android:maxLength="120"
             android:maxLines="3"
             android:textAlignment="viewStart"
@@ -303,6 +305,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/userProfileAboutMeETcounter"
+            android:layout_width="wrap_content"
+            android:layout_height="12dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="2dp"
+            android:alpha="0"
+            android:text=""
+            android:textSize="10sp"
+            android:textStyle="italic"
+            app:layout_constraintBottom_toBottomOf="@+id/userProfileAboutMeET"
+            app:layout_constraintEnd_toEndOf="@+id/userProfileAboutMeET" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

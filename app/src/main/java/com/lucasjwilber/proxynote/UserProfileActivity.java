@@ -65,7 +65,9 @@ public class UserProfileActivity extends AppCompatActivity {
                 thisProfileOwnerId != null &&
                 thisProfileOwnerId.equals(user.getUid());
 
-        if (userIsOnTheirOwnProfile) binding.userProfileAboutMeEditBtn.setVisibility(View.VISIBLE);
+        if (userIsOnTheirOwnProfile) {
+            binding.userProfileAboutMeEditBtn.setVisibility(View.VISIBLE);
+        }
 
 
         if (thisProfileOwnerId != null) {
@@ -366,19 +368,28 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     public void onEditAboutmeButtonClicked(View v) {
+        if (!userIsOnTheirOwnProfile) return;
+
+        aboutMeBeingEdited = !aboutMeBeingEdited;
+
+        String buttonText = aboutMeBeingEdited ? "SAVE" : "EDIT";
+        binding.userProfileAboutMeEditBtn.setText(buttonText);
+
         TextView aboutMeTV = binding.userProfileAboutMeTV;
         EditText aboutMeET = binding.userProfileAboutMeET;
 
-        if (!userIsOnTheirOwnProfile) return;
-        aboutMeBeingEdited = !aboutMeBeingEdited;
         aboutMeTV.setVisibility(aboutMeBeingEdited ? View.GONE : View.VISIBLE);
         aboutMeET.setVisibility(aboutMeBeingEdited ? View.VISIBLE : View.GONE);
-        String buttonText = aboutMeBeingEdited ? "SAVE" : "EDIT";
-        binding.userProfileAboutMeEditBtn.setText(buttonText);
 
         //on "edit" click:
         if (aboutMeBeingEdited) {
             aboutMeET.setText(aboutMeTV.getText().toString());
+
+            binding.userProfileAboutMeET.addTextChangedListener(Utils.makeTextWatcher(binding.userProfileAboutMeET,
+                    binding.userProfileAboutMeETcounter,120));
+            binding.userProfileAboutMeETcounter.setVisibility(View.VISIBLE);
+        } else {
+            binding.userProfileAboutMeETcounter.setVisibility(View.GONE);
         }
 
         // on "save" click, if the text was changed:

@@ -52,7 +52,7 @@
             android:id="@+id/createPostIconsRV"
             android:layout_width="0dp"
             android:layout_height="50dp"
-            android:layout_marginBottom="4dp"
+            android:layout_marginBottom="8dp"
             android:scrollbars="horizontal"
             app:layout_constraintBottom_toTopOf="@+id/createPostTitleET"
             app:layout_constraintEnd_toEndOf="@+id/createPostTitleET"
@@ -73,9 +73,9 @@
             android:layout_height="45dp"
             android:layout_marginStart="40dp"
             android:layout_marginEnd="30dp"
-            android:layout_marginBottom="2dp"
+            android:layout_marginBottom="8dp"
             android:inputType="text"
-            android:maxLength="52"
+            android:maxLength="60"
             android:maxLines="4"
             android:textSize="18sp"
             app:layout_constraintBottom_toTopOf="@+id/createPostMediaContainer"
@@ -89,16 +89,16 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/createPostTitleET"
-            app:layout_constraintStart_toStartOf="@+id/createPostTitleET"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.45"
+            app:layout_constraintVertical_bias="0.41000003"
             tools:visibility="visible">
 
             <ImageView
                 android:id="@+id/createPostImage"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="200dp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -109,7 +109,7 @@
             <VideoView
                 android:id="@+id/createPostVideo"
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
+                android:layout_height="200dp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -129,18 +129,16 @@
             app:layout_constraintEnd_toStartOf="@+id/createPostTextET"
             app:layout_constraintTop_toBottomOf="@+id/createPostMediaContainer" />
 
-
         <EditText
             android:id="@+id/createPostTextET"
             android:layout_width="0dp"
-            android:layout_height="45dp"
-            android:layout_marginTop="5dp"
-            android:inputType="text"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:inputType="textMultiLine"
             android:maxLength="250"
-            android:maxLines="8"
+            android:maxLines="7"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="@+id/createPostTitleET"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/createPostTitleET"
             app:layout_constraintTop_toBottomOf="@+id/createPostMediaContainer" />
 
@@ -158,7 +156,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/createPostSubmitBtn"
             app:layout_constraintEnd_toStartOf="@+id/createPostSubmitBtn"
             app:layout_constraintTop_toTopOf="@+id/createPostSubmitBtn"
-            app:layout_constraintVertical_bias="0.6"
+            app:layout_constraintVertical_bias="0.5"
             app:srcCompat="@color/colorAccent" />
 
         <Button
@@ -182,7 +180,7 @@
             android:id="@+id/createPostSubmitBtn"
             android:layout_width="90dp"
             android:layout_height="50dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:background="@drawable/rounded_square_filled_accentcolor"
             android:onClick="createPost"
             android:text="@string/done"
@@ -213,6 +211,33 @@
             app:layout_constraintTop_toTopOf="@+id/createPostSubmitBtn"
             app:layout_constraintVertical_bias="0.5" />
 
+        <TextView
+            android:id="@+id/createPostTitleETcounter"
+            android:layout_width="wrap_content"
+            android:layout_height="12dp"
+            android:alpha="0"
+            android:textSize="10sp"
+            android:textStyle="italic"
+            app:layout_constraintBottom_toBottomOf="@+id/createPostTitleET"
+            app:layout_constraintEnd_toEndOf="@+id/createPostTitleET"
+            app:layout_constraintTop_toBottomOf="@+id/createPostTitleET"
+            app:layout_constraintVertical_bias="1.0"
+            tools:text="10/60" />
+
+        <TextView
+            android:id="@+id/createPostTextETcounter"
+            android:layout_width="wrap_content"
+            android:layout_height="12dp"
+            android:layout_marginEnd="3dp"
+            android:alpha="0"
+            android:textSize="10sp"
+            android:textStyle="italic"
+            app:layout_constraintBottom_toBottomOf="@+id/createPostTextET"
+            app:layout_constraintEnd_toEndOf="@+id/createPostTextET"
+            app:layout_constraintTop_toBottomOf="@+id/createPostTextET"
+            app:layout_constraintVertical_bias="1.0"
+            tools:text="55/234" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -241,7 +266,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.42000002"
+            app:layout_constraintVertical_bias="0.48000002"
             tools:visibility="visible" />
 
         <TextView

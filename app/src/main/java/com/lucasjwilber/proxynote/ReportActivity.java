@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,6 +28,7 @@ public class ReportActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseUser user;
     private ProgressBar loadingSpinner;
+    private EditText additionalInfoET;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +38,14 @@ public class ReportActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         user = FirebaseAuth.getInstance().getCurrentUser();
+
+        additionalInfoET = findViewById(R.id.reportAdditionalInfoET);
+        TextView additionalInfoETcounter = findViewById(R.id.reportAdditionalInfoETcounter);
+        additionalInfoET.addTextChangedListener(Utils.makeTextWatcher(
+                additionalInfoET,
+                additionalInfoETcounter,
+                200
+        ));
 
         Intent intent = getIntent();
         postId = intent.getStringExtra("postId");
@@ -79,8 +89,7 @@ public class ReportActivity extends AppCompatActivity {
 
         loadingSpinner.setVisibility(View.VISIBLE);
 
-        EditText additionalInfoTV = findViewById(R.id.reportAdditionalInfoET);
-        String additionalInfo = additionalInfoTV.getText().toString();
+        String additionalInfo = additionalInfoET.getText().toString();
         String userId = user == null ? "unknown user" : user.getUid();
         String reportId = postId + "|" + userId;
         Report report = new Report(reportId, reason, additionalInfo, postId, postUserId, postTitle, postText, postMediaStorageId, postLat, postLng);

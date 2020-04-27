@@ -97,7 +97,9 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 l = (ConstraintLayout) LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.post_layout, parent, false);
 
-                addCommentBox = l.findViewById(R.id.postRvPostReplyBox);
+                addCommentBox = l.findViewById(R.id.postRvCommentET);
+                TextView commentCounter = l.findViewById(R.id.postRvCommentETcounter);
+                addCommentBox.addTextChangedListener(Utils.makeTextWatcher(addCommentBox, commentCounter,300));
                 replyLoadingSpinner = l.findViewById(R.id.replySubmitPB);
 
                 postScore = l.findViewById(R.id.postRvHeaderScore);
@@ -443,5 +445,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         goToFullScreenMedia.putExtra("videoThumbnailUrl", videoThumbnailUrl);
         context.startActivity(goToFullScreenMedia);
     }
+
+
 
 }

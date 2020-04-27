@@ -22,9 +22,13 @@
         android:theme="@style/AppTheme">
         <activity android:name=".HelpActivity" />
         <activity android:name=".FullScreenMediaActivity" />
-        <activity android:name=".ReportActivity" />
+        <activity
+            android:name=".ReportActivity"
+            android:screenOrientation="portrait" />
         <activity android:name=".UserProfileActivity" />
-        <activity android:name=".CreatePostActivity" />
+        <activity
+            android:name=".CreatePostActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".LoginActivity"
             android:screenOrientation="portrait"

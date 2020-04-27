@@ -50,6 +50,12 @@ public class HelpActivity extends AppCompatActivity {
         binding.helpRV.setLayoutManager(new LinearLayoutManager(this));
         binding.helpRV.setAdapter(new HelpRvAdapter());
         binding.helpRV.setHasFixedSize(true);
+
+        binding.helpQuestionOrCommentET.addTextChangedListener(Utils.makeTextWatcher(
+                binding.helpQuestionOrCommentET,
+                binding.helpQuestionOrCommentETcounter,
+                200
+        ));
     }
 
     public void onSubmitQuestionOrCommentButtonClicked(View v) {

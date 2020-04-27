@@ -5,7 +5,13 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
@@ -359,6 +365,43 @@ public class Utils {
             user.reload();
             return loginType == null || !loginType.equals("firebase") || user.isEmailVerified();
         }
+    }
+
+    // limits an EditText's length and number of lines, and updates the alpha of a provided TextView to
+    // show the user when they're approaching the max char limit
+    static TextWatcher makeTextWatcher(EditText editText, TextView counter, int maxLength) {
+        return new TextWatcher() {
+            String currentText;
+            int cursorPosition;
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                Log.i(TAG, "before: " + s.toString() + ", " + editText.getText().toString());
+
+                currentText = editText.getText().toString();
+                cursorPosition = editText.getSelectionStart() - 1;
+            }
+
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Log.i(TAG, "on: " + s.toString() + ", " + editText.getText().toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                Log.i(TAG, "after: " + s.toString() + ", " + editText.getText().toString());
+
+                if (editText.getLineCount() > editText.getMaxLines() ||
+                        (editText.length() -1) >= maxLength) {
+                    editText.setText(currentText);
+                    editText.setSelection(cursorPosition);
+                } else {
+                    String counterText = (editText.length()) + "/" + maxLength;
+                    counter.setText(counterText);
+                }
+
+                float alpha = ( (float) editText.length() ) / maxLength;
+                counter.setAlpha(alpha);
+            }
+        };
     }
 
 }
