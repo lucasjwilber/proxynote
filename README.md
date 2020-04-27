@@ -9,6 +9,7 @@ Share what you see! Leave notes, images, and videos on a map for others to see, 
 * Glide (https://github.com/bumptech/glide)
 * Transcoder (https://github.com/natario1/Transcoder)
 * Google Maps and Geocode APIs
+* Android Studio
 
 ## Author
 Lucas Wilber
@@ -22,4 +23,5 @@ Lucas Wilber
 * TheLittleNaruto for custom Toast info (https://stackoverflow.com/questions/11288475/custom-toast-on-android-a-simple-example)
 * grantespo for VideoView info (https://stackoverflow.com/questions/37865482/firebase-storage-video-streaming)
 * Sunil Patel for code to rotate a photo based on its EXIF orientation info (https://www.semicolonworld.com/question/48691/android-camera-intent-saving-image-landscape-when-taken-portrait)
+* Docracy.com for help with the required Privacy Policy
 * The Code Fellows Java instructional team

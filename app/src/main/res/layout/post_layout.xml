@@ -139,6 +139,7 @@
         android:inputType="textMultiLine"
         android:lines="2"
         android:maxLength="300"
+        android:maxLines="10"
         android:paddingBottom="12dp"
         android:textAlignment="viewStart"
         android:textSize="16sp"

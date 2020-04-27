@@ -20,7 +20,8 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="gone">
 
         <TextView
             android:id="@+id/userProfileUsername"
@@ -141,7 +142,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/userProfilePostButtonsContainer"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/userProfilePostRV"
@@ -155,7 +156,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="gone" />
 
         <ProgressBar
             android:id="@+id/userProfilePostRvPB"
@@ -200,31 +202,31 @@
 
             <Button
                 android:id="@+id/uerProfileYesDeleteBtn"
-                android:layout_width="60dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="60dp"
-                android:background="@drawable/rounded_square_accentcolor"
+                android:layout_width="75dp"
+                android:layout_height="35dp"
+                android:layout_marginEnd="55dp"
+                android:background="@drawable/rounded_square_filled_accentcolor"
                 android:onClick="yesDelete"
                 android:text="@string/yes"
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/white"
                 android:textSize="15sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/textView2"
+                app:layout_constraintEnd_toEndOf="@+id/textView2"
                 app:layout_constraintTop_toBottomOf="@+id/textView2"
                 tools:text="Yes" />
 
             <Button
                 android:id="@+id/userProfileNoDeleteBtn"
-                android:layout_width="60dp"
-                android:layout_height="30dp"
-                android:layout_marginEnd="60dp"
-                android:background="@drawable/rounded_square_accentcolor"
+                android:layout_width="75dp"
+                android:layout_height="35dp"
+                android:layout_marginStart="55dp"
+                android:background="@drawable/button_pinkborder_whitefill"
                 android:onClick="noDelete"
-                android:text="@string/no"
+                android:text="@string/cancel"
                 android:textColor="@color/colorAccent"
                 android:textSize="15sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/textView2"
+                app:layout_constraintStart_toStartOf="@+id/textView2"
                 app:layout_constraintTop_toBottomOf="@+id/textView2"
                 tools:text="No" />
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -247,13 +249,14 @@
 
     <ProgressBar
         android:id="@+id/userProfileDeletePostPB"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/userProfilePostDescriptorsRV"
         app:layout_constraintEnd_toEndOf="@+id/userProfilePostDescriptorsRV"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/userProfilePostDescriptorsRV" />
+        app:layout_constraintTop_toTopOf="@+id/userProfilePostDescriptorsRV"
+        tools:visibility="gone" />
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -264,7 +267,8 @@
         android:paddingBottom="6dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userProfileHeader">
+        app:layout_constraintTop_toBottomOf="@+id/userProfileHeader"
+        tools:visibility="gone">
 
         <TextView
             android:id="@+id/userProfileAboutMeTV"
@@ -273,6 +277,7 @@
             android:layout_marginStart="6dp"
             android:layout_marginTop="6dp"
             android:layout_marginEnd="6dp"
+            android:maxLines="3"
             android:textColor="@color/darkgray"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -287,11 +292,10 @@
             android:layout_marginTop="1dp"
             android:background="@drawable/rounded_square_black"
             android:hint="@string/about_me"
-            android:imeOptions="actionDone"
-            android:inputType="textMultiLine"
+            android:inputType="text"
             android:maxLength="120"
             android:maxLines="3"
-            android:textAlignment="textStart"
+            android:textAlignment="viewStart"
             android:textSize="16sp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"

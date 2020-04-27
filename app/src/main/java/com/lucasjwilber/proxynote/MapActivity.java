@@ -162,8 +162,12 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     .addOnSuccessListener(result -> {
                         if (result.exists()) {
                             setPostRvAdapter(currentSelectedPostId);
-                            postRv.setVisibility(View.VISIBLE);
+                        } else {
+                            postRv.setVisibility(View.GONE);
                         }
+                    })
+                    .addOnFailureListener(e -> {
+                        postRv.setVisibility(View.GONE);
                     });
         }
     }
