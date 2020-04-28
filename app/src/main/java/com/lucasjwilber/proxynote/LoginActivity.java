@@ -430,17 +430,32 @@ public class LoginActivity extends AppCompatActivity {
 
     private void sendPasswordResetEmail() {
         String email = binding.loginResetPWEmailET.getText().toString();
+        if (email.equals("") || email.length() < 5 || !email.contains("@") || !email.contains(".")) {
+            Utils.showToast(LoginActivity.this, "Invalid email address");
+            return;
+        }
+
+        binding.loginPB.setVisibility(View.VISIBLE);
         mAuth.sendPasswordResetEmail(email)
                 .addOnSuccessListener(success -> {
-                    Utils.showToast(LoginActivity.this, "Password reset email sent.");
-                    binding.loginBaseLayout.setVisibility(View.VISIBLE);
-                    binding.loginResetPasswordModal.setVisibility(View.GONE);
-                    binding.loginResetPWEmailET.setText("");
+                    Log.i(TAG, "sent password reset email");
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "couldn't send password reset: " + e.toString());
-                    Utils.showToast(LoginActivity.this, "Error sending password reset email.");
+                    Log.e(TAG, "failed sending password reset email");
                 });
+
+        Handler handler = new Handler();
+        handler.postDelayed(() -> {
+            // If the provided email doesn't have an account already, onFailure triggers.
+            // So in order to help prevent someone from collecting user emails by verifying which ones do/don't exist,
+            // intentionally make it appear that it worked either way:
+            binding.loginPB.setVisibility(View.GONE);
+            Utils.showToast(LoginActivity.this, "Password reset email sent to " + email);
+            binding.loginBaseLayout.setVisibility(View.VISIBLE);
+            binding.loginResetPasswordModal.setVisibility(View.GONE);
+            binding.loginResetPWEmailET.setText("");
+        }, (1000 + ( (long) (Math.random() * 1000) ) ) );
+
     }
 
 }

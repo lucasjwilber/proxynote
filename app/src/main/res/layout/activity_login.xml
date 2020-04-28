@@ -502,8 +502,8 @@
 
     <ProgressBar
         android:id="@+id/loginPB"
-        android:layout_width="113dp"
-        android:layout_height="113dp"
+        android:layout_width="114dp"
+        android:layout_height="114dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/loginLogo"
         app:layout_constraintEnd_toEndOf="@+id/loginLogo"
