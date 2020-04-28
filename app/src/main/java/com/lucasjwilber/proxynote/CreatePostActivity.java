@@ -3,6 +3,7 @@ package com.lucasjwilber.proxynote;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -60,6 +61,7 @@ import java.util.UUID;
 public class CreatePostActivity extends AppCompatActivity {
 
     private final String TAG = "ljw";
+    private static final int REQUEST_LOCATION = 68;
     private static final int REQUEST_IMAGE_CAPTURE = 69;
     private static final int REQUEST_VIDEO_CAPTURE = 70;
     private static final int MAX_VIDEO_DURATION = 20;
@@ -125,6 +127,14 @@ public class CreatePostActivity extends AppCompatActivity {
             return;
         } else if (postBody.equals("") || postBody.length() == 0) {
             Utils.showToast(CreatePostActivity.this, "Post text is required.");
+            return;
+        } else if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_LOCATION);
             return;
         }
 
@@ -393,6 +403,8 @@ public class CreatePostActivity extends AppCompatActivity {
                 //launch camera
                 dispatchRecordMediaIntent(requestCode);
             }
+        } else if (requestCode == REQUEST_LOCATION) {
+            return;
         }
     }
 
