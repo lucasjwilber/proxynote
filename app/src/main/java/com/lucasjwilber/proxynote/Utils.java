@@ -375,20 +375,14 @@ public class Utils {
             int cursorPosition;
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                Log.i(TAG, "before: " + s.toString() + ", " + editText.getText().toString());
-
                 currentText = editText.getText().toString();
                 cursorPosition = editText.getSelectionStart() - 1;
             }
 
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.i(TAG, "on: " + s.toString() + ", " + editText.getText().toString());
-            }
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
-                Log.i(TAG, "after: " + s.toString() + ", " + editText.getText().toString());
-
                 if (editText.getLineCount() > editText.getMaxLines() ||
                         (editText.length() -1) >= maxLength) {
                     editText.setText(currentText);

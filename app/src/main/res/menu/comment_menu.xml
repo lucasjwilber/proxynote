@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/commentMenu"
+    >
+    <item
+        android:id="@+id/commentMenuReport"
+        android:orderInCategory="0"
+        android:title="Report this comment" />
+    <item
+        android:id="@+id/commentMenuDelete"
+        android:orderInCategory="1"
+        android:visible="false"
+        android:title="Delete this comment" >
+        <menu>
+            <item
+                android:id="@+id/commentMenuNoDelete"
+                android:title="@string/cancel" />
+            <item
+                android:id="@+id/commentMenuYesDelete"
+                android:title="Confirm: delete this comment" />
+        </menu>
+    </item>
+</menu>

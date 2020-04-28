@@ -302,7 +302,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
     public void showMenu(View v) {
         PopupMenu popup = new PopupMenu(this, v);
         popup.setOnMenuItemClickListener(this::onMenuItemClick);
-        popup.inflate(R.menu.hamburger_menu);
+        popup.inflate(R.menu.map_menu);
 
         Menu menu = popup.getMenu();
         if (FirebaseAuth.getInstance().getCurrentUser() == null || FirebaseAuth.getInstance().getCurrentUser().isAnonymous()) {
@@ -344,6 +344,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                     user = null;
                     //for facebook:
                     AccessToken.setCurrentAccessToken(null);
+                    binding.mapPostRV.setVisibility(View.GONE);
                     Utils.showToast(MapActivity.this, "You are now logged out.");
 
                     //sign in anonymously so they can still read from the db
@@ -577,6 +578,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         postRv.setAdapter(null);
         binding.mapLoginSuggestionModal.setVisibility(View.GONE);
         binding.mapPostRvPB.setVisibility(View.GONE);
+        binding.mapCreatePostBtn.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -586,6 +588,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         currentSelectedPostId = (String) marker.getTag();
         setPostRvAdapter(currentSelectedPostId);
         postRv.setVisibility(View.VISIBLE);
+        binding.mapCreatePostBtn.setVisibility(View.GONE);
 
         // returning false would center the camera on the marker and open the info window if there is one attached
         return true;

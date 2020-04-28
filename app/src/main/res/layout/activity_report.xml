@@ -111,7 +111,7 @@
             android:inputType="textMultiLine"
             android:maxLines="10"
             android:maxLength="200"
-            android:paddingBottom="12dp"
+            android:paddingBottom="6dp"
             app:layout_constraintStart_toStartOf="@+id/reportAdditionalInfoLabel"
             app:layout_constraintTop_toBottomOf="@+id/reportAdditionalInfoLabel" />
 
@@ -153,7 +153,7 @@
         android:layout_width="wrap_content"
         android:layout_height="35dp"
         android:layout_marginTop="8dp"
-        android:text="@string/report_post"
+        android:text="@string/report"
         android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"

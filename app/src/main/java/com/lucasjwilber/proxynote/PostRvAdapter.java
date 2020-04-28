@@ -3,14 +3,18 @@ package com.lucasjwilber.proxynote;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -24,11 +28,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
-public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHolder> {
+public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHolder> implements PopupMenu.OnMenuItemClickListener {
 
     private final String TAG = "ljw";
     private FirebaseFirestore db;
@@ -49,6 +55,9 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private static final int POST_HEADER = 0;
     private static final int POST_COMMENT = 1;
     private long timeOfLastComment;
+    private Comment selectedComment;
+    private TextView selectedCommentText;
+    private List<String> deletedCommentIds;
 
     PostRvAdapter(
             Post post,
@@ -70,6 +79,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         upArrowColored = context.getResources().getDrawable(R.drawable.arrow_up_colored);
         downArrowColored = context.getResources().getDrawable(R.drawable.arrow_down_colored);
         timeOfLastComment = new Date().getTime() - 2000;
+        deletedCommentIds = new LinkedList<>();
     }
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
@@ -126,7 +136,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 postTitle.setText(post.getTitle());
 
                 Button reportButton = l.findViewById(R.id.postRvHeaderReportBtn);
-                reportButton.setOnClickListener(v -> onReportButtonClicked());
+                reportButton.setOnClickListener(v -> onPostReportButtonClicked());
 
                 TextView postText = l.findViewById(R.id.postRvPostText);
                 postText.setText(post.getText());
@@ -210,8 +220,20 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
             commentTimeAndPlace.setText(commentTimeAndPlaceText);
 
             // body of comment:
-            TextView commentText = holder.constraintLayout.findViewById(R.id.postRvCommentText);
-            commentText.setText(comment.getText());
+            TextView commentTextView = holder.constraintLayout.findViewById(R.id.postRvCommentText);
+            String commentText;
+            if (deletedCommentIds.contains(comment.getId())) {
+                commentText = context.getResources().getString(R.string.deleted);
+            } else {
+                commentText = comment.getText();
+            }
+            commentTextView.setText(commentText);
+
+            Button optionsButton = holder.constraintLayout.findViewById(R.id.commentOptionsButton);
+            if (Utils.isUserAuthorized()) {
+                optionsButton.setVisibility(View.VISIBLE);
+                optionsButton.setOnClickListener(c -> showCommentMenu(optionsButton, comment, commentTextView));
+            }
         }
     }
 
@@ -352,28 +374,41 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         }
     }
 
-    private void onReportButtonClicked() {
+    private void onPostReportButtonClicked() {
         if (user == null || user.isAnonymous()) {
             Utils.showToast(context, "You must be signed in to report a post.");
-            return;
         } else if (!user.isEmailVerified()) {
             //reload and check again first
             user.reload()
                     .addOnSuccessListener(r -> {
                         if (!user.isEmailVerified()) {
                             Utils.showToast(context, "Please verify your email first.");
-                            return;
                         }
                     });
+        } else {
+            initReport(
+                    post.getId(),
+                    null,
+                    post.getUserId(),
+                    post.getTitle(),
+                    post.getText(),
+                    post.getLat(),
+                    post.getLng(),
+                    post.getMediaStorageId()
+            );
         }
+    }
+
+    private void initReport(String postId, String commentId, String userId, String title, String text, double lat, double lng, String mediaStorageId) {
         Intent goToReportActivity = new Intent(context, ReportActivity.class);
-        goToReportActivity.putExtra("postId", post.getId());
-        goToReportActivity.putExtra("postUserId", post.getUserId());
-        goToReportActivity.putExtra("postTitle", post.getTitle());
-        goToReportActivity.putExtra("postText", post.getText());
-        goToReportActivity.putExtra("postLat", post.getLat());
-        goToReportActivity.putExtra("postLng", post.getLng());
-        goToReportActivity.putExtra("postMediaStorageId", post.getMediaStorageId());
+        goToReportActivity.putExtra("postId", postId);
+        goToReportActivity.putExtra("commentId", commentId);
+        goToReportActivity.putExtra("postUserId", userId);
+        goToReportActivity.putExtra("postTitle", title);
+        goToReportActivity.putExtra("postText", text);
+        goToReportActivity.putExtra("postLat", lat);
+        goToReportActivity.putExtra("postLng", lng);
+        goToReportActivity.putExtra("postMediaStorageId", mediaStorageId);
         context.startActivity(goToReportActivity);
     }
 
@@ -446,6 +481,82 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         context.startActivity(goToFullScreenMedia);
     }
 
+    private void showCommentMenu(View v, Comment comment, TextView commentText) {
+        PopupMenu popup = new PopupMenu(context, v);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.comment_menu, popup.getMenu());
+        selectedComment = comment;
+        selectedCommentText = commentText;
 
+        // show the delete option for a user's own comments
+        if (currentUserId.equals(comment.getUserId())) {
+            popup.getMenu().getItem(1).setVisible(true);
+        }
+        popup.setOnMenuItemClickListener(this);
+        popup.show();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.commentMenuReport:
+                initReport(
+                        post.getId(),
+                        selectedComment.getId(),
+                        selectedComment.getUserId(),
+                        null,
+                        selectedComment.getText(),
+                        selectedComment.getLat(),
+                        selectedComment.getLng(),
+                        null
+                );
+                return true;
+            case R.id.commentMenuYesDelete:
+                if (user.getUid().equals(selectedComment.getUserId())) {
+                    //get the latest comments list
+                    db.collection("posts")
+                            .document(post.getId())
+                            .get()
+                            .addOnSuccessListener(result -> {
+                                Post thisPost = result.toObject(Post.class);
+                                if (thisPost == null) {
+                                    Utils.showToast(context, "Couldn't delete post");
+                                    return;
+                                }
+                                ArrayList oldCommentMaps = (ArrayList) result.getData().get("comments");
+                                ArrayList<Comment> oldComments = Utils.turnMapsIntoListOfComments(oldCommentMaps);
+
+                                ArrayList<Comment> updatedComments = new ArrayList<>();
+
+                                for (Comment comment : oldComments) {
+                                    if (!comment.getId().equals(selectedComment.getId())) {
+                                        updatedComments.add(comment);
+                                    }
+                                }
+
+                                db.collection("posts")
+                                        .document(post.getId())
+                                        .update("comments", updatedComments)
+                                        .addOnSuccessListener(success -> {
+                                            selectedCommentText.setText(R.string.deleted);
+                                            deletedCommentIds.add(selectedComment.getId());
+                                            Utils.showToast(context, "Comment deleted");
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Utils.showToast(context, "Couldn't delete post");
+                                            Log.e(TAG, "couldn't get post");
+                                        });
+
+                            })
+                            .addOnFailureListener(e -> {
+                                Utils.showToast(context, "Couldn't delete post");
+                                Log.e(TAG, "couldn't get post");
+                            });
+                }
+                return true;
+            default:
+                return false;
+        }
+    }
 
 }

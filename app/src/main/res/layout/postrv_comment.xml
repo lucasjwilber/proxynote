@@ -13,23 +13,21 @@
         android:id="@+id/postRvCommentHeader"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:paddingStart="6dp"
         android:textSize="12sp"
         android:textStyle="italic"
-        android:paddingStart="6dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.195"
+        app:layout_constraintEnd_toStartOf="@+id/commentOptionsButton"
         app:layout_constraintStart_toEndOf="@+id/postRvCommentUsername"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/postRvCommentText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="2dp"
         android:textSize="15sp"
-        app:layout_constraintEnd_toEndOf="@+id/postRvCommentHeader"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/postRvCommentHeader"
+        app:layout_constraintEnd_toStartOf="@+id/commentOptionsButton"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/postRvCommentHeader" />
 
     <TextView
@@ -43,5 +41,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="username" />
+
+    <Button
+        android:id="@+id/commentOptionsButton"
+        android:layout_width="20dp"
+        android:layout_height="22dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:drawableTop="@drawable/comment_options_accent"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

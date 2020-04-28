@@ -19,12 +19,13 @@ public class ReportActivity extends AppCompatActivity {
 
     private final String TAG = "ljw";
     private String postId;
-    private String postUserId;
-    private String postTitle;
-    private String postText;
-    private String postMediaStorageId;
-    private double postLat;
-    private double postLng;
+    private String commentId;
+    private String userId;
+    private String title;
+    private String text;
+    private String mediaStorageId;
+    private double lat;
+    private double lng;
     private FirebaseFirestore db;
     private FirebaseUser user;
     private ProgressBar loadingSpinner;
@@ -49,12 +50,13 @@ public class ReportActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         postId = intent.getStringExtra("postId");
-        postUserId = intent.getStringExtra("postUserId");
-        postTitle = intent.getStringExtra("postTitle");
-        postText = intent.getStringExtra("postText");
-        postMediaStorageId = intent.getStringExtra("postMediaStorageId");
-        postLat = intent.getDoubleExtra("postLat", postLat);
-        postLng = intent.getDoubleExtra("postLng", postLng);
+        commentId = intent.getStringExtra("commentId");
+        userId = intent.getStringExtra("postUserId");
+        title = intent.getStringExtra("postTitle");
+        text = intent.getStringExtra("postText");
+        mediaStorageId = intent.getStringExtra("postMediaStorageId");
+        lat = intent.getDoubleExtra("postLat",lat);
+        lng = intent.getDoubleExtra("postLng", lng);
     }
 
     public void onReportSubmit(View v) {
@@ -90,9 +92,10 @@ public class ReportActivity extends AppCompatActivity {
         loadingSpinner.setVisibility(View.VISIBLE);
 
         String additionalInfo = additionalInfoET.getText().toString();
-        String userId = user == null ? "unknown user" : user.getUid();
-        String reportId = postId + "|" + userId;
-        Report report = new Report(reportId, reason, additionalInfo, postId, postUserId, postTitle, postText, postMediaStorageId, postLat, postLng);
+        String currentUserId = user == null ? "unknown user" : user.getUid();
+        //report id is [post/comment that is being reported's id]|[reporting user's id]
+        String reportId = commentId != null ? (commentId + "|" + currentUserId) : postId + "|" + currentUserId;
+        Report report = new Report(reportId, reason, additionalInfo, postId, commentId, userId, title, text, mediaStorageId, lat, lng);
 
         db.collection("reports")
                 .document(reportId)
