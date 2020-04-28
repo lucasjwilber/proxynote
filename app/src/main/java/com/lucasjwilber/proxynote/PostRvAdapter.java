@@ -144,15 +144,15 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 Button addCommentButton = l.findViewById(R.id.postRvPostReplyBtn);
                 addCommentButton.setOnClickListener(v -> addCommentToPost(addCommentBox.getText().toString()));
 
-                TextView commentCount = l.findViewById(R.id.postCommentCount);
-                int numComments = post.getComments().size();
-                String commentCountText = "";
-                if (numComments == 1) {
-                    commentCountText = numComments + " comment:";
-                } else if (numComments > 1) {
-                    commentCountText = numComments + " comments:";
-                }
-                commentCount.setText(commentCountText);
+//                TextView commentCount = l.findViewById(R.id.postCommentCount);
+//                int numComments = post.getComments().size();
+//                String commentCountText = "";
+//                if (numComments == 1) {
+//                    commentCountText = numComments + " comment:";
+//                } else if (numComments > 1) {
+//                    commentCountText = numComments + " comments:";
+//                }
+//                commentCount.setText(commentCountText);
 
                 //if there's an image or video create the thumbnail
                 if ((post.getImageUrl() != null && post.getImageUrl().length() > 0) ||

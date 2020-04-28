@@ -1,30 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/postRvComment"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="4dp"
-    android:id="@+id/postRvComment"
-    >
+    android:paddingBottom="6dp">
 
     <TextView
         android:id="@+id/postRvCommentHeader"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingStart="6dp"
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintEnd_toStartOf="@+id/commentOptionsButton"
-        app:layout_constraintStart_toEndOf="@+id/postRvCommentUsername"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/postRvCommentUsername" />
 
     <TextView
         android:id="@+id/postRvCommentText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
         android:textSize="15sp"
         app:layout_constraintEnd_toStartOf="@+id/commentOptionsButton"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,12 +28,13 @@
 
     <TextView
         android:id="@+id/postRvCommentUsername"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/username"
         android:textColor="@color/colorAccent"
         android:textSize="12sp"
         android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/commentOptionsButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="username" />

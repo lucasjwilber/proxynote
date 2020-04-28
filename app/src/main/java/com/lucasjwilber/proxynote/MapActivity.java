@@ -164,6 +164,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
                             setPostRvAdapter(currentSelectedPostId);
                         } else {
                             postRv.setVisibility(View.GONE);
+                            binding.mapCreatePostBtn.setVisibility(View.VISIBLE);
                         }
                     })
                     .addOnFailureListener(e -> {
