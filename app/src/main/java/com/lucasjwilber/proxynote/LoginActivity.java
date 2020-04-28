@@ -396,7 +396,6 @@ public class LoginActivity extends AppCompatActivity {
         user.updateProfile(userProfileChangeRequest)
                 .addOnSuccessListener(aVoid -> {
                     createNewUser(username, user.getUid(), true);
-                    sharedPreferences.edit().putString("loginType", "firebase").apply();
                 })
                 .addOnFailureListener(e -> Log.i(TAG, "failed adding username to user"));
     }
