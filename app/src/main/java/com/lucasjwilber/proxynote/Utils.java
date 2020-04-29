@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -328,6 +329,7 @@ public class Utils {
         } else {
             increment = 10;
         }
+        Log.i(TAG, "lrtb is " + left + right + top + bottom);
 
         while (leftCounter <= rightCounter + increment) {
             while (bottomCounter <= top) {

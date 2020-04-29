@@ -27,6 +27,7 @@ import com.lucasjwilber.proxynote.databinding.ActivityUserProfileBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -106,6 +107,8 @@ public class UserProfileActivity extends AppCompatActivity {
                             binding.userProfileNoCommentsYet.setText(noPostsText);
                             binding.userProfileNoCommentsYet.setVisibility(View.VISIBLE);
                         } else {
+                            // sort by timestamp
+                            Collections.sort(visiblePostDescriptors);
                             postDescriptorsRvLayoutManager = new LinearLayoutManager(this);
                             binding.userProfilePostDescriptorsRV.setLayoutManager(postDescriptorsRvLayoutManager);
                             postDescriptorsRvAdapter = new PostSelectAdapter(visiblePostDescriptors);

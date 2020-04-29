@@ -3,7 +3,7 @@ package com.lucasjwilber.proxynote;
 // the purpose of this class is to provide a link between posts and users without nesting all posts in users.
 // it also keeps queries that populate user profile recyclerviews much more lightweight.
 
-public class PostDescriptor {
+public class PostDescriptor implements Comparable<PostDescriptor> {
     private String id;
     private boolean isAnonymous;
     private String title;
@@ -22,6 +22,11 @@ public class PostDescriptor {
         this.location = location;
         this.score = score;
         this.icon = icon;
+    }
+
+    @Override
+    public int compareTo(PostDescriptor pd) {
+        return Long.compare(pd.timestamp, this.timestamp);
     }
 
     public String getLocation() {
@@ -79,4 +84,5 @@ public class PostDescriptor {
     public void setIcon(int icon) {
         this.icon = icon;
     }
+
 }
