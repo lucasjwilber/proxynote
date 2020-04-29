@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.VideoView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -227,7 +226,14 @@ public class CreatePostActivity extends AppCompatActivity {
 
         //  UPLOAD IMAGE //
         if (currentImage != null) {
-            binding.createPostUploadingMessage.setText(R.string.uploading_image);
+
+            Handler handler = new Handler(Looper.getMainLooper()) {
+                @Override
+                public void handleMessage(@NonNull Message msg) {
+                    binding.createPostUploadingMessage.setText(R.string.uploading_image);
+                }
+            };
+            handler.obtainMessage().sendToTarget();
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             currentImage.compress(Bitmap.CompressFormat.JPEG, IMAGE_QUALITY, baos);
@@ -250,7 +256,13 @@ public class CreatePostActivity extends AppCompatActivity {
 
         // UPLOAD VIDEO //
         } else {
-            binding.createPostUploadingMessage.setText(R.string.uploading_video);
+            Handler handler = new Handler(Looper.getMainLooper()) {
+                @Override
+                public void handleMessage(@NonNull Message msg) {
+                    binding.createPostUploadingMessage.setText(R.string.uploading_video);
+                }
+            };
+            handler.obtainMessage().sendToTarget();
 
             //temp file to transcode the video into, then upload
             File transcodedVideoFile = File.createTempFile(
@@ -305,7 +317,13 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     public void uploadPost(Post post) {
-        binding.createPostUploadingMessage.setText(R.string.uploading_post);
+        Handler handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(@NonNull Message msg) {
+                binding.createPostUploadingMessage.setText(R.string.uploading_post);
+            }
+        };
+        handler.obtainMessage().sendToTarget();
 
         db.collection("posts")
                 .document(post.getId())

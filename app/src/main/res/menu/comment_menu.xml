@@ -6,19 +6,19 @@
     <item
         android:id="@+id/commentMenuReport"
         android:orderInCategory="0"
-        android:title="Report this comment" />
+        android:title="@string/report_this_comment" />
     <item
         android:id="@+id/commentMenuDelete"
         android:orderInCategory="1"
         android:visible="false"
-        android:title="Delete this comment" >
+        android:title="@string/delete_this_comment" >
         <menu>
             <item
                 android:id="@+id/commentMenuNoDelete"
                 android:title="@string/cancel" />
             <item
                 android:id="@+id/commentMenuYesDelete"
-                android:title="Confirm: delete this comment" />
+                android:title="@string/confirm_delete_this_comment" />
         </menu>
     </item>
 </menu>
