@@ -1,5 +1,7 @@
 # ![ProxyNote logo](/readmeImages/banner.png)
-Share what you see! Leave notes, images, and videos on a map for others to see, vote, and comment on.
+Share what you see! Leave notes, images, and videos on a map for others to see, vote, and comment on. Currently pending Google Play publication.
+
+![screenshots](/readmeImages/screenshots.png)
 
 ## Built With
 * Firebase Auth + Google and Facebook OAuth
