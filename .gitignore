@@ -22,3 +22,5 @@ google_maps_api.xml
 /.firebaserc
 proguard-rules.pro
 app/google-services.json
+app/src/debug/res/values/google_maps_api.xml
+app/src/main/res/values/google_web_client_id.xml
