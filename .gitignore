@@ -20,4 +20,4 @@ google_maps_api.xml
 **/function_formatted_address_url.xml
 /firebase.json
 /.firebaserc
-app/proguardrules-pro
+app/proguard-rules.pro
