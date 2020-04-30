@@ -21,3 +21,4 @@ google_maps_api.xml
 /firebase.json
 /.firebaserc
 proguard-rules.pro
+app/google-services.json
