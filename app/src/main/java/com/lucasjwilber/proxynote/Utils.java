@@ -308,7 +308,6 @@ public class Utils {
         double right = cameraBounds.northeast.longitude;
         double top = cameraBounds.northeast.latitude;
         double bottom = cameraBounds.southwest.latitude;
-        Log.i(TAG, "lr, tb: " + left + right + top + bottom);
 
         List<String> zonesOnScreen = new ArrayList<>();
 
@@ -330,7 +329,6 @@ public class Utils {
         } else {
             increment = 10;
         }
-        Log.i(TAG, "lrbt is " + left + right + bottom + top);
 
         while (leftCounter <= rightCounter) {
             while (bottomCounter <= top + increment) {
@@ -344,7 +342,6 @@ public class Utils {
                     zone = getLargeZone(bottomCounter, left);
                 }
                 if (!cache.contains(zone)) zonesOnScreen.add(zone);
-                Log.i(TAG, "bc is " + bottomCounter);
                 bottomCounter += increment;
             }
             bottomCounter = bottom;
@@ -354,7 +351,6 @@ public class Utils {
             //account for antimeridian:
             if (left >= 180.0) left = -180.0;
         }
-        Log.i(TAG, "went to " + left);
         return zonesOnScreen;
     }
 

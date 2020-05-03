@@ -92,6 +92,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         binding = ActivityMapBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -489,7 +490,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
 
         int postsPerZoneLimit = 1 + ( (int) Math.ceil(totalQueryLimit / allZonesOnScreen.size()));
         String zoneType = Utils.getZoneType(cameraBounds);
-        Log.i(TAG, allZonesOnScreen.size() + " zones on screen, limit " + postsPerZoneLimit + " posts per zone");
 
         if (allZonesOnScreen.size() > 10) {
             String[] zones = allZonesOnScreen.toArray(new String[0]);
