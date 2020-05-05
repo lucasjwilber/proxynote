@@ -1,5 +1,5 @@
 # ![ProxyNote logo](/readmeImages/banner.png)
-Share what you see! Leave notes, images, and videos on a map for others to see, vote, and comment on. Find it in the Google Play store or with a direct link ![here](play.google.com/store/apps/details?id=com.lucasjwilber.proxynote).
+Share what you see! Leave notes, images, and videos on a map for others to see, vote, and comment on. Find it in the Google Play store or with a direct link [here](play.google.com/store/apps/details?id=com.lucasjwilber.proxynote).
 
 ![screenshots](/readmeImages/screenshots.png)
 
