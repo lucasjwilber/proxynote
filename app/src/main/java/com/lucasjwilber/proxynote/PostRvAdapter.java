@@ -125,7 +125,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
                 }
 
                 String place = post.getLocation();
-                String timeAndPlace = place == null ?
+                String timeAndPlace = (place == null || place.length() == 0) ?
                         Utils.getHowLongAgo(post.getTimestamp()) :
                         Utils.getHowLongAgo(post.getTimestamp()) + " @ " + place;
                 TextView postTimeAndPlace = l.findViewById(R.id.postRvTimeAndPlace);
