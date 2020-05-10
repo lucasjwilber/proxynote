@@ -678,4 +678,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback,
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (binding.mapPostRV.getVisibility() == View.VISIBLE) {
+            hideAllModals();
+        } else {
+            finish();
+        }
+    }
+
 }

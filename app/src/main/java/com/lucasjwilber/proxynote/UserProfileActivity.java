@@ -429,4 +429,13 @@ public class UserProfileActivity extends AppCompatActivity {
         finish();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (binding.userProfilePostRvBackground.getVisibility() == View.VISIBLE) {
+            hidePostRv(null);
+        } else {
+            finish();
+        }
+    }
+
 }
