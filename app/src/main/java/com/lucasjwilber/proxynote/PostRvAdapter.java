@@ -354,7 +354,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     }
 
     private void onUsernameClicked(String userId) {
-        if (post.getUserId().equals(profileOwnerId)) {
+        if (userId.equals(profileOwnerId)) {
             Utils.showToast(context, "You're already viewing this profile.");
         } else {
             Intent goToProfile = new Intent(context, UserProfileActivity.class);
