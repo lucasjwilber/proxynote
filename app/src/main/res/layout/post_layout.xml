@@ -11,7 +11,7 @@
         android:id="@+id/postRvUsername"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="40dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
         android:text="@string/username"
@@ -19,7 +19,7 @@
         android:textColor="@color/colorAccent"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/postRvHeaderReportBtn"
-        app:layout_constraintStart_toEndOf="@+id/postRvHeaderVoteUpBtn"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="username" />
 
@@ -27,13 +27,12 @@
         android:id="@+id/postRvTimeAndPlace"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
         android:textAlignment="viewStart"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/postRvHeaderVoteUpBtn"
+        app:layout_constraintStart_toStartOf="@+id/postRvUsername"
         app:layout_constraintTop_toBottomOf="@+id/postRvUsername" />
 
     <Button
@@ -48,10 +47,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
+    <ImageButton
         android:id="@+id/postRvHeaderVoteUpBtn"
-        android:layout_width="30dp"
-        android:layout_height="23dp"
+        android:layout_width="35dp"
+        android:layout_height="30dp"
+        android:padding="0dp"
         android:background="@drawable/arrow_up"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -67,10 +67,10 @@
         app:layout_constraintStart_toStartOf="@+id/postRvHeaderVoteUpBtn"
         app:layout_constraintTop_toBottomOf="@+id/postRvHeaderVoteUpBtn" />
 
-    <Button
+    <ImageButton
         android:id="@+id/postRvHeaderVoteDownBtn"
-        android:layout_width="30dp"
-        android:layout_height="23dp"
+        android:layout_width="35dp"
+        android:layout_height="30dp"
         android:background="@drawable/arrow_down"
         app:layout_constraintEnd_toEndOf="@+id/postRvHeaderVoteUpBtn"
         app:layout_constraintStart_toStartOf="@+id/postRvHeaderVoteUpBtn"
@@ -80,15 +80,16 @@
         android:id="@+id/postRvHeaderTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginStart="35dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="35dp"
         android:text="@string/title"
         android:textAlignment="center"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/postRvHeaderReportBtn"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/postRvHeaderVoteDownBtn" />
+        app:layout_constraintTop_toBottomOf="@+id/postRvTimeAndPlace" />
 
     <ImageView
         android:id="@+id/postRvPostImage"

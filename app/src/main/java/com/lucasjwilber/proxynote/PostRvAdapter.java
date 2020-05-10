@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
@@ -46,8 +47,8 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
     private String distanceType;
     private Drawable upArrowColored;
     private Drawable downArrowColored;
-    private Button upvoteButton;
-    private Button downvoteButton;
+    private ImageButton upvoteButton;
+    private ImageButton downvoteButton;
     private TextView postScore;
     private EditText addCommentBox;
     private ProgressBar replyLoadingSpinner;
@@ -231,7 +232,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         return 1 + post.getComments().size();
     }
 
-    public void onVoteButtonClick(Button b) {
+    public void onVoteButtonClick(ImageButton b) {
         if (!Utils.isUserAuthorized()) {
             Utils.showToast(context, "Please log in or verify your email address.");
         } else {
@@ -239,7 +240,7 @@ public class PostRvAdapter extends RecyclerView.Adapter<PostRvAdapter.PostViewHo
         }
     }
 
-    private void castVote(Button b) {
+    private void castVote(ImageButton b) {
         // need to disable the button until the firestore transaction is complete, otherwise users
         // could cast multiple votes by spamming the button
         b.setEnabled(false);
